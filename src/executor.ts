@@ -68,37 +68,65 @@ function 应用主角基础更新(state: 状态总表, command: Extract<状态�
   state.主角 = recompute主角(create主角(合并对象(_.cloneDeep(state.主角), command.changes)));
 }
 
+function 获取目标势力(state: 状态总表, factionId: string): 势力 {
+  return 断言存在(state.势力[factionId], `势力不存在: ${factionId}`);
+}
+
 function 应用势力更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateFaction' }>): void {
-  state.势力 = create势力(合并对象(_.cloneDeep(state.势力), command.changes as Partial<势力>));
+  const current = state.势力[command.factionId];
+  if (!current && command.createIfMissing === false) {
+    throw new Error(`势力不存在: ${command.factionId}`);
+  }
+  state.势力[command.factionId] = create势力(合并对象(_.cloneDeep(current ?? create势力()), command.changes as Partial<势力>));
 }
 
 function 应用城池更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertCity' }>): void {
-  const current = state.势力.城池[command.id];
+  const faction = 获取目标势力(state, command.factionId);
+  const current = faction.城池[command.id];
   if (!current && command.createIfMissing === false) {
     throw new Error(`城池不存在: ${command.id}`);
   }
   const next: 城池 = create城池(合并对象(_.cloneDeep(current ?? create城池()), command.data));
-  state.势力.城池[command.id] = next;
+  faction.城池[command.id] = next;
+}
+
+function 应用城池设施追加(state: 状态总表, command: Extract<状态命令, { type: 'AddCityFacility' }>): void {
+  const faction = 获取目标势力(state, command.factionId);
+  const current = 断言存在(faction.城池[command.id], `城池不存在: ${command.id}`);
+  const set = new Set([...(current.设施 || []), String(command.facility || '')].filter(Boolean));
+  faction.城池[command.id] = create城池({ ...current, 设施: [...set] });
+}
+
+function 应用城池设施移除(state: 状态总表, command: Extract<状态命令, { type: 'RemoveCityFacility' }>): void {
+  const faction = 获取目标势力(state, command.factionId);
+  const current = 断言存在(faction.城池[command.id], `城池不存在: ${command.id}`);
+  faction.城池[command.id] = create城池({
+    ...current,
+    设施: (current.设施 || []).filter(item => item !== command.facility),
+  });
 }
 
 function 应用军队更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertArmy' }>): void {
-  const current = state.势力.军队[command.id];
+  const faction = 获取目标势力(state, command.factionId);
+  const current = faction.军队[command.id];
   if (!current && command.createIfMissing === false) {
     throw new Error(`军队不存在: ${command.id}`);
   }
   const next: 军队 = create军队(合并对象(_.cloneDeep(current ?? create军队()), command.data));
-  state.势力.军队[command.id] = next;
+  faction.军队[command.id] = next;
 }
 
 function 应用外交更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateDiplomacy' }>): void {
-  state.势力.外交 = {
-    ...state.势力.外交,
+  const faction = 获取目标势力(state, command.factionId);
+  faction.外交 = {
+    ...faction.外交,
     ..._.mapValues(command.changes, value => Math.max(0, Math.min(100, 数值(value)))),
   };
 }
 
 function 应用政策更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdatePolicy' }>): void {
-  state.势力.政策 = create政策(合并对象(_.cloneDeep(state.势力.政策), command.changes));
+  const faction = 获取目标势力(state, command.factionId);
+  faction.政策 = create政策(合并对象(_.cloneDeep(faction.政策), command.changes));
 }
 
 function 应用NPC更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertNpc' }>): void {
@@ -172,6 +200,7 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
         index,
         type: command.type,
         id: 'id' in command ? command.id : undefined,
+        factionId: 'factionId' in command ? command.factionId : undefined,
       });
       switch (command.type) {
         case 'UpdateWorld':
@@ -192,14 +221,20 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
         case 'UpsertCity':
           应用城池更新(next, command);
           break;
+        case 'AddCityFacility':
+          应用城池设施追加(next, command);
+          break;
+        case 'RemoveCityFacility':
+          应用城池设施移除(next, command);
+          break;
         case 'RemoveCity':
-          delete next.势力.城池[command.id];
+          delete 获取目标势力(next, command.factionId).城池[command.id];
           break;
         case 'UpsertArmy':
           应用军队更新(next, command);
           break;
         case 'RemoveArmy':
-          delete next.势力.军队[command.id];
+          delete 获取目标势力(next, command.factionId).军队[command.id];
           break;
         case 'UpdateDiplomacy':
           应用外交更新(next, command);

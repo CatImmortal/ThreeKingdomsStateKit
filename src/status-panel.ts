@@ -1,7 +1,9 @@
-import type { NPC, 状态总表 } from './state';
+import type { NPC, 势力, 状态总表 } from './state';
 
 export const STATUS_BAR_START = '<StatusBar>';
 export const STATUS_BAR_END = '</StatusBar>';
+
+const 商城分类标签 = ['装备', '技能书', '消耗品', '资源', '限时稀有'] as const;
 
 function 转义HTML(value: unknown): string {
   return String(value ?? '')
@@ -28,7 +30,58 @@ function 列表项(title: string, meta: string, desc?: string): string {
   return `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${转义HTML(title)}</div><div class="tk-panel-list-meta">${转义HTML(meta)}</div>${desc ? `<div class="tk-panel-list-desc">${转义HTML(desc)}</div>` : ''}</div>`;
 }
 
-function 渲染主角页(state: 状态总表): string {
+function 折叠栏(title: string, count: number, content: string): string {
+  return `<section class="tk-panel-card cols-span-2"><details class="tk-panel-detail tk-panel-equip-detail"><summary><span>${转义HTML(title)}</span><span>${转义HTML(count)} 项</span></summary><div class="tk-panel-detail-body"><div class="tk-panel-list">${content}</div></div></details></section>`;
+}
+
+function 渲染二级分页(group: string, tabs: Array<{ key: string; label: string; content: string }>): string {
+  if (tabs.length === 0) {
+    return '<div class="tk-panel-empty">暂无内容</div>';
+  }
+  const ids = tabs.map(tab => ({
+    ...tab,
+    inputId: `${group}-${tab.key}`,
+    pageClass: `is-${group}-${tab.key}`,
+  }));
+  const activeRules = ids.map(tab => `#${tab.inputId}:checked~.tk-subtabs label[for="${tab.inputId}"]{background:linear-gradient(180deg,#8d5a27,#653717);color:#fff5e6;border-color:rgba(255,216,158,.72)}#${tab.inputId}:checked~.tk-subpages .${tab.pageClass}{display:block}`).join('');
+  return `<div class="tk-subtab-shell"><style>${activeRules}</style>${ids.map((tab, index) => `<input class="tk-subtab-input" type="radio" name="${group}" id="${tab.inputId}"${index === 0 ? ' checked' : ''}>`).join('')}<div class="tk-subtabs">${ids.map(tab => `<label class="tk-subtab-label" for="${tab.inputId}">${转义HTML(tab.label)}</label>`).join('')}</div><div class="tk-subpages">${ids.map(tab => `<div class="tk-subpage ${tab.pageClass}">${tab.content}</div>`).join('')}</div></div>`;
+}
+
+function 雷达点(cx: number, cy: number, radius: number, angle: number): string {
+  const x = cx + Math.cos(angle) * radius;
+  const y = cy + Math.sin(angle) * radius;
+  return `${x.toFixed(1)},${y.toFixed(1)}`;
+}
+
+function 渲染六维雷达图(stats: 状态总表['主角']['六维']): string {
+  const labels = [
+    { key: '武力', value: stats.武力, bonus: stats._武力加值 ?? 0 },
+    { key: '智力', value: stats.智力, bonus: stats._智力加值 ?? 0 },
+    { key: '统率', value: stats.统率, bonus: stats._统率加值 ?? 0 },
+    { key: '政治', value: stats.政治, bonus: stats._政治加值 ?? 0 },
+    { key: '魅力', value: stats.魅力, bonus: stats._魅力加值 ?? 0 },
+    { key: '体质', value: stats.体质, bonus: stats._体质加值 ?? 0 },
+  ];
+  const cx = 110;
+  const cy = 110;
+  const maxRadius = 72;
+  const maxValue = 120;
+  const angles = labels.map((_, index) => (-Math.PI / 2) + (Math.PI * 2 * index) / labels.length);
+  const rings = [0.25, 0.5, 0.75, 1].map(scale => `<polygon class="tk-radar-ring" points="${angles.map(angle => 雷达点(cx, cy, maxRadius * scale, angle)).join(' ')}"></polygon>`).join('');
+  const axes = angles.map(angle => `<line class="tk-radar-axis" x1="${cx}" y1="${cy}" x2="${(cx + Math.cos(angle) * maxRadius).toFixed(1)}" y2="${(cy + Math.sin(angle) * maxRadius).toFixed(1)}"></line>`).join('');
+  const polygon = `<polygon class="tk-radar-shape" points="${labels.map((item, index) => 雷达点(cx, cy, maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles[index])).join(' ')}"></polygon>`;
+  const dots = labels.map((item, index) => {
+    const [x, y] = 雷达点(cx, cy, maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles[index]).split(',');
+    return `<circle class="tk-radar-dot" cx="${x}" cy="${y}" r="3"></circle>`;
+  }).join('');
+  const axisLabels = labels.map((item, index) => {
+    const [x, y] = 雷达点(cx, cy, maxRadius + 28, angles[index]).split(',');
+    return `<text class="tk-radar-label" x="${x}" y="${y}" text-anchor="middle"><tspan x="${x}" dy="0">${转义HTML(item.key)}</tspan><tspan x="${x}" dy="13">${转义HTML(`${item.value}/${item.bonus}`)}</tspan></text>`;
+  }).join('');
+  return `<div class="tk-radar-wrap"><svg class="tk-radar" viewBox="0 0 220 220" role="img" aria-label="主角六维雷达图">${rings}${axes}${polygon}${dots}${axisLabels}</svg></div>`;
+}
+
+function 渲染主角页(state: 状态总表, suffix: string): string {
   const player = state.主角;
   const 资源标签 = [
     标签('官职', player.官职 || '无', true),
@@ -39,50 +92,51 @@ function 渲染主角页(state: 状态总表): string {
     标签('积分', player.积分),
     标签('声望', player.声望),
   ].join('');
+  const 六维雷达图 = 渲染六维雷达图(player.六维);
+  const 装备项列表 = Object.entries(player.装备 || {});
+  const 武技项列表 = Object.entries(player.武技 || {});
+  const 专长项列表 = Object.entries(player.专长 || {});
+  const 背包项列表 = Object.entries(player.物品栏 || {});
+  const 后宫项列表 = Object.entries(state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性));
+  const 武将项列表 = Object.entries(state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息));
 
-  const 六维 = [
-    标签('武力', `${player.六维.武力} / ${player.六维._武力加值 ?? 0}`),
-    标签('智力', `${player.六维.智力} / ${player.六维._智力加值 ?? 0}`),
-    标签('统率', `${player.六维.统率} / ${player.六维._统率加值 ?? 0}`),
-    标签('政治', `${player.六维.政治} / ${player.六维._政治加值 ?? 0}`),
-    标签('魅力', `${player.六维.魅力} / ${player.六维._魅力加值 ?? 0}`),
-    标签('体质', `${player.六维.体质} / ${player.六维._体质加值 ?? 0}`),
-  ].join('');
-
-  const 装备列表 = Object.entries(player.装备 || {})
-    .map(([slot, item]) => {
-      if (!item || item === '无') {
-        return 列表项(slot, '未装备');
-      }
-      return 列表项(`${slot} · ${item.名称}`, `${item.品质} / ${item.类型}`, item.描述 || item.其他效果 || '无');
-    })
-    .join('');
-
-  return `
-    <div class="tk-panel-page-grid cols-2">
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">主角面板</div>
-        ${数值条('生命', player.当前生命值, player._生命值上限, 'hp')}
-        ${数值条('体力', player.当前体力值, player._体力值上限, 'sp')}
-        <div class="tk-panel-inline-note">伤势：${转义HTML(player._伤势 || '完好')}　减值：${转义HTML(player._战斗减值 ?? 0)}</div>
-        <div class="tk-panel-kv-grid">${资源标签}</div>
-      </section>
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">六维与战斗</div>
-        <div class="tk-panel-kv-grid">${六维}</div>
-        <div class="tk-panel-kv-grid compact">
-          ${标签('先攻', player._先攻值 ?? 0)}
-          ${标签('攻击', player._攻击基础值 ?? 0)}
-          ${标签('伤害', player._伤害基础值 ?? 0)}
-          ${标签('防御DC', player._防御DC ?? 0)}
-          ${标签('伤害减免', player._伤害减免 ?? 0)}
-        </div>
-      </section>
-      <section class="tk-panel-card cols-span-2">
-        <div class="tk-panel-card-title">装备栏</div>
-        <div class="tk-panel-list">${装备列表 || '<div class="tk-panel-empty">暂无装备</div>'}</div>
-      </section>
-    </div>`;
+  return 渲染二级分页(`hero-sub-${suffix}`, [
+    {
+      key: 'attrs',
+      label: '属性',
+      content: `<div class="tk-panel-page-grid cols-2"><section class="tk-panel-card"><div class="tk-panel-card-title">主角面板</div>${数值条('生命', player.当前生命值, player._生命值上限, 'hp')}${数值条('体力', player.当前体力值, player._体力值上限, 'sp')}<div class="tk-panel-inline-note">伤势：${转义HTML(player._伤势 || '完好')}　减值：${转义HTML(player._战斗减值 ?? 0)}</div><div class="tk-panel-kv-grid">${资源标签}</div></section><section class="tk-panel-card"><div class="tk-panel-card-title">六维与战斗</div>${六维雷达图}<div class="tk-panel-kv-grid compact">${标签('先攻', player._先攻值 ?? 0)}${标签('攻击', player._攻击基础值 ?? 0)}${标签('伤害', player._伤害基础值 ?? 0)}${标签('防御DC', player._防御DC ?? 0)}${标签('伤害减免', player._伤害减免 ?? 0)}</div></section></div>`,
+    },
+    {
+      key: 'equip',
+      label: '装备',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">装备栏</div><div class="tk-panel-list">${装备项列表.map(([slot, item]) => !item || item === '无' ? 列表项(slot, '未装备') : 列表项(`${slot} · ${item.名称}`, `${item.品质} / ${item.类型}`, item.描述 || item.其他效果 || '无')).join('') || '<div class="tk-panel-empty">暂无装备</div>'}</div></section>`,
+    },
+    {
+      key: 'bag',
+      label: '背包',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">背包</div><div class="tk-panel-list">${背包项列表.map(([id, item]) => 列表项(id, `${item.品质} / 数量:${item.数量}`, item.描述 || '无')).join('') || '<div class="tk-panel-empty">暂无物品</div>'}</div></section>`,
+    },
+    {
+      key: 'skills',
+      label: '武技',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">武技栏</div><div class="tk-panel-list">${武技项列表.map(([id, skill]) => 列表项(skill.名称 || id, `${skill.等级} / ${skill.类型}`, `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}`)).join('') || '<div class="tk-panel-empty">暂无武技</div>'}</div></section>`,
+    },
+    {
+      key: 'perks',
+      label: '专长',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">专长栏</div><div class="tk-panel-list">${专长项列表.map(([id, perk]) => 列表项(perk.名称 || id, perk.等级 || '未定级', perk.效果 || '无')).join('') || '<div class="tk-panel-empty">暂无专长</div>'}</div></section>`,
+    },
+    {
+      key: 'consorts',
+      label: '后宫',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">后宫列表</div><div class="tk-panel-list">${后宫项列表.map(([id, npc]) => 列表项(npc.名称 || id, `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}`)).join('') || '<div class="tk-panel-empty">暂无后宫成员</div>'}</div></section>`,
+    },
+    {
+      key: 'generals',
+      label: '武将',
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">已招募武将</div><div class="tk-panel-list">${武将项列表.map(([id, npc]) => 列表项(npc.名称 || id, `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, `${npc.武将信息?.驻扎地 || '无驻地'} · ${npc.简述 || '无'}`)).join('') || '<div class="tk-panel-empty">暂无已招募武将</div>'}</div></section>`,
+    },
+  ]);
 }
 
 function 渲染NPC详情(id: string, npc: NPC): string {
@@ -107,27 +161,53 @@ function 渲染NPC页(state: 状态总表): string {
   return `<section class="tk-panel-card"><div class="tk-panel-card-title">当前地点 NPC</div><div class="tk-panel-detail-list">${list}</div></section>`;
 }
 
-function 渲染任务页(state: 状态总表): string {
+function 渲染任务页(state: 状态总表, suffix: string): string {
   const tasks = Object.entries(state.任务 || {});
-  const content = tasks.length
-    ? tasks.map(([id, task]) => {
-        const targets = Object.values(task.目标 || {}).map(target => `${target.类型}:${target.状态}`).join(' / ') || '无目标';
-        return 列表项(task.名称 || id, `${task.类型} / ${task.状态}`, `${task.时限 || '无时限'} · ${targets}`);
-      }).join('')
-    : '<div class="tk-panel-empty">当前没有活跃任务</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">任务列表</div><div class="tk-panel-list">${content}</div></section>`;
+  const typeTabs = [...new Set(tasks.map(([, task]) => task.类型))];
+  if (typeTabs.length === 0) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">任务列表</div><div class="tk-panel-empty">当前没有活跃任务</div></section>`;
+  }
+  return 渲染二级分页(`quest-sub-${suffix}`, typeTabs.map(type => ({
+    key: type,
+    label: type,
+    content: `<section class="tk-panel-card"><div class="tk-panel-card-title">${转义HTML(type)}任务</div><div class="tk-panel-detail-list">${tasks.filter(([, task]) => task.类型 === type).map(([id, task]) => {
+      const targets = Object.entries(task.目标 || {});
+      const targetContent = targets.length
+        ? targets.map(([targetId, target]) => `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${转义HTML(target.描述 || targetId)}</div><div class="tk-panel-list-meta">${转义HTML(target.类型)} / ${转义HTML(target.状态)}</div><div class="tk-panel-list-desc">${转义HTML(`积分：${target.积分 ?? 0}　其他奖励：${target.其他奖励 || '无'}`)}</div></div>`).join('')
+        : '<div class="tk-panel-empty">暂无任务目标</div>';
+      return `<details class="tk-panel-detail"><summary><span>${转义HTML(task.名称 || id)}</span><span>${转义HTML(task.类型)} / ${转义HTML(task.状态)}</span></summary><div class="tk-panel-detail-body"><div class="tk-panel-inline-note">时限：${转义HTML(task.时限 || '无时限')}</div><div class="tk-panel-list">${targetContent}</div></div></details>`;
+    }).join('')}</div></section>`,
+  })));
 }
 
-function 渲染商城页(state: 状态总表): string {
+function 渲染商城页(state: 状态总表, suffix: string): string {
   const items = Object.entries(state.商城 || {});
-  const content = items.length
-    ? items.map(([id, item]) => 列表项(item.名称 || id, `${item.分类} / ${item.价格} 积分`, item.描述 || '')).join('')
-    : '<div class="tk-panel-empty">当前没有可见商品</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">商城</div><div class="tk-panel-list">${content}</div></section>`;
+  const typeTabs = [...new Set(items.map(([, item]) => item.分类))];
+  if (typeTabs.length === 0) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">商城</div><div class="tk-panel-empty">当前没有可见商品</div></section>`;
+  }
+  return 渲染二级分页(`shop-sub-${suffix}`, typeTabs.map(type => ({
+    key: type,
+    label: type,
+    content: `<section class="tk-panel-card"><div class="tk-panel-card-title">${转义HTML(type)}</div><div class="tk-panel-list">${items.filter(([, item]) => item.分类 === type).map(([id, item]) => 列表项(item.名称 || id, `${item.分类} / ${item.价格} 积分`, item.描述 || '')).join('') || '<div class="tk-panel-empty">当前分类暂无商品</div>'}</div></section>`,
+  })));
+}
+
+function 选择展示势力(state: 状态总表): { id: string; faction: 势力 } | null {
+  const entries = Object.entries(state.势力 || {});
+  if (entries.length === 0) {
+    return null;
+  }
+  const [id, faction] = entries[0];
+  return { id, faction };
 }
 
 function 渲染军队页(state: 状态总表): string {
-  const armies = Object.entries(state.势力?.军队 || {});
+  const current = 选择展示势力(state);
+  if (!current) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">军队</div><div class="tk-panel-empty">当前没有势力数据</div></section>`;
+  }
+  const armies = Object.entries(current.faction.军队 || {});
   const content = armies.length
     ? armies.map(([id, army]) => `
       <details class="tk-panel-detail">
@@ -146,17 +226,22 @@ function 渲染军队页(state: 状态总表): string {
         </div>
       </details>`).join('')
     : '<div class="tk-panel-empty">当前没有军队数据</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">军队</div><div class="tk-panel-detail-list">${content}</div></section>`;
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">军队</div><div class="tk-panel-inline-note">当前展示势力：${转义HTML(current.faction.名称 || current.id)}（${转义HTML(current.id)}）</div><div class="tk-panel-detail-list">${content}</div></section>`;
 }
 
 function 渲染势力页(state: 状态总表): string {
-  const faction = state.势力;
+  const current = 选择展示势力(state);
+  if (!current) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">势力</div><div class="tk-panel-empty">当前没有势力数据</div></section>`;
+  }
+  const { id, faction } = current;
   const diplomacy = Object.entries(faction.外交 || {}).slice(0, 8).map(([name, value]) => 标签(name, `${value} / ${faction._外交等级?.[name] || '未知'}`)).join('');
   const cities = Object.entries(faction.城池 || {}).slice(0, 8).map(([name, city]) => 列表项(name, `${city.等级} / 太守:${city.太守 || '无'}`, `税收:${city._月税收 ?? 0} · 产粮:${city._月产粮 ?? 0}`)).join('');
   return `
     <div class="tk-panel-page-grid cols-2">
       <section class="tk-panel-card">
         <div class="tk-panel-card-title">势力总览</div>
+        <div class="tk-panel-inline-note">当前展示势力：${转义HTML(faction.名称 || id)}（${转义HTML(id)}）</div>
         <div class="tk-panel-kv-grid">
           ${标签('名称', faction.名称 || '无', true)}
           ${标签('规模', faction.规模 || '无', true)}
@@ -200,6 +285,11 @@ function 样式(ids: Record<string, string>): string {
 .tk-statusbar #${ids.hero}:checked~.tk-panel-tabs label[for="${ids.hero}"],.tk-statusbar #${ids.npc}:checked~.tk-panel-tabs label[for="${ids.npc}"],.tk-statusbar #${ids.quest}:checked~.tk-panel-tabs label[for="${ids.quest}"],.tk-statusbar #${ids.shop}:checked~.tk-panel-tabs label[for="${ids.shop}"],.tk-statusbar #${ids.army}:checked~.tk-panel-tabs label[for="${ids.army}"],.tk-statusbar #${ids.faction}:checked~.tk-panel-tabs label[for="${ids.faction}"]{background:linear-gradient(180deg,#a76b2e,#7a4a1f);color:#fff5e6;border-color:rgba(255,216,158,.8);box-shadow:0 0 0 1px rgba(255,240,212,.12) inset}
 .tk-statusbar #${ids.hero}:checked~.tk-panel-pages .is-hero,.tk-statusbar #${ids.npc}:checked~.tk-panel-pages .is-npc,.tk-statusbar #${ids.quest}:checked~.tk-panel-pages .is-quest,.tk-statusbar #${ids.shop}:checked~.tk-panel-pages .is-shop,.tk-statusbar #${ids.army}:checked~.tk-panel-pages .is-army,.tk-statusbar #${ids.faction}:checked~.tk-panel-pages .is-faction{display:block}
 .tk-statusbar .tk-panel-page-grid{display:grid;gap:12px}.tk-statusbar .tk-panel-page-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tk-statusbar .tk-subtab-input{display:none}
+.tk-statusbar .tk-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tk-statusbar .tk-subtab-label{padding:6px 12px;border:1px solid rgba(196,154,92,.22);border-radius:999px;background:rgba(255,255,255,.03);color:#d6bb91;cursor:pointer;font-size:12px;transition:.2s}
+.tk-statusbar .tk-subtab-label:hover{background:rgba(196,154,92,.1);color:#fff1d0}
+.tk-statusbar .tk-subpage{display:none}
 .tk-statusbar .cols-span-2{grid-column:span 2}
 .tk-statusbar .tk-panel-card{padding:14px;border:1px solid rgba(196,154,92,.22);border-radius:12px;background:rgba(255,248,232,.03)}
 .tk-statusbar .tk-panel-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
@@ -214,11 +304,19 @@ function 样式(ids: Record<string, string>): string {
 .tk-statusbar .tk-panel-detail{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
 .tk-statusbar .tk-panel-detail summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:10px 12px;color:#f6dfb5;font-size:13px}.tk-statusbar .tk-panel-detail summary::-webkit-details-marker{display:none}
 .tk-statusbar .tk-panel-detail-body{padding:0 12px 12px}
+.tk-statusbar .tk-panel-equip-detail summary{padding:12px 14px;background:rgba(167,107,46,.12)}
+.tk-statusbar .tk-panel-equip-detail .tk-panel-detail-body{padding:0 0 4px}
 .tk-statusbar .tk-panel-empty{padding:18px 12px;text-align:center;color:#bda681;font-size:12px}
+.tk-statusbar .tk-radar-wrap{display:block;margin-bottom:12px}
+.tk-statusbar .tk-radar{width:220px;height:220px;display:block;margin:0 auto}
+.tk-statusbar .tk-radar-ring,.tk-statusbar .tk-radar-axis{fill:none;stroke:rgba(240,201,131,.18);stroke-width:1}
+.tk-statusbar .tk-radar-shape{fill:rgba(167,107,46,.28);stroke:#f0c983;stroke-width:2}
+.tk-statusbar .tk-radar-dot{fill:#f6dfb5}
+.tk-statusbar .tk-radar-label{fill:#d8bf93;font-size:11px}
 .tk-statusbar .tk-panel-bar-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
 .tk-statusbar .tk-panel-bar-label,.tk-statusbar .tk-panel-bar-value{font-size:11px;color:#d8bf93}.tk-statusbar .tk-panel-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
 .tk-statusbar .tk-panel-bar-fill{display:block;height:100%}.tk-statusbar .tk-panel-bar-fill.is-hp{background:linear-gradient(90deg,#7f1d1d,#dc2626)}.tk-statusbar .tk-panel-bar-fill.is-sp{background:linear-gradient(90deg,#0f3d73,#3b82f6)}.tk-statusbar .tk-panel-bar-fill.is-morale{background:linear-gradient(90deg,#7c5c12,#f59e0b)}.tk-statusbar .tk-panel-bar-fill.is-fatigue{background:linear-gradient(90deg,#3f3f46,#a1a1aa)}.tk-statusbar .tk-panel-bar-fill.is-gold{background:linear-gradient(90deg,#8b5e00,#facc15)}
-@media (max-width:720px){.tk-statusbar .tk-panel-page-grid.cols-2,.tk-statusbar .tk-panel-kv-grid,.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:1fr}.tk-statusbar .cols-span-2{grid-column:span 1}}
+@media (max-width:720px){.tk-statusbar .tk-panel-page-grid.cols-2,.tk-statusbar .tk-panel-kv-grid,.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:1fr}.tk-statusbar .cols-span-2{grid-column:span 1}.tk-statusbar .tk-radar{width:180px;height:180px}}
 </style>`;
 }
 
@@ -238,7 +336,7 @@ export function buildStatusBar(state: 状态总表, messageId?: number): string 
     army: `tk-tab-army-${suffix}`,
     faction: `tk-tab-faction-${suffix}`,
   };
-  return `${STATUS_BAR_START}<div class="tk-statusbar"><div class="tk-panel-shell">${样式(ids)}<input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.hero}" checked><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.npc}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.quest}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.shop}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.army}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.faction}"><div class="tk-panel-head"><div class="tk-panel-title">三国霸主 · 系统面板</div><div class="tk-panel-subtitle"><span>${header}</span></div></div><div class="tk-panel-tabs"><label class="tk-panel-tab-label" for="${ids.hero}">主角</label><label class="tk-panel-tab-label" for="${ids.npc}">当前地点NPC</label><label class="tk-panel-tab-label" for="${ids.quest}">任务</label><label class="tk-panel-tab-label" for="${ids.shop}">商城</label><label class="tk-panel-tab-label" for="${ids.army}">军队</label><label class="tk-panel-tab-label" for="${ids.faction}">势力</label></div><div class="tk-panel-pages"><div class="tk-panel-page is-hero">${渲染主角页(state)}</div><div class="tk-panel-page is-npc">${渲染NPC页(state)}</div><div class="tk-panel-page is-quest">${渲染任务页(state)}</div><div class="tk-panel-page is-shop">${渲染商城页(state)}</div><div class="tk-panel-page is-army">${渲染军队页(state)}</div><div class="tk-panel-page is-faction">${渲染势力页(state)}</div></div></div></div>${STATUS_BAR_END}`;
+  return `${STATUS_BAR_START}<div class="tk-statusbar"><div class="tk-panel-shell">${样式(ids)}<input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.hero}" checked><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.npc}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.quest}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.shop}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.army}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.faction}"><div class="tk-panel-head"><div class="tk-panel-title">三国霸主 · 系统面板</div><div class="tk-panel-subtitle"><span>${header}</span></div></div><div class="tk-panel-tabs"><label class="tk-panel-tab-label" for="${ids.hero}">主角</label><label class="tk-panel-tab-label" for="${ids.npc}">当前地点NPC</label><label class="tk-panel-tab-label" for="${ids.quest}">任务</label><label class="tk-panel-tab-label" for="${ids.shop}">商城</label><label class="tk-panel-tab-label" for="${ids.army}">军队</label><label class="tk-panel-tab-label" for="${ids.faction}">势力</label></div><div class="tk-panel-pages"><div class="tk-panel-page is-hero">${渲染主角页(state, suffix)}</div><div class="tk-panel-page is-npc">${渲染NPC页(state)}</div><div class="tk-panel-page is-quest">${渲染任务页(state, suffix)}</div><div class="tk-panel-page is-shop">${渲染商城页(state, suffix)}</div><div class="tk-panel-page is-army">${渲染军队页(state)}</div><div class="tk-panel-page is-faction">${渲染势力页(state)}</div></div></div></div>${STATUS_BAR_END}`;
 }
 
 export function appendStatusBar(content: string, state: 状态总表, messageId?: number): string {

@@ -65,11 +65,6 @@ export function 提取命令块(replyText: string): string | null {
   return commandsText;
 }
 
-export function 移除命令块(replyText: string): string {
-  const pattern = new RegExp(`${_.escapeRegExp(UPDATE_VARIABLE_START)}[\\s\\S]*?${_.escapeRegExp(UPDATE_VARIABLE_END)}`, 'g');
-  return replyText.replace(pattern, '').trim();
-}
-
 export function 解析命令块(replyText: string): 命令块提取结果 {
   const commandsText = 提取命令块(replyText);
   if (!commandsText) {
@@ -91,7 +86,7 @@ export function 解析命令块(replyText: string): 命令块提取结果 {
     return {
       commandsText,
       commands,
-      replyText: 移除命令块(replyText),
+      replyText,
     };
   } catch (error) {
     debugError('protocol', '命令块 JSON 解析失败', error);

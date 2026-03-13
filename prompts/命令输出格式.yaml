@@ -8,9 +8,10 @@
     - `Commands` 必须是合法 JSON 数组，不带注释、解释或 markdown 代码块。
     - 每个命令对象都必须有 `type`，且只能使用白名单字段。
     - 不允许输出任何 `_` 开头字段。
-    - 同一回合可输出多条命令，按数组顺序执行。
-    - 只写本回合实际发生变化的字段；不要写推测性变化。
+    - 同一轮可输出多条命令，按数组顺序执行。
+    - 只写本轮实际发生变化的字段；不要写推测性变化。
     - `id` 必须稳定可复用。
+    - 势力相关命令必须显式提供 `factionId`，不能省略。
     - 名称字段必须显式提供，不能依赖外层 key 推断。
     - 没有状态变化时，不要输出 `UpdateVariable` 块。
   标签模板: |-
@@ -20,7 +21,7 @@
     <Analysis>$(不超过150词)
     - ${经过时间: 从上一时间点到现在经过了多久}
     - ${场景类型: 日常/社交/检定/战斗/经营/军队战/军团战}
-    - ${基于当前回复，逐项分析本回合哪些变量需要更新、哪些不需要更新}
+    - ${基于本轮正文，逐项分析本轮哪些变量需要更新、哪些不需要更新}
     </Analysis>
     <Commands>
     [
@@ -40,6 +41,7 @@
     美人性格: [温柔, 贞烈, 高冷, 娇蛮, 多情, 病娇, 善妒]
     美人状态: [正常, 怀孕, 产后, 生病, 被囚, 失踪]
     任务类型: [主线, 支线, 隐藏, 史诗, 成就, 委托]
+    商品分类: [装备, 技能书, 消耗品, 资源, 限时稀有]
     任务状态: [可接取, 进行中, 可提交, 已完成, 已失败, 已过期]
     任务目标类型: [主要, 次要, 隐藏]
     任务目标状态: [未发现, 未完成, 已完成]
@@ -128,7 +130,7 @@
       其他奖励: string
     商品条目:
       名称: string
-      分类: string
+      分类: 商品分类
       价格: number
       描述: string
     城池:
@@ -171,6 +173,8 @@
       军队: Record<string, 军队>
       外交: Record<string, number>
       政策: 政策
+    势力集合:
+      Record<string, 势力>
   命令白名单:
     UpdateWorld:
       必填字段: [type, changes]
@@ -252,7 +256,8 @@
           "changes": { "当前生命值": -12, "声望": 3 }
         }
     UpdateFaction:
-      必填字段: [type, changes]
+      必填字段: [type, factionId, changes]
+      可选字段: [createIfMissing]
       changes可填字段:
         名称: string
         规模: 势力规模
@@ -261,69 +266,105 @@
         金钱: number
         粮草: number
       关键约束:
+        - `factionId` 必填，表示要更新哪个势力
         - `changes` 至少包含一个字段
         - 不要写入 `城池` / `军队` / `外交` / `政策` 的整块重写；这些优先使用专用命令
       示例: |-
         {
           "type": "UpdateFaction",
+          "factionId": "liubei",
           "changes": { "名称": "刘备军", "规模": "郡级", "粮草": 2400 }
         }
     UpsertCity:
-      必填字段: [type, id, data]
+      必填字段: [type, factionId, id, data]
       可选字段: [createIfMissing]
       data可填字段: 城池
       关键约束:
+        - `factionId` 必填，表示该城池隶属哪个势力
         - `data` 至少包含一个字段
       示例: |-
         {
           "type": "UpsertCity",
+          "factionId": "liubei",
           "id": "xinye",
           "data": { "等级": "县城", "城防": 42, "太守": "关羽" }
         }
+    AddCityFacility:
+      必填字段: [type, factionId, id, facility]
+      关键约束:
+        - `factionId` 必填
+        - 仅追加单个设施，不重写整个 `设施` 数组
+      示例: |-
+        {
+          "type": "AddCityFacility",
+          "factionId": "liubei",
+          "id": "xinye",
+          "facility": "官府"
+        }
+    RemoveCityFacility:
+      必填字段: [type, factionId, id, facility]
+      关键约束:
+        - `factionId` 必填
+        - 仅移除单个设施，不重写整个 `设施` 数组
+      示例: |-
+        {
+          "type": "RemoveCityFacility",
+          "factionId": "liubei",
+          "id": "xinye",
+          "facility": "校场"
+        }
     RemoveCity:
-      必填字段: [type, id]
+      必填字段: [type, factionId, id]
       示例: |-
         {
           "type": "RemoveCity",
+          "factionId": "liubei",
           "id": "abandoned_outpost"
         }
     UpsertArmy:
-      必填字段: [type, id, data]
+      必填字段: [type, factionId, id, data]
       可选字段: [createIfMissing]
       data可填字段: 军队
       关键约束:
+        - `factionId` 必填，表示该军队隶属哪个势力
         - `data` 至少包含一个字段
       示例: |-
         {
           "type": "UpsertArmy",
+          "factionId": "liubei",
           "id": "first_cavalry",
           "data": { "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
         }
     RemoveArmy:
-      必填字段: [type, id]
+      必填字段: [type, factionId, id]
       示例: |-
         {
           "type": "RemoveArmy",
+          "factionId": "liubei",
           "id": "bandit_raiders"
         }
     UpdateDiplomacy:
-      必填字段: [type, changes]
+      必填字段: [type, factionId, changes]
       changes可填字段: Record<string, number>
       关键约束:
+        - `factionId` 必填
         - `changes` 至少包含一个势力关系值
       示例: |-
         {
           "type": "UpdateDiplomacy",
-          "changes": { "曹操": 28, "孙权": 66 }
+          "factionId": "liubei",
+          "changes": { "caocao": 28, "sunquan": 66 }
         }
     UpdatePolicy:
-      必填字段: [type, changes]
+      必填字段: [type, factionId, changes]
       changes可填字段: 政策
       关键约束:
+        - `factionId` 必填
         - `changes` 至少包含一个字段
       示例: |-
         {
           "type": "UpdatePolicy",
+          "factionId": "liubei",
           "changes": { "当前研究": "屯田制", "研究进度": 2, "富国": 1 }
         }
     UpsertNpc:
@@ -348,7 +389,7 @@
         - `角色数据` / `武将信息` / `美人属性` 只有正文明确出现对应具体数据时才允许写入
         - 正文未提及的详细字段不要猜测、不要臆造、不要输出空对象
         - 正文未提及详细字段时，不输出这些字段即可，旧详细数据会保持不变
-        - 只填写重要 NPC，或本回合与主角发生了明确互动的 NPC；路人、背景板、杂兵、无名字小兵不要输出 `UpsertNpc`
+        - 只填写重要 NPC，或本轮与主角发生了明确互动的 NPC；路人、背景板、杂兵、无名字小兵不要输出 `UpsertNpc`
       示例: |-
         {
           "type": "UpsertNpc",
@@ -431,7 +472,7 @@
       可选字段: [createIfMissing]
       data可填字段:
         名称: string
-        分类: string
+        分类: 商品分类
         价格: number
         描述: string
       关键约束:
@@ -443,7 +484,7 @@
           "id": "item_healing_herb",
           "data": {
             "名称": "止血草",
-            "分类": "药品",
+            "分类": "消耗品",
             "价格": 80,
             "描述": "可用于简单止血疗伤。"
           }

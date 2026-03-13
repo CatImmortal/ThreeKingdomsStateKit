@@ -5,6 +5,7 @@ import {
   create任务,
   create商品条目,
   create势力,
+  create势力集合,
   create城池,
   create军队,
   create政策,
@@ -22,7 +23,7 @@ import * as statusPanel from './status-panel';
 import './runtime-auto';
 import * as runtime from './runtime';
 import * as debug from './debug';
-import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据, recompute城池, recompute军队, recompute势力 } from './recompute';
+import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据, recompute城池, recompute军队, recompute势力, recompute势力集合 } from './recompute';
 
 export * from './state';
 export * from './rules';
@@ -46,6 +47,7 @@ export const ThreeKingdomsStateKit = {
     create任务,
     create商品条目,
     create势力,
+    create势力集合,
     create城池,
     create军队,
     create政策,
@@ -78,6 +80,7 @@ export const ThreeKingdomsStateKit = {
     recompute城池,
     recompute军队,
     recompute势力,
+    recompute势力集合,
     recomputeNPC,
     recompute主角,
     recompute全局,

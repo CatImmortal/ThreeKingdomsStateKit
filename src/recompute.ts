@@ -1,6 +1,7 @@
 import {
   create世界,
   create势力,
+  create势力集合,
   type 六维,
   type 状态总表,
   type 角色战斗数据,
@@ -10,6 +11,7 @@ import {
   type 城池,
   type 军队,
   type 势力,
+  type 势力集合,
 } from './state';
 import {
   MAX_RECENT_EVENTS,
@@ -176,13 +178,17 @@ export function recompute势力(data: 势力, state?: Pick<状态总表, 'NPC'>)
   return next;
 }
 
+export function recompute势力集合(data: 势力集合, state?: Pick<状态总表, 'NPC'>): 势力集合 {
+  return _.mapValues(data || {}, faction => recompute势力(create势力(faction), state));
+}
+
 export function recompute全局(state: 状态总表): 状态总表 {
   const next = _.cloneDeep(state);
   next.世界 = create世界(next.世界);
   next.世界.近期事件 = next.世界.近期事件.slice(-MAX_RECENT_EVENTS);
   next.主角 = recompute主角(next.主角);
   next.NPC = _.mapValues(next.NPC || {}, npc => recomputeNPC(npc));
-  next.势力 = recompute势力(create势力(next.势力), { NPC: next.NPC });
+  next.势力 = recompute势力集合(create势力集合(next.势力), { NPC: next.NPC });
   next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中', '可提交'].includes(task.状态));
   next.meta.updatedAt = new Date().toISOString();
   return next;

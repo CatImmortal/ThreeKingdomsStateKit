@@ -45,34 +45,54 @@ export type 状态命令 =
     }
   | {
       type: 'UpdateFaction';
+      factionId: string;
       changes: 势力更新;
+      createIfMissing?: boolean;
     }
   | {
       type: 'UpsertCity';
+      factionId: string;
       id: string;
       data: 城池更新;
       createIfMissing?: boolean;
     }
   | {
+      type: 'AddCityFacility';
+      factionId: string;
+      id: string;
+      facility: string;
+    }
+  | {
+      type: 'RemoveCityFacility';
+      factionId: string;
+      id: string;
+      facility: string;
+    }
+  | {
       type: 'RemoveCity';
+      factionId: string;
       id: string;
     }
   | {
       type: 'UpsertArmy';
+      factionId: string;
       id: string;
       data: 军队更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'RemoveArmy';
+      factionId: string;
       id: string;
     }
   | {
       type: 'UpdateDiplomacy';
+      factionId: string;
       changes: Record<string, number>;
     }
   | {
       type: 'UpdatePolicy';
+      factionId: string;
       changes: 政策更新;
     }
   | {
@@ -128,13 +148,15 @@ const 命令字段白名单 = {
   AppendRecentEvent: ['type', 'event'],
   UpdatePlayerBase: ['type', 'changes'],
   AdjustPlayerResource: ['type', 'mode', 'changes'],
-  UpdateFaction: ['type', 'changes'],
-  UpsertCity: ['type', 'id', 'data', 'createIfMissing'],
-  RemoveCity: ['type', 'id'],
-  UpsertArmy: ['type', 'id', 'data', 'createIfMissing'],
-  RemoveArmy: ['type', 'id'],
-  UpdateDiplomacy: ['type', 'changes'],
-  UpdatePolicy: ['type', 'changes'],
+  UpdateFaction: ['type', 'factionId', 'changes', 'createIfMissing'],
+  UpsertCity: ['type', 'factionId', 'id', 'data', 'createIfMissing'],
+  AddCityFacility: ['type', 'factionId', 'id', 'facility'],
+  RemoveCityFacility: ['type', 'factionId', 'id', 'facility'],
+  RemoveCity: ['type', 'factionId', 'id'],
+  UpsertArmy: ['type', 'factionId', 'id', 'data', 'createIfMissing'],
+  RemoveArmy: ['type', 'factionId', 'id'],
+  UpdateDiplomacy: ['type', 'factionId', 'changes'],
+  UpdatePolicy: ['type', 'factionId', 'changes'],
   UpsertNpc: ['type', 'id', 'data', 'createIfMissing'],
   UpdateNpcRelation: ['type', 'id', 'mode', '好感', '羁绊'],
   RemoveNpc: ['type', 'id'],
@@ -402,7 +424,7 @@ function 校验商品条目(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 商品字段, path);
   if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
-  if (value.分类 !== undefined) 断言字符串(value.分类, `${path}.分类`);
+  if (value.分类 !== undefined) 断言枚举值(value.分类, 枚举.商品分类, `${path}.分类`);
   if (value.价格 !== undefined) 断言数字(value.价格, `${path}.价格`);
   if (value.描述 !== undefined) 断言字符串(value.描述, `${path}.描述`);
 }
@@ -600,23 +622,42 @@ export function 校验命令(command: 状态命令, index = 0): void {
         校验资源变化(command.changes, `${path}.changes`);
         return;
       case 'UpdateFaction':
-        debugLog('commands', '校验 UpdateFaction', { index });
+        debugLog('commands', '校验 UpdateFaction', { index, factionId: command.factionId });
+        断言字符串(command.factionId, `${path}.factionId`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
         校验势力更新(command.changes, `${path}.changes`);
         return;
       case 'UpsertCity':
-        debugLog('commands', '校验 UpsertCity', { index, id: command.id });
+        debugLog('commands', '校验 UpsertCity', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
         断言字符串(command.id, `${path}.id`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验城池更新(command.data, `${path}.data`);
         return;
+      case 'AddCityFacility':
+        debugLog('commands', '校验 AddCityFacility', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
+        断言字符串(command.id, `${path}.id`);
+        断言字符串(command.facility, `${path}.facility`);
+        return;
+      case 'RemoveCityFacility':
+        debugLog('commands', '校验 RemoveCityFacility', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
+        断言字符串(command.id, `${path}.id`);
+        断言字符串(command.facility, `${path}.facility`);
+        return;
       case 'RemoveCity':
-        debugLog('commands', '校验 RemoveCity', { index, id: command.id });
+        debugLog('commands', '校验 RemoveCity', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
         断言字符串(command.id, `${path}.id`);
         return;
       case 'UpsertArmy':
-        debugLog('commands', '校验 UpsertArmy', { index, id: command.id });
+        debugLog('commands', '校验 UpsertArmy', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
         断言字符串(command.id, `${path}.id`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
@@ -624,15 +665,18 @@ export function 校验命令(command: 状态命令, index = 0): void {
         校验军队更新(command.data, `${path}.data`);
         return;
       case 'RemoveArmy':
-        debugLog('commands', '校验 RemoveArmy', { index, id: command.id });
+        debugLog('commands', '校验 RemoveArmy', { index, factionId: command.factionId, id: command.id });
+        断言字符串(command.factionId, `${path}.factionId`);
         断言字符串(command.id, `${path}.id`);
         return;
       case 'UpdateDiplomacy':
-        debugLog('commands', '校验 UpdateDiplomacy', { index });
+        debugLog('commands', '校验 UpdateDiplomacy', { index, factionId: command.factionId });
+        断言字符串(command.factionId, `${path}.factionId`);
         校验数字映射(command.changes, `${path}.changes`);
         return;
       case 'UpdatePolicy':
-        debugLog('commands', '校验 UpdatePolicy', { index });
+        debugLog('commands', '校验 UpdatePolicy', { index, factionId: command.factionId });
+        断言字符串(command.factionId, `${path}.factionId`);
         校验政策更新(command.changes, `${path}.changes`);
         return;
       case 'UpsertNpc':

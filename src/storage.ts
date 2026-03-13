@@ -1,5 +1,6 @@
 import { recompute全局 } from './recompute';
 import { create初始状态, type 状态总表 } from './state';
+import { stripStatusBar } from './status-panel';
 import { debugError, debugLog, summarizeState, summarizeValue } from './debug';
 
 export const STATE_ROOT_KEY = 'sgbz_state';
@@ -133,6 +134,36 @@ async function 清理过期状态快照(): Promise<void> {
   });
 }
 
+async function 清理旧状态栏(当前消息ID: number): Promise<void> {
+  const messages = 读取所有消息();
+  const patches = messages
+    .filter(message => message.role === 'assistant' && message.message_id !== 当前消息ID)
+    .map(message => {
+      const cleaned = stripStatusBar(String(message.message || ''));
+      if (cleaned === String(message.message || '').trim()) {
+        return null;
+      }
+      return {
+        message_id: message.message_id,
+        message: cleaned,
+      };
+    })
+    .filter((item): item is { message_id: number; message: string } => Boolean(item));
+  if (patches.length === 0) {
+    debugLog('storage', '无需清理旧状态栏', { currentMessageId: 当前消息ID });
+    return;
+  }
+  debugLog('storage', '准备清理旧状态栏', {
+    currentMessageId: 当前消息ID,
+    removeFromMessageIds: patches.map(item => item.message_id),
+  });
+  await 获取消息接口().setChatMessages(patches, { refresh: 'none' });
+  debugLog('storage', '旧状态栏清理完成', {
+    currentMessageId: 当前消息ID,
+    cleanedMessageIds: patches.map(item => item.message_id),
+  });
+}
+
 export async function 更新消息正文(messageId: number, message: string): Promise<void> {
   const currentMessage = 读取消息(messageId);
   if (!currentMessage) {
@@ -143,6 +174,7 @@ export async function 更新消息正文(messageId: number, message: string): Pr
     before: summarizeValue(currentMessage.message),
     after: summarizeValue(message),
   });
+  await 清理旧状态栏(messageId);
   await 获取消息接口().setChatMessages([{ message_id: messageId, message }], { refresh: 'affected' });
   debugLog('storage', '楼层正文写入完成', { messageId });
 }

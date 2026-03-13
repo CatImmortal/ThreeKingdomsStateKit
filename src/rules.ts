@@ -14,6 +14,7 @@ export const 枚举 = {
   美人性格: ['温柔', '贞烈', '高冷', '娇蛮', '多情', '病娇', '善妒'],
   美人状态: ['正常', '怀孕', '产后', '生病', '被囚', '失踪'],
   任务类型: ['主线', '支线', '隐藏', '史诗', '成就', '委托'],
+  商品分类: ['装备', '技能书', '消耗品', '资源', '限时稀有'],
   任务状态: ['可接取', '进行中', '可提交', '已完成', '已失败', '已过期'],
   任务目标类型: ['主要', '次要', '隐藏'],
   任务目标状态: ['未发现', '未完成', '已完成'],
@@ -58,6 +59,7 @@ export type 美人位份 = (typeof 枚举.美人位份)[number];
 export type 美人性格 = (typeof 枚举.美人性格)[number];
 export type 美人状态 = (typeof 枚举.美人状态)[number];
 export type 任务类型 = (typeof 枚举.任务类型)[number];
+export type 商品分类 = (typeof 枚举.商品分类)[number];
 export type 任务状态 = (typeof 枚举.任务状态)[number];
 export type 任务目标类型 = (typeof 枚举.任务目标类型)[number];
 export type 任务目标状态 = (typeof 枚举.任务目标状态)[number];

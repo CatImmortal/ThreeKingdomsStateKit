@@ -8,6 +8,30 @@ function formatPrefix(scope: string, level?: 'info' | 'warn' | 'error'): string 
   return level ? `${DEBUG_PREFIX}[${level}][${scope}]` : `${DEBUG_PREFIX}[${scope}]`;
 }
 
+function stringifyPayload(payload: unknown): string {
+  if (payload instanceof Error) {
+    return payload.stack || `${payload.name}: ${payload.message}`;
+  }
+  if (typeof payload === 'string') {
+    return payload;
+  }
+  if (payload === undefined) {
+    return '';
+  }
+  try {
+    return JSON.stringify(payload, null, 2);
+  } catch {
+    return String(payload);
+  }
+}
+
+function formatMessage(message: string, payload?: unknown): string {
+  if (payload === undefined) {
+    return message;
+  }
+  return `${message}\n${stringifyPayload(payload)}`;
+}
+
 export function setDebugEnabled(enabled: boolean): boolean {
   debugEnabled = Boolean(enabled);
   console.log(`${DEBUG_PREFIX}[debug] ${debugEnabled ? 'enabled' : 'disabled'}`);
@@ -20,36 +44,20 @@ export function getDebugEnabled(): boolean {
 
 export function debugInfo(scope: string, message: string, payload?: unknown): void {
   if (!debugEnabled) return;
-  if (payload === undefined) {
-    console.info(formatPrefix(scope, 'info'), message);
-    return;
-  }
-  console.info(formatPrefix(scope, 'info'), message, payload);
+  console.info(formatPrefix(scope, 'info'), formatMessage(message, payload));
 }
 
 export function debugLog(scope: string, message: string, payload?: unknown): void {
   if (!debugEnabled) return;
-  if (payload === undefined) {
-    console.log(formatPrefix(scope), message);
-    return;
-  }
-  console.log(formatPrefix(scope), message, payload);
+  console.log(formatPrefix(scope), formatMessage(message, payload));
 }
 
 export function debugWarn(scope: string, message: string, payload?: unknown): void {
-  if (payload === undefined) {
-    console.warn(formatPrefix(scope, 'warn'), message);
-    return;
-  }
-  console.warn(formatPrefix(scope, 'warn'), message, payload);
+  console.warn(formatPrefix(scope, 'warn'), formatMessage(message, payload));
 }
 
 export function debugError(scope: string, message: string, error?: unknown): void {
-  if (error === undefined) {
-    console.error(formatPrefix(scope, 'error'), message);
-    return;
-  }
-  console.error(formatPrefix(scope, 'error'), message, error);
+  console.error(formatPrefix(scope, 'error'), formatMessage(message, error));
 }
 
 export function summarizeState(state: 状态总表) {
@@ -69,6 +77,7 @@ export function summarizeState(state: 状态总表) {
       官职: state.主角?.官职 || '',
       爵位: state.主角?.爵位 || '',
     },
+    势力数量: Object.keys(state.势力 || {}).length,
     NPC数量: Object.keys(state.NPC || {}).length,
     任务数量: Object.keys(state.任务 || {}).length,
     商城数量: Object.keys(state.商城 || {}).length,

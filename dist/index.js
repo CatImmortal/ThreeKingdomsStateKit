@@ -47,6 +47,7 @@ var \u679A\u4E3E = {
   \u7F8E\u4EBA\u6027\u683C: ["\u6E29\u67D4", "\u8D1E\u70C8", "\u9AD8\u51B7", "\u5A07\u86EE", "\u591A\u60C5", "\u75C5\u5A07", "\u5584\u5992"],
   \u7F8E\u4EBA\u72B6\u6001: ["\u6B63\u5E38", "\u6000\u5B55", "\u4EA7\u540E", "\u751F\u75C5", "\u88AB\u56DA", "\u5931\u8E2A"],
   \u4EFB\u52A1\u7C7B\u578B: ["\u4E3B\u7EBF", "\u652F\u7EBF", "\u9690\u85CF", "\u53F2\u8BD7", "\u6210\u5C31", "\u59D4\u6258"],
+  \u5546\u54C1\u5206\u7C7B: ["\u88C5\u5907", "\u6280\u80FD\u4E66", "\u6D88\u8017\u54C1", "\u8D44\u6E90", "\u9650\u65F6\u7A00\u6709"],
   \u4EFB\u52A1\u72B6\u6001: ["\u53EF\u63A5\u53D6", "\u8FDB\u884C\u4E2D", "\u53EF\u63D0\u4EA4", "\u5DF2\u5B8C\u6210", "\u5DF2\u5931\u8D25", "\u5DF2\u8FC7\u671F"],
   \u4EFB\u52A1\u76EE\u6807\u7C7B\u578B: ["\u4E3B\u8981", "\u6B21\u8981", "\u9690\u85CF"],
   \u4EFB\u52A1\u76EE\u6807\u72B6\u6001: ["\u672A\u53D1\u73B0", "\u672A\u5B8C\u6210", "\u5DF2\u5B8C\u6210"],
@@ -343,6 +344,20 @@ function create\u52BF\u529B(data = {}) {
     \u653F\u7B56: create\u653F\u7B56(data.\u653F\u7B56)
   };
 }
+function \u770B\u8D77\u6765\u50CF\u5355\u52BF\u529B\u5BF9\u8C61(data) {
+  if (!_.isPlainObject(data)) {
+    return false;
+  }
+  return ["\u540D\u79F0", "\u89C4\u6A21", "\u6B63\u7EDF\u6027", "\u60C5\u62A5\u7F51", "\u91D1\u94B1", "\u7CAE\u8349", "\u57CE\u6C60", "\u519B\u961F", "\u5916\u4EA4", "\u653F\u7B56"].some((key) => key in data);
+}
+function create\u52BF\u529B\u96C6\u5408(data = {}) {
+  if (\u770B\u8D77\u6765\u50CF\u5355\u52BF\u529B\u5BF9\u8C61(data)) {
+    const faction = create\u52BF\u529B(data);
+    const factionId = String(faction.\u540D\u79F0 || "default_faction").trim() || "default_faction";
+    return { [factionId]: faction };
+  }
+  return _.mapValues(data || {}, (item) => create\u52BF\u529B(item));
+}
 function create\u6B66\u5C06\u4FE1\u606F(data = {}) {
   return {
     \u91CE\u5FC3\u503C: \u9650\u5236\u6570\u503C(data.\u91CE\u5FC3\u503C, 0, 100),
@@ -399,7 +414,7 @@ function create\u4EFB\u52A1(data = {}) {
 function create\u5546\u54C1\u6761\u76EE(data = {}) {
   return {
     \u540D\u79F0: String(data.\u540D\u79F0 || ""),
-    \u5206\u7C7B: String(data.\u5206\u7C7B || ""),
+    \u5206\u7C7B: \u679A\u4E3E.\u5546\u54C1\u5206\u7C7B.includes(data.\u5206\u7C7B) ? data.\u5206\u7C7B : "\u8D44\u6E90",
     \u4EF7\u683C: Math.max(0, \u6570\u503C(data.\u4EF7\u683C)),
     \u63CF\u8FF0: String(data.\u63CF\u8FF0 || "")
   };
@@ -442,7 +457,7 @@ function create\u521D\u59CB\u72B6\u6001(seed = {}) {
     },
     \u4E16\u754C: create\u4E16\u754C(seed.\u4E16\u754C),
     \u4E3B\u89D2: create\u4E3B\u89D2(seed.\u4E3B\u89D2),
-    \u52BF\u529B: create\u52BF\u529B(seed.\u52BF\u529B),
+    \u52BF\u529B: create\u52BF\u529B\u96C6\u5408(seed.\u52BF\u529B),
     NPC: _.mapValues(seed.NPC || {}, (item) => createNPC(item)),
     \u4EFB\u52A1: _.mapValues(seed.\u4EFB\u52A1 || {}, (item) => create\u4EFB\u52A1(item)),
     \u5546\u57CE: _.mapValues(seed.\u5546\u57CE || {}, (item) => create\u5546\u54C1\u6761\u76EE(item))
@@ -475,6 +490,29 @@ var debugEnabled = false;
 function formatPrefix(scope, level) {
   return level ? `${DEBUG_PREFIX}[${level}][${scope}]` : `${DEBUG_PREFIX}[${scope}]`;
 }
+function stringifyPayload(payload) {
+  if (payload instanceof Error) {
+    return payload.stack || `${payload.name}: ${payload.message}`;
+  }
+  if (typeof payload === "string") {
+    return payload;
+  }
+  if (payload === void 0) {
+    return "";
+  }
+  try {
+    return JSON.stringify(payload, null, 2);
+  } catch {
+    return String(payload);
+  }
+}
+function formatMessage(message, payload) {
+  if (payload === void 0) {
+    return message;
+  }
+  return `${message}
+${stringifyPayload(payload)}`;
+}
 function setDebugEnabled(enabled) {
   debugEnabled = Boolean(enabled);
   console.log(`${DEBUG_PREFIX}[debug] ${debugEnabled ? "enabled" : "disabled"}`);
@@ -485,33 +523,17 @@ function getDebugEnabled() {
 }
 function debugInfo(scope, message, payload) {
   if (!debugEnabled) return;
-  if (payload === void 0) {
-    console.info(formatPrefix(scope, "info"), message);
-    return;
-  }
-  console.info(formatPrefix(scope, "info"), message, payload);
+  console.info(formatPrefix(scope, "info"), formatMessage(message, payload));
 }
 function debugLog(scope, message, payload) {
   if (!debugEnabled) return;
-  if (payload === void 0) {
-    console.log(formatPrefix(scope), message);
-    return;
-  }
-  console.log(formatPrefix(scope), message, payload);
+  console.log(formatPrefix(scope), formatMessage(message, payload));
 }
 function debugWarn(scope, message, payload) {
-  if (payload === void 0) {
-    console.warn(formatPrefix(scope, "warn"), message);
-    return;
-  }
-  console.warn(formatPrefix(scope, "warn"), message, payload);
+  console.warn(formatPrefix(scope, "warn"), formatMessage(message, payload));
 }
 function debugError(scope, message, error) {
-  if (error === void 0) {
-    console.error(formatPrefix(scope, "error"), message);
-    return;
-  }
-  console.error(formatPrefix(scope, "error"), message, error);
+  console.error(formatPrefix(scope, "error"), formatMessage(message, error));
 }
 function summarizeState(state) {
   return {
@@ -530,6 +552,7 @@ function summarizeState(state) {
       \u5B98\u804C: state.\u4E3B\u89D2?.\u5B98\u804C || "",
       \u7235\u4F4D: state.\u4E3B\u89D2?.\u7235\u4F4D || ""
     },
+    \u52BF\u529B\u6570\u91CF: Object.keys(state.\u52BF\u529B || {}).length,
     NPC\u6570\u91CF: Object.keys(state.NPC || {}).length,
     \u4EFB\u52A1\u6570\u91CF: Object.keys(state.\u4EFB\u52A1 || {}).length,
     \u5546\u57CE\u6570\u91CF: Object.keys(state.\u5546\u57CE || {}).length,
@@ -556,13 +579,15 @@ var \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355 = {
   AppendRecentEvent: ["type", "event"],
   UpdatePlayerBase: ["type", "changes"],
   AdjustPlayerResource: ["type", "mode", "changes"],
-  UpdateFaction: ["type", "changes"],
-  UpsertCity: ["type", "id", "data", "createIfMissing"],
-  RemoveCity: ["type", "id"],
-  UpsertArmy: ["type", "id", "data", "createIfMissing"],
-  RemoveArmy: ["type", "id"],
-  UpdateDiplomacy: ["type", "changes"],
-  UpdatePolicy: ["type", "changes"],
+  UpdateFaction: ["type", "factionId", "changes", "createIfMissing"],
+  UpsertCity: ["type", "factionId", "id", "data", "createIfMissing"],
+  AddCityFacility: ["type", "factionId", "id", "facility"],
+  RemoveCityFacility: ["type", "factionId", "id", "facility"],
+  RemoveCity: ["type", "factionId", "id"],
+  UpsertArmy: ["type", "factionId", "id", "data", "createIfMissing"],
+  RemoveArmy: ["type", "factionId", "id"],
+  UpdateDiplomacy: ["type", "factionId", "changes"],
+  UpdatePolicy: ["type", "factionId", "changes"],
   UpsertNpc: ["type", "id", "data", "createIfMissing"],
   UpdateNpcRelation: ["type", "id", "mode", "\u597D\u611F", "\u7F81\u7ECA"],
   RemoveNpc: ["type", "id"],
@@ -800,7 +825,7 @@ function \u6821\u9A8C\u5546\u54C1\u6761\u76EE(value, path) {
   \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u5546\u54C1\u5B57\u6BB5, path);
   if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
-  if (value.\u5206\u7C7B !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u5206\u7C7B, `${path}.\u5206\u7C7B`);
+  if (value.\u5206\u7C7B !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u5206\u7C7B, \u679A\u4E3E.\u5546\u54C1\u5206\u7C7B, `${path}.\u5206\u7C7B`);
   if (value.\u4EF7\u683C !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u4EF7\u683C, `${path}.\u4EF7\u683C`);
   if (value.\u63CF\u8FF0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u63CF\u8FF0, `${path}.\u63CF\u8FF0`);
 }
@@ -986,23 +1011,42 @@ function \u6821\u9A8C\u547D\u4EE4(command, index = 0) {
         \u6821\u9A8C\u8D44\u6E90\u53D8\u5316(command.changes, `${path}.changes`);
         return;
       case "UpdateFaction":
-        debugLog("commands", "\u6821\u9A8C UpdateFaction", { index });
+        debugLog("commands", "\u6821\u9A8C UpdateFaction", { index, factionId: command.factionId });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
         \u6821\u9A8C\u52BF\u529B\u66F4\u65B0(command.changes, `${path}.changes`);
         return;
       case "UpsertCity":
-        debugLog("commands", "\u6821\u9A8C UpsertCity", { index, id: command.id });
+        debugLog("commands", "\u6821\u9A8C UpsertCity", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
         if (command.createIfMissing !== void 0) {
           \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
         }
         \u6821\u9A8C\u57CE\u6C60\u66F4\u65B0(command.data, `${path}.data`);
         return;
+      case "AddCityFacility":
+        debugLog("commands", "\u6821\u9A8C AddCityFacility", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.facility, `${path}.facility`);
+        return;
+      case "RemoveCityFacility":
+        debugLog("commands", "\u6821\u9A8C RemoveCityFacility", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.facility, `${path}.facility`);
+        return;
       case "RemoveCity":
-        debugLog("commands", "\u6821\u9A8C RemoveCity", { index, id: command.id });
+        debugLog("commands", "\u6821\u9A8C RemoveCity", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
         return;
       case "UpsertArmy":
-        debugLog("commands", "\u6821\u9A8C UpsertArmy", { index, id: command.id });
+        debugLog("commands", "\u6821\u9A8C UpsertArmy", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
         if (command.createIfMissing !== void 0) {
           \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
@@ -1010,15 +1054,18 @@ function \u6821\u9A8C\u547D\u4EE4(command, index = 0) {
         \u6821\u9A8C\u519B\u961F\u66F4\u65B0(command.data, `${path}.data`);
         return;
       case "RemoveArmy":
-        debugLog("commands", "\u6821\u9A8C RemoveArmy", { index, id: command.id });
+        debugLog("commands", "\u6821\u9A8C RemoveArmy", { index, factionId: command.factionId, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
         return;
       case "UpdateDiplomacy":
-        debugLog("commands", "\u6821\u9A8C UpdateDiplomacy", { index });
+        debugLog("commands", "\u6821\u9A8C UpdateDiplomacy", { index, factionId: command.factionId });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u6821\u9A8C\u6570\u5B57\u6620\u5C04(command.changes, `${path}.changes`);
         return;
       case "UpdatePolicy":
-        debugLog("commands", "\u6821\u9A8C UpdatePolicy", { index });
+        debugLog("commands", "\u6821\u9A8C UpdatePolicy", { index, factionId: command.factionId });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.factionId, `${path}.factionId`);
         \u6821\u9A8C\u653F\u7B56\u66F4\u65B0(command.changes, `${path}.changes`);
         return;
       case "UpsertNpc":
@@ -1219,16 +1266,340 @@ function recompute\u52BF\u529B(data, state) {
   next._\u6708\u7CAE\u8349\u6D88\u8017\u4F30\u7B97 = _.sumBy(\u519B\u961F\u5217\u8868, (item) => Math.ceil((item.\u5175\u529B ?? 0) / 1e3) * 10);
   return next;
 }
+function recompute\u52BF\u529B\u96C6\u5408(data, state) {
+  return _.mapValues(data || {}, (faction) => recompute\u52BF\u529B(create\u52BF\u529B(faction), state));
+}
 function recompute\u5168\u5C40(state) {
   const next = _.cloneDeep(state);
   next.\u4E16\u754C = create\u4E16\u754C(next.\u4E16\u754C);
   next.\u4E16\u754C.\u8FD1\u671F\u4E8B\u4EF6 = next.\u4E16\u754C.\u8FD1\u671F\u4E8B\u4EF6.slice(-MAX_RECENT_EVENTS);
   next.\u4E3B\u89D2 = recompute\u4E3B\u89D2(next.\u4E3B\u89D2);
   next.NPC = _.mapValues(next.NPC || {}, (npc) => recomputeNPC(npc));
-  next.\u52BF\u529B = recompute\u52BF\u529B(create\u52BF\u529B(next.\u52BF\u529B), { NPC: next.NPC });
+  next.\u52BF\u529B = recompute\u52BF\u529B\u96C6\u5408(create\u52BF\u529B\u96C6\u5408(next.\u52BF\u529B), { NPC: next.NPC });
   next.\u4EFB\u52A1 = _.pickBy(next.\u4EFB\u52A1 || {}, (task) => ["\u53EF\u63A5\u53D6", "\u8FDB\u884C\u4E2D", "\u53EF\u63D0\u4EA4"].includes(task.\u72B6\u6001));
   next.meta.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
   return next;
+}
+
+// src/status-panel.ts
+var status_panel_exports = {};
+__export(status_panel_exports, {
+  STATUS_BAR_END: () => STATUS_BAR_END,
+  STATUS_BAR_START: () => STATUS_BAR_START,
+  appendStatusBar: () => appendStatusBar,
+  buildStatusBar: () => buildStatusBar,
+  stripStatusBar: () => stripStatusBar
+});
+var STATUS_BAR_START = "<StatusBar>";
+var STATUS_BAR_END = "</StatusBar>";
+function \u8F6C\u4E49HTML(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function \u6570\u503C\u6761(label, current, max, tone = "hp") {
+  const currentNumber = Number(current ?? 0);
+  const maxNumber = Number(max ?? Math.max(currentNumber, 100));
+  const safeMax = maxNumber > 0 ? maxNumber : 100;
+  const percent = Math.max(0, Math.min(100, Math.round(currentNumber / safeMax * 100)));
+  return `<div class="tk-panel-bar-row"><div class="tk-panel-bar-label">${\u8F6C\u4E49HTML(label)}</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-${tone}" style="width:${percent}%"></span></div><div class="tk-panel-bar-value">${\u8F6C\u4E49HTML(currentNumber)}${max !== void 0 ? ` / ${\u8F6C\u4E49HTML(maxNumber)}` : ""}</div></div>`;
+}
+function \u6807\u7B7E(label, value, accent = false) {
+  return `<div class="tk-panel-kv${accent ? " is-accent" : ""}"><span class="tk-panel-k">${\u8F6C\u4E49HTML(label)}</span><span class="tk-panel-v">${\u8F6C\u4E49HTML(value || "\u65E0")}</span></div>`;
+}
+function \u5217\u8868\u9879(title, meta, desc) {
+  return `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${\u8F6C\u4E49HTML(title)}</div><div class="tk-panel-list-meta">${\u8F6C\u4E49HTML(meta)}</div>${desc ? `<div class="tk-panel-list-desc">${\u8F6C\u4E49HTML(desc)}</div>` : ""}</div>`;
+}
+function \u6E32\u67D3\u4E8C\u7EA7\u5206\u9875(group, tabs) {
+  if (tabs.length === 0) {
+    return '<div class="tk-panel-empty">\u6682\u65E0\u5185\u5BB9</div>';
+  }
+  const ids = tabs.map((tab) => ({
+    ...tab,
+    inputId: `${group}-${tab.key}`,
+    pageClass: `is-${group}-${tab.key}`
+  }));
+  const activeRules = ids.map((tab) => `#${tab.inputId}:checked~.tk-subtabs label[for="${tab.inputId}"]{background:linear-gradient(180deg,#8d5a27,#653717);color:#fff5e6;border-color:rgba(255,216,158,.72)}#${tab.inputId}:checked~.tk-subpages .${tab.pageClass}{display:block}`).join("");
+  return `<div class="tk-subtab-shell"><style>${activeRules}</style>${ids.map((tab, index) => `<input class="tk-subtab-input" type="radio" name="${group}" id="${tab.inputId}"${index === 0 ? " checked" : ""}>`).join("")}<div class="tk-subtabs">${ids.map((tab) => `<label class="tk-subtab-label" for="${tab.inputId}">${\u8F6C\u4E49HTML(tab.label)}</label>`).join("")}</div><div class="tk-subpages">${ids.map((tab) => `<div class="tk-subpage ${tab.pageClass}">${tab.content}</div>`).join("")}</div></div>`;
+}
+function \u96F7\u8FBE\u70B9(cx, cy, radius, angle) {
+  const x = cx + Math.cos(angle) * radius;
+  const y = cy + Math.sin(angle) * radius;
+  return `${x.toFixed(1)},${y.toFixed(1)}`;
+}
+function \u6E32\u67D3\u516D\u7EF4\u96F7\u8FBE\u56FE(stats) {
+  const labels = [
+    { key: "\u6B66\u529B", value: stats.\u6B66\u529B, bonus: stats._\u6B66\u529B\u52A0\u503C ?? 0 },
+    { key: "\u667A\u529B", value: stats.\u667A\u529B, bonus: stats._\u667A\u529B\u52A0\u503C ?? 0 },
+    { key: "\u7EDF\u7387", value: stats.\u7EDF\u7387, bonus: stats._\u7EDF\u7387\u52A0\u503C ?? 0 },
+    { key: "\u653F\u6CBB", value: stats.\u653F\u6CBB, bonus: stats._\u653F\u6CBB\u52A0\u503C ?? 0 },
+    { key: "\u9B45\u529B", value: stats.\u9B45\u529B, bonus: stats._\u9B45\u529B\u52A0\u503C ?? 0 },
+    { key: "\u4F53\u8D28", value: stats.\u4F53\u8D28, bonus: stats._\u4F53\u8D28\u52A0\u503C ?? 0 }
+  ];
+  const cx = 110;
+  const cy = 110;
+  const maxRadius = 72;
+  const maxValue = 120;
+  const angles = labels.map((_2, index) => -Math.PI / 2 + Math.PI * 2 * index / labels.length);
+  const rings = [0.25, 0.5, 0.75, 1].map((scale) => `<polygon class="tk-radar-ring" points="${angles.map((angle) => \u96F7\u8FBE\u70B9(cx, cy, maxRadius * scale, angle)).join(" ")}"></polygon>`).join("");
+  const axes = angles.map((angle) => `<line class="tk-radar-axis" x1="${cx}" y1="${cy}" x2="${(cx + Math.cos(angle) * maxRadius).toFixed(1)}" y2="${(cy + Math.sin(angle) * maxRadius).toFixed(1)}"></line>`).join("");
+  const polygon = `<polygon class="tk-radar-shape" points="${labels.map((item, index) => \u96F7\u8FBE\u70B9(cx, cy, maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles[index])).join(" ")}"></polygon>`;
+  const dots = labels.map((item, index) => {
+    const [x, y] = \u96F7\u8FBE\u70B9(cx, cy, maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles[index]).split(",");
+    return `<circle class="tk-radar-dot" cx="${x}" cy="${y}" r="3"></circle>`;
+  }).join("");
+  const axisLabels = labels.map((item, index) => {
+    const [x, y] = \u96F7\u8FBE\u70B9(cx, cy, maxRadius + 28, angles[index]).split(",");
+    return `<text class="tk-radar-label" x="${x}" y="${y}" text-anchor="middle"><tspan x="${x}" dy="0">${\u8F6C\u4E49HTML(item.key)}</tspan><tspan x="${x}" dy="13">${\u8F6C\u4E49HTML(`${item.value}/${item.bonus}`)}</tspan></text>`;
+  }).join("");
+  return `<div class="tk-radar-wrap"><svg class="tk-radar" viewBox="0 0 220 220" role="img" aria-label="\u4E3B\u89D2\u516D\u7EF4\u96F7\u8FBE\u56FE">${rings}${axes}${polygon}${dots}${axisLabels}</svg></div>`;
+}
+function \u6E32\u67D3\u4E3B\u89D2\u9875(state, suffix) {
+  const player = state.\u4E3B\u89D2;
+  const \u8D44\u6E90\u6807\u7B7E = [
+    \u6807\u7B7E("\u5B98\u804C", player.\u5B98\u804C || "\u65E0", true),
+    \u6807\u7B7E("\u7235\u4F4D", player.\u7235\u4F4D || "\u65E0", true),
+    \u6807\u7B7E("\u58F0\u671B\u79F0\u53F7", player._\u58F0\u671B\u79F0\u53F7 || "\u65E0"),
+    \u6807\u7B7E("\u548C\u8C10\u7B49\u7EA7", player._\u548C\u8C10\u7B49\u7EA7 || "\u65E0"),
+    \u6807\u7B7E("\u91D1\u94B1", player.\u91D1\u94B1),
+    \u6807\u7B7E("\u79EF\u5206", player.\u79EF\u5206),
+    \u6807\u7B7E("\u58F0\u671B", player.\u58F0\u671B)
+  ].join("");
+  const \u516D\u7EF4\u96F7\u8FBE\u56FE = \u6E32\u67D3\u516D\u7EF4\u96F7\u8FBE\u56FE(player.\u516D\u7EF4);
+  const \u88C5\u5907\u9879\u5217\u8868 = Object.entries(player.\u88C5\u5907 || {});
+  const \u6B66\u6280\u9879\u5217\u8868 = Object.entries(player.\u6B66\u6280 || {});
+  const \u4E13\u957F\u9879\u5217\u8868 = Object.entries(player.\u4E13\u957F || {});
+  const \u80CC\u5305\u9879\u5217\u8868 = Object.entries(player.\u7269\u54C1\u680F || {});
+  const \u540E\u5BAB\u9879\u5217\u8868 = Object.entries(state.NPC || {}).filter(([, npc]) => Boolean(npc.\u7F8E\u4EBA\u5C5E\u6027));
+  const \u6B66\u5C06\u9879\u5217\u8868 = Object.entries(state.NPC || {}).filter(([, npc]) => Boolean(npc.\u6B66\u5C06\u4FE1\u606F));
+  return \u6E32\u67D3\u4E8C\u7EA7\u5206\u9875(`hero-sub-${suffix}`, [
+    {
+      key: "attrs",
+      label: "\u5C5E\u6027",
+      content: `<div class="tk-panel-page-grid cols-2"><section class="tk-panel-card"><div class="tk-panel-card-title">\u4E3B\u89D2\u9762\u677F</div>${\u6570\u503C\u6761("\u751F\u547D", player.\u5F53\u524D\u751F\u547D\u503C, player._\u751F\u547D\u503C\u4E0A\u9650, "hp")}${\u6570\u503C\u6761("\u4F53\u529B", player.\u5F53\u524D\u4F53\u529B\u503C, player._\u4F53\u529B\u503C\u4E0A\u9650, "sp")}<div class="tk-panel-inline-note">\u4F24\u52BF\uFF1A${\u8F6C\u4E49HTML(player._\u4F24\u52BF || "\u5B8C\u597D")}\u3000\u51CF\u503C\uFF1A${\u8F6C\u4E49HTML(player._\u6218\u6597\u51CF\u503C ?? 0)}</div><div class="tk-panel-kv-grid">${\u8D44\u6E90\u6807\u7B7E}</div></section><section class="tk-panel-card"><div class="tk-panel-card-title">\u516D\u7EF4\u4E0E\u6218\u6597</div>${\u516D\u7EF4\u96F7\u8FBE\u56FE}<div class="tk-panel-kv-grid compact">${\u6807\u7B7E("\u5148\u653B", player._\u5148\u653B\u503C ?? 0)}${\u6807\u7B7E("\u653B\u51FB", player._\u653B\u51FB\u57FA\u7840\u503C ?? 0)}${\u6807\u7B7E("\u4F24\u5BB3", player._\u4F24\u5BB3\u57FA\u7840\u503C ?? 0)}${\u6807\u7B7E("\u9632\u5FA1DC", player._\u9632\u5FA1DC ?? 0)}${\u6807\u7B7E("\u4F24\u5BB3\u51CF\u514D", player._\u4F24\u5BB3\u51CF\u514D ?? 0)}</div></section></div>`
+    },
+    {
+      key: "equip",
+      label: "\u88C5\u5907",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u88C5\u5907\u680F</div><div class="tk-panel-list">${\u88C5\u5907\u9879\u5217\u8868.map(([slot, item]) => !item || item === "\u65E0" ? \u5217\u8868\u9879(slot, "\u672A\u88C5\u5907") : \u5217\u8868\u9879(`${slot} \xB7 ${item.\u540D\u79F0}`, `${item.\u54C1\u8D28} / ${item.\u7C7B\u578B}`, item.\u63CF\u8FF0 || item.\u5176\u4ED6\u6548\u679C || "\u65E0")).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u88C5\u5907</div>'}</div></section>`
+    },
+    {
+      key: "bag",
+      label: "\u80CC\u5305",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u80CC\u5305</div><div class="tk-panel-list">${\u80CC\u5305\u9879\u5217\u8868.map(([id, item]) => \u5217\u8868\u9879(id, `${item.\u54C1\u8D28} / \u6570\u91CF:${item.\u6570\u91CF}`, item.\u63CF\u8FF0 || "\u65E0")).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u7269\u54C1</div>'}</div></section>`
+    },
+    {
+      key: "skills",
+      label: "\u6B66\u6280",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u6B66\u6280\u680F</div><div class="tk-panel-list">${\u6B66\u6280\u9879\u5217\u8868.map(([id, skill]) => \u5217\u8868\u9879(skill.\u540D\u79F0 || id, `${skill.\u7B49\u7EA7} / ${skill.\u7C7B\u578B}`, `\u719F\u7EC3\u5EA6\uFF1A${skill.\u719F\u7EC3\u5EA6 ?? 0}\u3000\u4F53\u529B\u6D88\u8017\uFF1A${skill.\u4F53\u529B\u6D88\u8017 ?? 0}${skill.\u6548\u679C ? `
+${skill.\u6548\u679C}` : ""}`)).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u6B66\u6280</div>'}</div></section>`
+    },
+    {
+      key: "perks",
+      label: "\u4E13\u957F",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u4E13\u957F\u680F</div><div class="tk-panel-list">${\u4E13\u957F\u9879\u5217\u8868.map(([id, perk]) => \u5217\u8868\u9879(perk.\u540D\u79F0 || id, perk.\u7B49\u7EA7 || "\u672A\u5B9A\u7EA7", perk.\u6548\u679C || "\u65E0")).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u4E13\u957F</div>'}</div></section>`
+    },
+    {
+      key: "consorts",
+      label: "\u540E\u5BAB",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u540E\u5BAB\u5217\u8868</div><div class="tk-panel-list">${\u540E\u5BAB\u9879\u5217\u8868.map(([id, npc]) => \u5217\u8868\u9879(npc.\u540D\u79F0 || id, `${npc.\u7F8E\u4EBA\u5C5E\u6027?.\u4F4D\u4EFD || "\u672A\u7EB3\u5165"} / ${npc.\u7F8E\u4EBA\u5C5E\u6027?._\u4F9D\u8D56\u7B49\u7EA7 || npc.\u7F8E\u4EBA\u5C5E\u6027?.\u4F9D\u8D56\u5EA6 || 0}`, `${npc.\u7F8E\u4EBA\u5C5E\u6027?.\u5F53\u524D\u72B6\u6001 || "\u6B63\u5E38"} \xB7 ${npc.\u7B80\u8FF0 || "\u65E0"}`)).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u540E\u5BAB\u6210\u5458</div>'}</div></section>`
+    },
+    {
+      key: "generals",
+      label: "\u6B66\u5C06",
+      content: `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5DF2\u62DB\u52DF\u6B66\u5C06</div><div class="tk-panel-list">${\u6B66\u5C06\u9879\u5217\u8868.map(([id, npc]) => \u5217\u8868\u9879(npc.\u540D\u79F0 || id, `${npc.\u6B66\u5C06\u4FE1\u606F?.\u5B98\u804C || "\u65E0\u5B98\u804C"} / ${npc.\u6B66\u5C06\u4FE1\u606F?.\u5F53\u524D\u72B6\u6001 || "\u5F85\u547D"}`, `${npc.\u6B66\u5C06\u4FE1\u606F?.\u9A7B\u624E\u5730 || "\u65E0\u9A7B\u5730"} \xB7 ${npc.\u7B80\u8FF0 || "\u65E0"}`)).join("") || '<div class="tk-panel-empty">\u6682\u65E0\u5DF2\u62DB\u52DF\u6B66\u5C06</div>'}</div></section>`
+    }
+  ]);
+}
+function \u6E32\u67D3NPC\u8BE6\u60C5(id, npc) {
+  const details = [
+    \u6807\u7B7E("\u9635\u8425", npc.\u9635\u8425 || "\u65E0"),
+    \u6807\u7B7E("\u5B9A\u4F4D", npc.\u5B9A\u4F4D || "\u65E0"),
+    \u6807\u7B7E("\u5173\u7CFB", npc._\u5FE0\u8BDA\u7B49\u7EA7 || npc._\u597D\u611F\u7B49\u7EA7 || npc._\u4EA4\u60C5\u7B49\u7EA7 || npc.\u597D\u611F)
+  ].join("");
+  return `
+    <details class="tk-panel-detail">
+      <summary><span>${\u8F6C\u4E49HTML(npc.\u540D\u79F0 || id)}</span><span>${\u8F6C\u4E49HTML(npc.\u54C1\u8D28)} / ${\u8F6C\u4E49HTML(npc.\u5B9A\u4F4D || "\u672A\u77E5")}</span></summary>
+      <div class="tk-panel-detail-body">
+        <div class="tk-panel-kv-grid compact">${details}</div>
+        <div class="tk-panel-inline-note">${\u8F6C\u4E49HTML(npc.\u7B80\u8FF0 || "\u6682\u65E0\u63CF\u8FF0")}</div>
+      </div>
+    </details>`;
+}
+function \u6E32\u67D3NPC\u9875(state) {
+  const entries = Object.entries(state.NPC || {});
+  const list = entries.length > 0 ? entries.map(([id, npc]) => \u6E32\u67D3NPC\u8BE6\u60C5(id, npc)).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u5730\u70B9\u6682\u65E0\u5173\u952E NPC</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5F53\u524D\u5730\u70B9 NPC</div><div class="tk-panel-detail-list">${list}</div></section>`;
+}
+function \u6E32\u67D3\u4EFB\u52A1\u9875(state, suffix) {
+  const tasks = Object.entries(state.\u4EFB\u52A1 || {});
+  const typeTabs = [...new Set(tasks.map(([, task]) => task.\u7C7B\u578B))];
+  if (typeTabs.length === 0) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u4EFB\u52A1\u5217\u8868</div><div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u6D3B\u8DC3\u4EFB\u52A1</div></section>`;
+  }
+  return \u6E32\u67D3\u4E8C\u7EA7\u5206\u9875(`quest-sub-${suffix}`, typeTabs.map((type) => ({
+    key: type,
+    label: type,
+    content: `<section class="tk-panel-card"><div class="tk-panel-card-title">${\u8F6C\u4E49HTML(type)}\u4EFB\u52A1</div><div class="tk-panel-detail-list">${tasks.filter(([, task]) => task.\u7C7B\u578B === type).map(([id, task]) => {
+      const targets = Object.entries(task.\u76EE\u6807 || {});
+      const targetContent = targets.length ? targets.map(([targetId, target]) => `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${\u8F6C\u4E49HTML(target.\u63CF\u8FF0 || targetId)}</div><div class="tk-panel-list-meta">${\u8F6C\u4E49HTML(target.\u7C7B\u578B)} / ${\u8F6C\u4E49HTML(target.\u72B6\u6001)}</div><div class="tk-panel-list-desc">${\u8F6C\u4E49HTML(`\u79EF\u5206\uFF1A${target.\u79EF\u5206 ?? 0}\u3000\u5176\u4ED6\u5956\u52B1\uFF1A${target.\u5176\u4ED6\u5956\u52B1 || "\u65E0"}`)}</div></div>`).join("") : '<div class="tk-panel-empty">\u6682\u65E0\u4EFB\u52A1\u76EE\u6807</div>';
+      return `<details class="tk-panel-detail"><summary><span>${\u8F6C\u4E49HTML(task.\u540D\u79F0 || id)}</span><span>${\u8F6C\u4E49HTML(task.\u7C7B\u578B)} / ${\u8F6C\u4E49HTML(task.\u72B6\u6001)}</span></summary><div class="tk-panel-detail-body"><div class="tk-panel-inline-note">\u65F6\u9650\uFF1A${\u8F6C\u4E49HTML(task.\u65F6\u9650 || "\u65E0\u65F6\u9650")}</div><div class="tk-panel-list">${targetContent}</div></div></details>`;
+    }).join("")}</div></section>`
+  })));
+}
+function \u6E32\u67D3\u5546\u57CE\u9875(state, suffix) {
+  const items = Object.entries(state.\u5546\u57CE || {});
+  const typeTabs = [...new Set(items.map(([, item]) => item.\u5206\u7C7B))];
+  if (typeTabs.length === 0) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5546\u57CE</div><div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u53EF\u89C1\u5546\u54C1</div></section>`;
+  }
+  return \u6E32\u67D3\u4E8C\u7EA7\u5206\u9875(`shop-sub-${suffix}`, typeTabs.map((type) => ({
+    key: type,
+    label: type,
+    content: `<section class="tk-panel-card"><div class="tk-panel-card-title">${\u8F6C\u4E49HTML(type)}</div><div class="tk-panel-list">${items.filter(([, item]) => item.\u5206\u7C7B === type).map(([id, item]) => \u5217\u8868\u9879(item.\u540D\u79F0 || id, `${item.\u5206\u7C7B} / ${item.\u4EF7\u683C} \u79EF\u5206`, item.\u63CF\u8FF0 || "")).join("") || '<div class="tk-panel-empty">\u5F53\u524D\u5206\u7C7B\u6682\u65E0\u5546\u54C1</div>'}</div></section>`
+  })));
+}
+function \u9009\u62E9\u5C55\u793A\u52BF\u529B(state) {
+  const entries = Object.entries(state.\u52BF\u529B || {});
+  if (entries.length === 0) {
+    return null;
+  }
+  const [id, faction] = entries[0];
+  return { id, faction };
+}
+function \u6E32\u67D3\u519B\u961F\u9875(state) {
+  const current = \u9009\u62E9\u5C55\u793A\u52BF\u529B(state);
+  if (!current) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u519B\u961F</div><div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u52BF\u529B\u6570\u636E</div></section>`;
+  }
+  const armies = Object.entries(current.faction.\u519B\u961F || {});
+  const content = armies.length ? armies.map(([id, army]) => `
+      <details class="tk-panel-detail">
+        <summary><span>${\u8F6C\u4E49HTML(id)}</span><span>${\u8F6C\u4E49HTML(army.\u5175\u79CD)} / ${\u8F6C\u4E49HTML(army.\u7B49\u7EA7)}</span></summary>
+        <div class="tk-panel-detail-body">
+          ${\u6570\u503C\u6761("\u58EB\u6C14", army.\u58EB\u6C14, 100, "morale")}
+          ${\u6570\u503C\u6761("\u75B2\u60EB", army.\u75B2\u60EB, 100, "fatigue")}
+          <div class="tk-panel-kv-grid compact">
+            ${\u6807\u7B7E("\u5175\u529B", army.\u5175\u529B)}
+            ${\u6807\u7B7E("\u5C06\u9886", army.\u7EDF\u5C5E\u5C06\u9886 || "\u65E0")}
+            ${\u6807\u7B7E("\u9A7B\u624E\u5730", army.\u9A7B\u624E\u5730 || "\u65E0")}
+            ${\u6807\u7B7E("\u6218\u529B", army._\u7EFC\u5408\u6218\u529B ?? 0)}
+            ${\u6807\u7B7E("\u653B\u51FB\u6218\u529B", army._\u653B\u51FB\u6218\u529B ?? 0)}
+            ${\u6807\u7B7E("\u9632\u5FA1\u6218\u529B", army._\u9632\u5FA1\u6218\u529B ?? 0)}
+          </div>
+        </div>
+      </details>`).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u519B\u961F\u6570\u636E</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u519B\u961F</div><div class="tk-panel-inline-note">\u5F53\u524D\u5C55\u793A\u52BF\u529B\uFF1A${\u8F6C\u4E49HTML(current.faction.\u540D\u79F0 || current.id)}\uFF08${\u8F6C\u4E49HTML(current.id)}\uFF09</div><div class="tk-panel-detail-list">${content}</div></section>`;
+}
+function \u6E32\u67D3\u52BF\u529B\u9875(state) {
+  const current = \u9009\u62E9\u5C55\u793A\u52BF\u529B(state);
+  if (!current) {
+    return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u52BF\u529B</div><div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u52BF\u529B\u6570\u636E</div></section>`;
+  }
+  const { id, faction } = current;
+  const diplomacy = Object.entries(faction.\u5916\u4EA4 || {}).slice(0, 8).map(([name, value]) => \u6807\u7B7E(name, `${value} / ${faction._\u5916\u4EA4\u7B49\u7EA7?.[name] || "\u672A\u77E5"}`)).join("");
+  const cities = Object.entries(faction.\u57CE\u6C60 || {}).slice(0, 8).map(([name, city]) => \u5217\u8868\u9879(name, `${city.\u7B49\u7EA7} / \u592A\u5B88:${city.\u592A\u5B88 || "\u65E0"}`, `\u7A0E\u6536:${city._\u6708\u7A0E\u6536 ?? 0} \xB7 \u4EA7\u7CAE:${city._\u6708\u4EA7\u7CAE ?? 0}`)).join("");
+  return `
+    <div class="tk-panel-page-grid cols-2">
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u52BF\u529B\u603B\u89C8</div>
+        <div class="tk-panel-inline-note">\u5F53\u524D\u5C55\u793A\u52BF\u529B\uFF1A${\u8F6C\u4E49HTML(faction.\u540D\u79F0 || id)}\uFF08${\u8F6C\u4E49HTML(id)}\uFF09</div>
+        <div class="tk-panel-kv-grid">
+          ${\u6807\u7B7E("\u540D\u79F0", faction.\u540D\u79F0 || "\u65E0", true)}
+          ${\u6807\u7B7E("\u89C4\u6A21", faction.\u89C4\u6A21 || "\u65E0", true)}
+          ${\u6807\u7B7E("\u6B63\u7EDF\u6027", faction.\u6B63\u7EDF\u6027)}
+          ${\u6807\u7B7E("\u60C5\u62A5\u7F51", faction.\u60C5\u62A5\u7F51)}
+          ${\u6807\u7B7E("\u91D1\u94B1", faction.\u91D1\u94B1)}
+          ${\u6807\u7B7E("\u7CAE\u8349", faction.\u7CAE\u8349)}
+          ${\u6807\u7B7E("\u603B\u5175\u529B", faction._\u603B\u5175\u529B ?? 0)}
+          ${\u6807\u7B7E("\u603B\u6218\u529B", faction._\u603B\u6218\u529B ?? 0)}
+          ${\u6807\u7B7E("\u6708\u7A0E\u6536", faction._\u6708\u603B\u7A0E\u6536 ?? 0)}
+          ${\u6807\u7B7E("\u6708\u4EA7\u7CAE", faction._\u6708\u603B\u4EA7\u7CAE ?? 0)}
+          ${\u6807\u7B7E("\u6708\u519B\u9977", faction._\u6708\u519B\u9977\u4F30\u7B97 ?? 0)}
+          ${\u6807\u7B7E("\u6708\u8017\u7CAE", faction._\u6708\u7CAE\u8349\u6D88\u8017\u4F30\u7B97 ?? 0)}
+        </div>
+      </section>
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u5916\u4EA4\u6001\u52BF</div>
+        <div class="tk-panel-kv-grid compact">${diplomacy || '<div class="tk-panel-empty">\u6682\u65E0\u5916\u4EA4\u6570\u636E</div>'}</div>
+      </section>
+      <section class="tk-panel-card cols-span-2">
+        <div class="tk-panel-card-title">\u57CE\u6C60\u6458\u8981</div>
+        <div class="tk-panel-list">${cities || '<div class="tk-panel-empty">\u6682\u65E0\u57CE\u6C60\u6570\u636E</div>'}</div>
+      </section>
+    </div>`;
+}
+function \u6837\u5F0F(ids) {
+  return `<style>
+.tk-statusbar{margin-top:14px;border:1px solid rgba(196,154,92,.45);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(37,24,17,.96),rgba(15,12,10,.96));box-shadow:0 12px 32px rgba(0,0,0,.35);color:#f3e3c3;font-family:"Microsoft YaHei",serif}
+.tk-statusbar *{box-sizing:border-box}
+.tk-statusbar .tk-panel-shell{position:relative}
+.tk-statusbar .tk-panel-head{padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.28);background:linear-gradient(180deg,rgba(122,63,30,.35),rgba(54,30,18,.15))}
+.tk-statusbar .tk-panel-title{font-size:18px;font-weight:700;letter-spacing:2px;color:#f6d9a2}
+.tk-statusbar .tk-panel-subtitle{margin-top:6px;font-size:12px;color:#d8bf93;display:flex;flex-wrap:wrap;gap:10px}
+.tk-statusbar .tk-panel-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.02)}
+.tk-statusbar .tk-panel-tab-input{display:none}
+.tk-statusbar .tk-panel-tab-label{padding:8px 14px;border:1px solid rgba(196,154,92,.28);border-radius:999px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;transition:.2s;font-size:12px}
+.tk-statusbar .tk-panel-tab-label:hover{background:rgba(196,154,92,.12);color:#fff1d0}
+.tk-statusbar .tk-panel-pages{padding:14px}
+.tk-statusbar .tk-panel-page{display:none}
+.tk-statusbar #${ids.hero}:checked~.tk-panel-tabs label[for="${ids.hero}"],.tk-statusbar #${ids.npc}:checked~.tk-panel-tabs label[for="${ids.npc}"],.tk-statusbar #${ids.quest}:checked~.tk-panel-tabs label[for="${ids.quest}"],.tk-statusbar #${ids.shop}:checked~.tk-panel-tabs label[for="${ids.shop}"],.tk-statusbar #${ids.army}:checked~.tk-panel-tabs label[for="${ids.army}"],.tk-statusbar #${ids.faction}:checked~.tk-panel-tabs label[for="${ids.faction}"]{background:linear-gradient(180deg,#a76b2e,#7a4a1f);color:#fff5e6;border-color:rgba(255,216,158,.8);box-shadow:0 0 0 1px rgba(255,240,212,.12) inset}
+.tk-statusbar #${ids.hero}:checked~.tk-panel-pages .is-hero,.tk-statusbar #${ids.npc}:checked~.tk-panel-pages .is-npc,.tk-statusbar #${ids.quest}:checked~.tk-panel-pages .is-quest,.tk-statusbar #${ids.shop}:checked~.tk-panel-pages .is-shop,.tk-statusbar #${ids.army}:checked~.tk-panel-pages .is-army,.tk-statusbar #${ids.faction}:checked~.tk-panel-pages .is-faction{display:block}
+.tk-statusbar .tk-panel-page-grid{display:grid;gap:12px}.tk-statusbar .tk-panel-page-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tk-statusbar .tk-subtab-input{display:none}
+.tk-statusbar .tk-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tk-statusbar .tk-subtab-label{padding:6px 12px;border:1px solid rgba(196,154,92,.22);border-radius:999px;background:rgba(255,255,255,.03);color:#d6bb91;cursor:pointer;font-size:12px;transition:.2s}
+.tk-statusbar .tk-subtab-label:hover{background:rgba(196,154,92,.1);color:#fff1d0}
+.tk-statusbar .tk-subpage{display:none}
+.tk-statusbar .cols-span-2{grid-column:span 2}
+.tk-statusbar .tk-panel-card{padding:14px;border:1px solid rgba(196,154,92,.22);border-radius:12px;background:rgba(255,248,232,.03)}
+.tk-statusbar .tk-panel-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
+.tk-statusbar .tk-panel-kv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tk-statusbar .tk-panel-kv{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.tk-statusbar .tk-panel-kv.is-accent{background:rgba(167,107,46,.18);border-color:rgba(240,201,131,.26)}
+.tk-statusbar .tk-panel-k{display:block;font-size:11px;color:#cba977}.tk-statusbar .tk-panel-v{display:block;margin-top:4px;font-size:13px;color:#fff1d0}
+.tk-statusbar .tk-panel-inline-note{margin-top:10px;font-size:12px;color:#d6c4a4}
+.tk-statusbar .tk-panel-list,.tk-statusbar .tk-panel-detail-list{display:flex;flex-direction:column;gap:8px}
+.tk-statusbar .tk-panel-list-item{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.tk-statusbar .tk-panel-list-title{font-size:13px;font-weight:700;color:#f6dfb5}.tk-statusbar .tk-panel-list-meta{margin-top:4px;font-size:11px;color:#d6bb91}.tk-statusbar .tk-panel-list-desc{margin-top:6px;font-size:12px;color:#f2eadc;opacity:.88}
+.tk-statusbar .tk-panel-detail{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
+.tk-statusbar .tk-panel-detail summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:10px 12px;color:#f6dfb5;font-size:13px}.tk-statusbar .tk-panel-detail summary::-webkit-details-marker{display:none}
+.tk-statusbar .tk-panel-detail-body{padding:0 12px 12px}
+.tk-statusbar .tk-panel-equip-detail summary{padding:12px 14px;background:rgba(167,107,46,.12)}
+.tk-statusbar .tk-panel-equip-detail .tk-panel-detail-body{padding:0 0 4px}
+.tk-statusbar .tk-panel-empty{padding:18px 12px;text-align:center;color:#bda681;font-size:12px}
+.tk-statusbar .tk-radar-wrap{display:block;margin-bottom:12px}
+.tk-statusbar .tk-radar{width:220px;height:220px;display:block;margin:0 auto}
+.tk-statusbar .tk-radar-ring,.tk-statusbar .tk-radar-axis{fill:none;stroke:rgba(240,201,131,.18);stroke-width:1}
+.tk-statusbar .tk-radar-shape{fill:rgba(167,107,46,.28);stroke:#f0c983;stroke-width:2}
+.tk-statusbar .tk-radar-dot{fill:#f6dfb5}
+.tk-statusbar .tk-radar-label{fill:#d8bf93;font-size:11px}
+.tk-statusbar .tk-panel-bar-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
+.tk-statusbar .tk-panel-bar-label,.tk-statusbar .tk-panel-bar-value{font-size:11px;color:#d8bf93}.tk-statusbar .tk-panel-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.tk-statusbar .tk-panel-bar-fill{display:block;height:100%}.tk-statusbar .tk-panel-bar-fill.is-hp{background:linear-gradient(90deg,#7f1d1d,#dc2626)}.tk-statusbar .tk-panel-bar-fill.is-sp{background:linear-gradient(90deg,#0f3d73,#3b82f6)}.tk-statusbar .tk-panel-bar-fill.is-morale{background:linear-gradient(90deg,#7c5c12,#f59e0b)}.tk-statusbar .tk-panel-bar-fill.is-fatigue{background:linear-gradient(90deg,#3f3f46,#a1a1aa)}.tk-statusbar .tk-panel-bar-fill.is-gold{background:linear-gradient(90deg,#8b5e00,#facc15)}
+@media (max-width:720px){.tk-statusbar .tk-panel-page-grid.cols-2,.tk-statusbar .tk-panel-kv-grid,.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:1fr}.tk-statusbar .cols-span-2{grid-column:span 1}.tk-statusbar .tk-radar{width:180px;height:180px}}
+</style>`;
+}
+function stripStatusBar(content) {
+  return String(content || "").replace(/\s*<StatusBar>[\s\S]*?<\/StatusBar>\s*$/i, "").trim();
+}
+function buildStatusBar(state, messageId) {
+  const header = `${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u65F6\u95F4 || "\u672A\u77E5\u65F6\u523B")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5730\u70B9 || "\u672A\u77E5\u5730\u70B9")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5929\u6C14 || "\u672A\u77E5\u5929\u6C14")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5267\u672C || "\u672A\u77E5\u5267\u672C")}`;
+  const suffix = String(messageId ?? "latest");
+  const group = `tk-panel-tab-${suffix}`;
+  const ids = {
+    hero: `tk-tab-hero-${suffix}`,
+    npc: `tk-tab-npc-${suffix}`,
+    quest: `tk-tab-quest-${suffix}`,
+    shop: `tk-tab-shop-${suffix}`,
+    army: `tk-tab-army-${suffix}`,
+    faction: `tk-tab-faction-${suffix}`
+  };
+  return `${STATUS_BAR_START}<div class="tk-statusbar"><div class="tk-panel-shell">${\u6837\u5F0F(ids)}<input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.hero}" checked><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.npc}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.quest}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.shop}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.army}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.faction}"><div class="tk-panel-head"><div class="tk-panel-title">\u4E09\u56FD\u9738\u4E3B \xB7 \u7CFB\u7EDF\u9762\u677F</div><div class="tk-panel-subtitle"><span>${header}</span></div></div><div class="tk-panel-tabs"><label class="tk-panel-tab-label" for="${ids.hero}">\u4E3B\u89D2</label><label class="tk-panel-tab-label" for="${ids.npc}">\u5F53\u524D\u5730\u70B9NPC</label><label class="tk-panel-tab-label" for="${ids.quest}">\u4EFB\u52A1</label><label class="tk-panel-tab-label" for="${ids.shop}">\u5546\u57CE</label><label class="tk-panel-tab-label" for="${ids.army}">\u519B\u961F</label><label class="tk-panel-tab-label" for="${ids.faction}">\u52BF\u529B</label></div><div class="tk-panel-pages"><div class="tk-panel-page is-hero">${\u6E32\u67D3\u4E3B\u89D2\u9875(state, suffix)}</div><div class="tk-panel-page is-npc">${\u6E32\u67D3NPC\u9875(state)}</div><div class="tk-panel-page is-quest">${\u6E32\u67D3\u4EFB\u52A1\u9875(state, suffix)}</div><div class="tk-panel-page is-shop">${\u6E32\u67D3\u5546\u57CE\u9875(state, suffix)}</div><div class="tk-panel-page is-army">${\u6E32\u67D3\u519B\u961F\u9875(state)}</div><div class="tk-panel-page is-faction">${\u6E32\u67D3\u52BF\u529B\u9875(state)}</div></div></div></div>${STATUS_BAR_END}`;
+}
+function appendStatusBar(content, state, messageId) {
+  const cleaned = stripStatusBar(content);
+  return `${cleaned}
+
+${buildStatusBar(state, messageId)}`.trim();
 }
 
 // src/storage.ts
@@ -1333,6 +1704,32 @@ async function \u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167() {
     removedMessageIds: patches.map((item) => item.message_id)
   });
 }
+async function \u6E05\u7406\u65E7\u72B6\u6001\u680F(\u5F53\u524D\u6D88\u606FID) {
+  const messages = \u8BFB\u53D6\u6240\u6709\u6D88\u606F();
+  const patches = messages.filter((message) => message.role === "assistant" && message.message_id !== \u5F53\u524D\u6D88\u606FID).map((message) => {
+    const cleaned = stripStatusBar(String(message.message || ""));
+    if (cleaned === String(message.message || "").trim()) {
+      return null;
+    }
+    return {
+      message_id: message.message_id,
+      message: cleaned
+    };
+  }).filter((item) => Boolean(item));
+  if (patches.length === 0) {
+    debugLog("storage", "\u65E0\u9700\u6E05\u7406\u65E7\u72B6\u6001\u680F", { currentMessageId: \u5F53\u524D\u6D88\u606FID });
+    return;
+  }
+  debugLog("storage", "\u51C6\u5907\u6E05\u7406\u65E7\u72B6\u6001\u680F", {
+    currentMessageId: \u5F53\u524D\u6D88\u606FID,
+    removeFromMessageIds: patches.map((item) => item.message_id)
+  });
+  await \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().setChatMessages(patches, { refresh: "none" });
+  debugLog("storage", "\u65E7\u72B6\u6001\u680F\u6E05\u7406\u5B8C\u6210", {
+    currentMessageId: \u5F53\u524D\u6D88\u606FID,
+    cleanedMessageIds: patches.map((item) => item.message_id)
+  });
+}
 async function \u66F4\u65B0\u6D88\u606F\u6B63\u6587(messageId, message) {
   const currentMessage = \u8BFB\u53D6\u6D88\u606F(messageId);
   if (!currentMessage) {
@@ -1343,6 +1740,7 @@ async function \u66F4\u65B0\u6D88\u606F\u6B63\u6587(messageId, message) {
     before: summarizeValue(currentMessage.message),
     after: summarizeValue(message)
   });
+  await \u6E05\u7406\u65E7\u72B6\u6001\u680F(messageId);
   await \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().setChatMessages([{ message_id: messageId, message }], { refresh: "affected" });
   debugLog("storage", "\u697C\u5C42\u6B63\u6587\u5199\u5165\u5B8C\u6210", { messageId });
 }
@@ -1429,33 +1827,58 @@ function \u5E94\u7528\u8FD1\u671F\u4E8B\u4EF6(state, command) {
 function \u5E94\u7528\u4E3B\u89D2\u57FA\u7840\u66F4\u65B0(state, command) {
   state.\u4E3B\u89D2 = recompute\u4E3B\u89D2(create\u4E3B\u89D2(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u4E3B\u89D2), command.changes)));
 }
+function \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, factionId) {
+  return \u65AD\u8A00\u5B58\u5728(state.\u52BF\u529B[factionId], `\u52BF\u529B\u4E0D\u5B58\u5728: ${factionId}`);
+}
 function \u5E94\u7528\u52BF\u529B\u66F4\u65B0(state, command) {
-  state.\u52BF\u529B = create\u52BF\u529B(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u52BF\u529B), command.changes));
+  const current = state.\u52BF\u529B[command.factionId];
+  if (!current && command.createIfMissing === false) {
+    throw new Error(`\u52BF\u529B\u4E0D\u5B58\u5728: ${command.factionId}`);
+  }
+  state.\u52BF\u529B[command.factionId] = create\u52BF\u529B(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(current ?? create\u52BF\u529B()), command.changes));
 }
 function \u5E94\u7528\u57CE\u6C60\u66F4\u65B0(state, command) {
-  const current = state.\u52BF\u529B.\u57CE\u6C60[command.id];
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  const current = faction.\u57CE\u6C60[command.id];
   if (!current && command.createIfMissing === false) {
     throw new Error(`\u57CE\u6C60\u4E0D\u5B58\u5728: ${command.id}`);
   }
   const next = create\u57CE\u6C60(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(current ?? create\u57CE\u6C60()), command.data));
-  state.\u52BF\u529B.\u57CE\u6C60[command.id] = next;
+  faction.\u57CE\u6C60[command.id] = next;
+}
+function \u5E94\u7528\u57CE\u6C60\u8BBE\u65BD\u8FFD\u52A0(state, command) {
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  const current = \u65AD\u8A00\u5B58\u5728(faction.\u57CE\u6C60[command.id], `\u57CE\u6C60\u4E0D\u5B58\u5728: ${command.id}`);
+  const set = new Set([...current.\u8BBE\u65BD || [], String(command.facility || "")].filter(Boolean));
+  faction.\u57CE\u6C60[command.id] = create\u57CE\u6C60({ ...current, \u8BBE\u65BD: [...set] });
+}
+function \u5E94\u7528\u57CE\u6C60\u8BBE\u65BD\u79FB\u9664(state, command) {
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  const current = \u65AD\u8A00\u5B58\u5728(faction.\u57CE\u6C60[command.id], `\u57CE\u6C60\u4E0D\u5B58\u5728: ${command.id}`);
+  faction.\u57CE\u6C60[command.id] = create\u57CE\u6C60({
+    ...current,
+    \u8BBE\u65BD: (current.\u8BBE\u65BD || []).filter((item) => item !== command.facility)
+  });
 }
 function \u5E94\u7528\u519B\u961F\u66F4\u65B0(state, command) {
-  const current = state.\u52BF\u529B.\u519B\u961F[command.id];
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  const current = faction.\u519B\u961F[command.id];
   if (!current && command.createIfMissing === false) {
     throw new Error(`\u519B\u961F\u4E0D\u5B58\u5728: ${command.id}`);
   }
   const next = create\u519B\u961F(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(current ?? create\u519B\u961F()), command.data));
-  state.\u52BF\u529B.\u519B\u961F[command.id] = next;
+  faction.\u519B\u961F[command.id] = next;
 }
 function \u5E94\u7528\u5916\u4EA4\u66F4\u65B0(state, command) {
-  state.\u52BF\u529B.\u5916\u4EA4 = {
-    ...state.\u52BF\u529B.\u5916\u4EA4,
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  faction.\u5916\u4EA4 = {
+    ...faction.\u5916\u4EA4,
     ..._.mapValues(command.changes, (value) => Math.max(0, Math.min(100, \u6570\u503C(value))))
   };
 }
 function \u5E94\u7528\u653F\u7B56\u66F4\u65B0(state, command) {
-  state.\u52BF\u529B.\u653F\u7B56 = create\u653F\u7B56(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u52BF\u529B.\u653F\u7B56), command.changes));
+  const faction = \u83B7\u53D6\u76EE\u6807\u52BF\u529B(state, command.factionId);
+  faction.\u653F\u7B56 = create\u653F\u7B56(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(faction.\u653F\u7B56), command.changes));
 }
 function \u5E94\u7528NPC\u66F4\u65B0(state, command) {
   const current = state.NPC[command.id];
@@ -1521,7 +1944,8 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
       debugLog("executor", "\u6267\u884C\u5355\u6761\u547D\u4EE4", {
         index,
         type: command.type,
-        id: "id" in command ? command.id : void 0
+        id: "id" in command ? command.id : void 0,
+        factionId: "factionId" in command ? command.factionId : void 0
       });
       switch (command.type) {
         case "UpdateWorld":
@@ -1542,14 +1966,20 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
         case "UpsertCity":
           \u5E94\u7528\u57CE\u6C60\u66F4\u65B0(next, command);
           break;
+        case "AddCityFacility":
+          \u5E94\u7528\u57CE\u6C60\u8BBE\u65BD\u8FFD\u52A0(next, command);
+          break;
+        case "RemoveCityFacility":
+          \u5E94\u7528\u57CE\u6C60\u8BBE\u65BD\u79FB\u9664(next, command);
+          break;
         case "RemoveCity":
-          delete next.\u52BF\u529B.\u57CE\u6C60[command.id];
+          delete \u83B7\u53D6\u76EE\u6807\u52BF\u529B(next, command.factionId).\u57CE\u6C60[command.id];
           break;
         case "UpsertArmy":
           \u5E94\u7528\u519B\u961F\u66F4\u65B0(next, command);
           break;
         case "RemoveArmy":
-          delete next.\u52BF\u529B.\u519B\u961F[command.id];
+          delete \u83B7\u53D6\u76EE\u6807\u52BF\u529B(next, command.factionId).\u519B\u961F[command.id];
           break;
         case "UpdateDiplomacy":
           \u5E94\u7528\u5916\u4EA4\u66F4\u65B0(next, command);
@@ -1656,11 +2086,20 @@ function \u9009\u62E9\u8FDB\u884C\u4E2D\u4EFB\u52A1(state, limit = MAX_CONTEXT_Q
 function \u9009\u62E9\u5546\u57CE\u6761\u76EE(state, limit = MAX_CONTEXT_SHOP_ITEMS) {
   return Object.fromEntries(Object.entries(state.\u5546\u57CE || {}).slice(0, limit));
 }
+function \u9009\u62E9\u5F53\u524D\u52BF\u529B(state) {
+  const entries = Object.entries(state.\u52BF\u529B || {});
+  if (entries.length === 0) {
+    return null;
+  }
+  const [id, \u6570\u636E] = entries[0];
+  return { id, \u6570\u636E };
+}
 function \u6784\u5EFA\u6CE8\u5165\u89C6\u56FE(state) {
   return {
     \u4E16\u754C: _.cloneDeep(state.\u4E16\u754C),
     \u4E3B\u89D2: _.cloneDeep(state.\u4E3B\u89D2),
     \u52BF\u529B: _.cloneDeep(state.\u52BF\u529B),
+    \u5F53\u524D\u52BF\u529B: _.cloneDeep(\u9009\u62E9\u5F53\u524D\u52BF\u529B(state)),
     \u5F53\u524D\u5730\u70B9\u76F8\u5173NPC: _.cloneDeep(\u9009\u62E9\u5F53\u524D\u5730\u70B9\u76F8\u5173NPC(state)),
     \u8FDB\u884C\u4E2D\u4EFB\u52A1: _.cloneDeep(\u9009\u62E9\u8FDB\u884C\u4E2D\u4EFB\u52A1(state)),
     \u5546\u57CE: _.cloneDeep(\u9009\u62E9\u5546\u57CE\u6761\u76EE(state))
@@ -1688,7 +2127,6 @@ __export(protocol_exports, {
   UPDATE_VARIABLE_START: () => UPDATE_VARIABLE_START,
   \u5305\u88C5\u547D\u4EE4\u5757: () => \u5305\u88C5\u547D\u4EE4\u5757,
   \u63D0\u53D6\u547D\u4EE4\u5757: () => \u63D0\u53D6\u547D\u4EE4\u5757,
-  \u79FB\u9664\u547D\u4EE4\u5757: () => \u79FB\u9664\u547D\u4EE4\u5757,
   \u89E3\u6790\u547D\u4EE4\u5757: () => \u89E3\u6790\u547D\u4EE4\u5757
 });
 var UPDATE_VARIABLE_START = "<UpdateVariable>";
@@ -1745,10 +2183,6 @@ function \u63D0\u53D6\u547D\u4EE4\u5757(replyText) {
   debugLog("protocol", "\u63D0\u53D6\u5230 Commands \u5185\u5BB9", summarizeValue(commandsText));
   return commandsText;
 }
-function \u79FB\u9664\u547D\u4EE4\u5757(replyText) {
-  const pattern = new RegExp(`${_.escapeRegExp(UPDATE_VARIABLE_START)}[\\s\\S]*?${_.escapeRegExp(UPDATE_VARIABLE_END)}`, "g");
-  return replyText.replace(pattern, "").trim();
-}
 function \u89E3\u6790\u547D\u4EE4\u5757(replyText) {
   const commandsText = \u63D0\u53D6\u547D\u4EE4\u5757(replyText);
   if (!commandsText) {
@@ -1769,7 +2203,7 @@ function \u89E3\u6790\u547D\u4EE4\u5757(replyText) {
     return {
       commandsText,
       commands,
-      replyText: \u79FB\u9664\u547D\u4EE4\u5757(replyText)
+      replyText
     };
   } catch (error) {
     debugError("protocol", "\u547D\u4EE4\u5757 JSON \u89E3\u6790\u5931\u8D25", error);
@@ -1792,234 +2226,6 @@ __export(bridge_exports, {
   refreshContextMacro: () => refreshContextMacro,
   refreshContextMacroFromStorage: () => refreshContextMacroFromStorage
 });
-
-// src/status-panel.ts
-var status_panel_exports = {};
-__export(status_panel_exports, {
-  STATUS_BAR_END: () => STATUS_BAR_END,
-  STATUS_BAR_START: () => STATUS_BAR_START,
-  appendStatusBar: () => appendStatusBar,
-  buildStatusBar: () => buildStatusBar,
-  stripStatusBar: () => stripStatusBar
-});
-var STATUS_BAR_START = "<StatusBar>";
-var STATUS_BAR_END = "</StatusBar>";
-function \u8F6C\u4E49HTML(value) {
-  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-}
-function \u6570\u503C\u6761(label, current, max, tone = "hp") {
-  const currentNumber = Number(current ?? 0);
-  const maxNumber = Number(max ?? Math.max(currentNumber, 100));
-  const safeMax = maxNumber > 0 ? maxNumber : 100;
-  const percent = Math.max(0, Math.min(100, Math.round(currentNumber / safeMax * 100)));
-  return `<div class="tk-panel-bar-row"><div class="tk-panel-bar-label">${\u8F6C\u4E49HTML(label)}</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-${tone}" style="width:${percent}%"></span></div><div class="tk-panel-bar-value">${\u8F6C\u4E49HTML(currentNumber)}${max !== void 0 ? ` / ${\u8F6C\u4E49HTML(maxNumber)}` : ""}</div></div>`;
-}
-function \u6807\u7B7E(label, value, accent = false) {
-  return `<div class="tk-panel-kv${accent ? " is-accent" : ""}"><span class="tk-panel-k">${\u8F6C\u4E49HTML(label)}</span><span class="tk-panel-v">${\u8F6C\u4E49HTML(value || "\u65E0")}</span></div>`;
-}
-function \u5217\u8868\u9879(title, meta, desc) {
-  return `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${\u8F6C\u4E49HTML(title)}</div><div class="tk-panel-list-meta">${\u8F6C\u4E49HTML(meta)}</div>${desc ? `<div class="tk-panel-list-desc">${\u8F6C\u4E49HTML(desc)}</div>` : ""}</div>`;
-}
-function \u6E32\u67D3\u4E3B\u89D2\u9875(state) {
-  const player = state.\u4E3B\u89D2;
-  const \u8D44\u6E90\u6807\u7B7E = [
-    \u6807\u7B7E("\u5B98\u804C", player.\u5B98\u804C || "\u65E0", true),
-    \u6807\u7B7E("\u7235\u4F4D", player.\u7235\u4F4D || "\u65E0", true),
-    \u6807\u7B7E("\u58F0\u671B\u79F0\u53F7", player._\u58F0\u671B\u79F0\u53F7 || "\u65E0"),
-    \u6807\u7B7E("\u548C\u8C10\u7B49\u7EA7", player._\u548C\u8C10\u7B49\u7EA7 || "\u65E0"),
-    \u6807\u7B7E("\u91D1\u94B1", player.\u91D1\u94B1),
-    \u6807\u7B7E("\u79EF\u5206", player.\u79EF\u5206),
-    \u6807\u7B7E("\u58F0\u671B", player.\u58F0\u671B)
-  ].join("");
-  const \u516D\u7EF4 = [
-    \u6807\u7B7E("\u6B66\u529B", `${player.\u516D\u7EF4.\u6B66\u529B} / ${player.\u516D\u7EF4._\u6B66\u529B\u52A0\u503C ?? 0}`),
-    \u6807\u7B7E("\u667A\u529B", `${player.\u516D\u7EF4.\u667A\u529B} / ${player.\u516D\u7EF4._\u667A\u529B\u52A0\u503C ?? 0}`),
-    \u6807\u7B7E("\u7EDF\u7387", `${player.\u516D\u7EF4.\u7EDF\u7387} / ${player.\u516D\u7EF4._\u7EDF\u7387\u52A0\u503C ?? 0}`),
-    \u6807\u7B7E("\u653F\u6CBB", `${player.\u516D\u7EF4.\u653F\u6CBB} / ${player.\u516D\u7EF4._\u653F\u6CBB\u52A0\u503C ?? 0}`),
-    \u6807\u7B7E("\u9B45\u529B", `${player.\u516D\u7EF4.\u9B45\u529B} / ${player.\u516D\u7EF4._\u9B45\u529B\u52A0\u503C ?? 0}`),
-    \u6807\u7B7E("\u4F53\u8D28", `${player.\u516D\u7EF4.\u4F53\u8D28} / ${player.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0}`)
-  ].join("");
-  const \u88C5\u5907\u5217\u8868 = Object.entries(player.\u88C5\u5907 || {}).map(([slot, item]) => {
-    if (!item || item === "\u65E0") {
-      return \u5217\u8868\u9879(slot, "\u672A\u88C5\u5907");
-    }
-    return \u5217\u8868\u9879(`${slot} \xB7 ${item.\u540D\u79F0}`, `${item.\u54C1\u8D28} / ${item.\u7C7B\u578B}`, item.\u63CF\u8FF0 || item.\u5176\u4ED6\u6548\u679C || "\u65E0");
-  }).join("");
-  return `
-    <div class="tk-panel-page-grid cols-2">
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">\u4E3B\u89D2\u9762\u677F</div>
-        ${\u6570\u503C\u6761("\u751F\u547D", player.\u5F53\u524D\u751F\u547D\u503C, player._\u751F\u547D\u503C\u4E0A\u9650, "hp")}
-        ${\u6570\u503C\u6761("\u4F53\u529B", player.\u5F53\u524D\u4F53\u529B\u503C, player._\u4F53\u529B\u503C\u4E0A\u9650, "sp")}
-        <div class="tk-panel-inline-note">\u4F24\u52BF\uFF1A${\u8F6C\u4E49HTML(player._\u4F24\u52BF || "\u5B8C\u597D")}\u3000\u51CF\u503C\uFF1A${\u8F6C\u4E49HTML(player._\u6218\u6597\u51CF\u503C ?? 0)}</div>
-        <div class="tk-panel-kv-grid">${\u8D44\u6E90\u6807\u7B7E}</div>
-      </section>
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">\u516D\u7EF4\u4E0E\u6218\u6597</div>
-        <div class="tk-panel-kv-grid">${\u516D\u7EF4}</div>
-        <div class="tk-panel-kv-grid compact">
-          ${\u6807\u7B7E("\u5148\u653B", player._\u5148\u653B\u503C ?? 0)}
-          ${\u6807\u7B7E("\u653B\u51FB", player._\u653B\u51FB\u57FA\u7840\u503C ?? 0)}
-          ${\u6807\u7B7E("\u4F24\u5BB3", player._\u4F24\u5BB3\u57FA\u7840\u503C ?? 0)}
-          ${\u6807\u7B7E("\u9632\u5FA1DC", player._\u9632\u5FA1DC ?? 0)}
-          ${\u6807\u7B7E("\u4F24\u5BB3\u51CF\u514D", player._\u4F24\u5BB3\u51CF\u514D ?? 0)}
-        </div>
-      </section>
-      <section class="tk-panel-card cols-span-2">
-        <div class="tk-panel-card-title">\u88C5\u5907\u680F</div>
-        <div class="tk-panel-list">${\u88C5\u5907\u5217\u8868 || '<div class="tk-panel-empty">\u6682\u65E0\u88C5\u5907</div>'}</div>
-      </section>
-    </div>`;
-}
-function \u6E32\u67D3NPC\u8BE6\u60C5(id, npc) {
-  const details = [
-    \u6807\u7B7E("\u9635\u8425", npc.\u9635\u8425 || "\u65E0"),
-    \u6807\u7B7E("\u5B9A\u4F4D", npc.\u5B9A\u4F4D || "\u65E0"),
-    \u6807\u7B7E("\u5173\u7CFB", npc._\u5FE0\u8BDA\u7B49\u7EA7 || npc._\u597D\u611F\u7B49\u7EA7 || npc._\u4EA4\u60C5\u7B49\u7EA7 || npc.\u597D\u611F)
-  ].join("");
-  return `
-    <details class="tk-panel-detail">
-      <summary><span>${\u8F6C\u4E49HTML(npc.\u540D\u79F0 || id)}</span><span>${\u8F6C\u4E49HTML(npc.\u54C1\u8D28)} / ${\u8F6C\u4E49HTML(npc.\u5B9A\u4F4D || "\u672A\u77E5")}</span></summary>
-      <div class="tk-panel-detail-body">
-        <div class="tk-panel-kv-grid compact">${details}</div>
-        <div class="tk-panel-inline-note">${\u8F6C\u4E49HTML(npc.\u7B80\u8FF0 || "\u6682\u65E0\u63CF\u8FF0")}</div>
-      </div>
-    </details>`;
-}
-function \u6E32\u67D3NPC\u9875(state) {
-  const entries = Object.entries(state.NPC || {});
-  const list = entries.length > 0 ? entries.map(([id, npc]) => \u6E32\u67D3NPC\u8BE6\u60C5(id, npc)).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u5730\u70B9\u6682\u65E0\u5173\u952E NPC</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5F53\u524D\u5730\u70B9 NPC</div><div class="tk-panel-detail-list">${list}</div></section>`;
-}
-function \u6E32\u67D3\u4EFB\u52A1\u9875(state) {
-  const tasks = Object.entries(state.\u4EFB\u52A1 || {});
-  const content = tasks.length ? tasks.map(([id, task]) => {
-    const targets = Object.values(task.\u76EE\u6807 || {}).map((target) => `${target.\u7C7B\u578B}:${target.\u72B6\u6001}`).join(" / ") || "\u65E0\u76EE\u6807";
-    return \u5217\u8868\u9879(task.\u540D\u79F0 || id, `${task.\u7C7B\u578B} / ${task.\u72B6\u6001}`, `${task.\u65F6\u9650 || "\u65E0\u65F6\u9650"} \xB7 ${targets}`);
-  }).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u6D3B\u8DC3\u4EFB\u52A1</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u4EFB\u52A1\u5217\u8868</div><div class="tk-panel-list">${content}</div></section>`;
-}
-function \u6E32\u67D3\u5546\u57CE\u9875(state) {
-  const items = Object.entries(state.\u5546\u57CE || {});
-  const content = items.length ? items.map(([id, item]) => \u5217\u8868\u9879(item.\u540D\u79F0 || id, `${item.\u5206\u7C7B} / ${item.\u4EF7\u683C} \u79EF\u5206`, item.\u63CF\u8FF0 || "")).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u53EF\u89C1\u5546\u54C1</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5546\u57CE</div><div class="tk-panel-list">${content}</div></section>`;
-}
-function \u6E32\u67D3\u519B\u961F\u9875(state) {
-  const armies = Object.entries(state.\u52BF\u529B?.\u519B\u961F || {});
-  const content = armies.length ? armies.map(([id, army]) => `
-      <details class="tk-panel-detail">
-        <summary><span>${\u8F6C\u4E49HTML(id)}</span><span>${\u8F6C\u4E49HTML(army.\u5175\u79CD)} / ${\u8F6C\u4E49HTML(army.\u7B49\u7EA7)}</span></summary>
-        <div class="tk-panel-detail-body">
-          ${\u6570\u503C\u6761("\u58EB\u6C14", army.\u58EB\u6C14, 100, "morale")}
-          ${\u6570\u503C\u6761("\u75B2\u60EB", army.\u75B2\u60EB, 100, "fatigue")}
-          <div class="tk-panel-kv-grid compact">
-            ${\u6807\u7B7E("\u5175\u529B", army.\u5175\u529B)}
-            ${\u6807\u7B7E("\u5C06\u9886", army.\u7EDF\u5C5E\u5C06\u9886 || "\u65E0")}
-            ${\u6807\u7B7E("\u9A7B\u624E\u5730", army.\u9A7B\u624E\u5730 || "\u65E0")}
-            ${\u6807\u7B7E("\u6218\u529B", army._\u7EFC\u5408\u6218\u529B ?? 0)}
-            ${\u6807\u7B7E("\u653B\u51FB\u6218\u529B", army._\u653B\u51FB\u6218\u529B ?? 0)}
-            ${\u6807\u7B7E("\u9632\u5FA1\u6218\u529B", army._\u9632\u5FA1\u6218\u529B ?? 0)}
-          </div>
-        </div>
-      </details>`).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u519B\u961F\u6570\u636E</div>';
-  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u519B\u961F</div><div class="tk-panel-detail-list">${content}</div></section>`;
-}
-function \u6E32\u67D3\u52BF\u529B\u9875(state) {
-  const faction = state.\u52BF\u529B;
-  const diplomacy = Object.entries(faction.\u5916\u4EA4 || {}).slice(0, 8).map(([name, value]) => \u6807\u7B7E(name, `${value} / ${faction._\u5916\u4EA4\u7B49\u7EA7?.[name] || "\u672A\u77E5"}`)).join("");
-  const cities = Object.entries(faction.\u57CE\u6C60 || {}).slice(0, 8).map(([name, city]) => \u5217\u8868\u9879(name, `${city.\u7B49\u7EA7} / \u592A\u5B88:${city.\u592A\u5B88 || "\u65E0"}`, `\u7A0E\u6536:${city._\u6708\u7A0E\u6536 ?? 0} \xB7 \u4EA7\u7CAE:${city._\u6708\u4EA7\u7CAE ?? 0}`)).join("");
-  return `
-    <div class="tk-panel-page-grid cols-2">
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">\u52BF\u529B\u603B\u89C8</div>
-        <div class="tk-panel-kv-grid">
-          ${\u6807\u7B7E("\u540D\u79F0", faction.\u540D\u79F0 || "\u65E0", true)}
-          ${\u6807\u7B7E("\u89C4\u6A21", faction.\u89C4\u6A21 || "\u65E0", true)}
-          ${\u6807\u7B7E("\u6B63\u7EDF\u6027", faction.\u6B63\u7EDF\u6027)}
-          ${\u6807\u7B7E("\u60C5\u62A5\u7F51", faction.\u60C5\u62A5\u7F51)}
-          ${\u6807\u7B7E("\u91D1\u94B1", faction.\u91D1\u94B1)}
-          ${\u6807\u7B7E("\u7CAE\u8349", faction.\u7CAE\u8349)}
-          ${\u6807\u7B7E("\u603B\u5175\u529B", faction._\u603B\u5175\u529B ?? 0)}
-          ${\u6807\u7B7E("\u603B\u6218\u529B", faction._\u603B\u6218\u529B ?? 0)}
-          ${\u6807\u7B7E("\u6708\u7A0E\u6536", faction._\u6708\u603B\u7A0E\u6536 ?? 0)}
-          ${\u6807\u7B7E("\u6708\u4EA7\u7CAE", faction._\u6708\u603B\u4EA7\u7CAE ?? 0)}
-          ${\u6807\u7B7E("\u6708\u519B\u9977", faction._\u6708\u519B\u9977\u4F30\u7B97 ?? 0)}
-          ${\u6807\u7B7E("\u6708\u8017\u7CAE", faction._\u6708\u7CAE\u8349\u6D88\u8017\u4F30\u7B97 ?? 0)}
-        </div>
-      </section>
-      <section class="tk-panel-card">
-        <div class="tk-panel-card-title">\u5916\u4EA4\u6001\u52BF</div>
-        <div class="tk-panel-kv-grid compact">${diplomacy || '<div class="tk-panel-empty">\u6682\u65E0\u5916\u4EA4\u6570\u636E</div>'}</div>
-      </section>
-      <section class="tk-panel-card cols-span-2">
-        <div class="tk-panel-card-title">\u57CE\u6C60\u6458\u8981</div>
-        <div class="tk-panel-list">${cities || '<div class="tk-panel-empty">\u6682\u65E0\u57CE\u6C60\u6570\u636E</div>'}</div>
-      </section>
-    </div>`;
-}
-function \u6837\u5F0F(ids) {
-  return `<style>
-.tk-statusbar{margin-top:14px;border:1px solid rgba(196,154,92,.45);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(37,24,17,.96),rgba(15,12,10,.96));box-shadow:0 12px 32px rgba(0,0,0,.35);color:#f3e3c3;font-family:"Microsoft YaHei",serif}
-.tk-statusbar *{box-sizing:border-box}
-.tk-statusbar .tk-panel-shell{position:relative}
-.tk-statusbar .tk-panel-head{padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.28);background:linear-gradient(180deg,rgba(122,63,30,.35),rgba(54,30,18,.15))}
-.tk-statusbar .tk-panel-title{font-size:18px;font-weight:700;letter-spacing:2px;color:#f6d9a2}
-.tk-statusbar .tk-panel-subtitle{margin-top:6px;font-size:12px;color:#d8bf93;display:flex;flex-wrap:wrap;gap:10px}
-.tk-statusbar .tk-panel-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.02)}
-.tk-statusbar .tk-panel-tab-input{display:none}
-.tk-statusbar .tk-panel-tab-label{padding:8px 14px;border:1px solid rgba(196,154,92,.28);border-radius:999px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;transition:.2s;font-size:12px}
-.tk-statusbar .tk-panel-tab-label:hover{background:rgba(196,154,92,.12);color:#fff1d0}
-.tk-statusbar .tk-panel-pages{padding:14px}
-.tk-statusbar .tk-panel-page{display:none}
-.tk-statusbar #${ids.hero}:checked~.tk-panel-tabs label[for="${ids.hero}"],.tk-statusbar #${ids.npc}:checked~.tk-panel-tabs label[for="${ids.npc}"],.tk-statusbar #${ids.quest}:checked~.tk-panel-tabs label[for="${ids.quest}"],.tk-statusbar #${ids.shop}:checked~.tk-panel-tabs label[for="${ids.shop}"],.tk-statusbar #${ids.army}:checked~.tk-panel-tabs label[for="${ids.army}"],.tk-statusbar #${ids.faction}:checked~.tk-panel-tabs label[for="${ids.faction}"]{background:linear-gradient(180deg,#a76b2e,#7a4a1f);color:#fff5e6;border-color:rgba(255,216,158,.8);box-shadow:0 0 0 1px rgba(255,240,212,.12) inset}
-.tk-statusbar #${ids.hero}:checked~.tk-panel-pages .is-hero,.tk-statusbar #${ids.npc}:checked~.tk-panel-pages .is-npc,.tk-statusbar #${ids.quest}:checked~.tk-panel-pages .is-quest,.tk-statusbar #${ids.shop}:checked~.tk-panel-pages .is-shop,.tk-statusbar #${ids.army}:checked~.tk-panel-pages .is-army,.tk-statusbar #${ids.faction}:checked~.tk-panel-pages .is-faction{display:block}
-.tk-statusbar .tk-panel-page-grid{display:grid;gap:12px}.tk-statusbar .tk-panel-page-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.tk-statusbar .cols-span-2{grid-column:span 2}
-.tk-statusbar .tk-panel-card{padding:14px;border:1px solid rgba(196,154,92,.22);border-radius:12px;background:rgba(255,248,232,.03)}
-.tk-statusbar .tk-panel-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
-.tk-statusbar .tk-panel-kv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
-.tk-statusbar .tk-panel-kv{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
-.tk-statusbar .tk-panel-kv.is-accent{background:rgba(167,107,46,.18);border-color:rgba(240,201,131,.26)}
-.tk-statusbar .tk-panel-k{display:block;font-size:11px;color:#cba977}.tk-statusbar .tk-panel-v{display:block;margin-top:4px;font-size:13px;color:#fff1d0}
-.tk-statusbar .tk-panel-inline-note{margin-top:10px;font-size:12px;color:#d6c4a4}
-.tk-statusbar .tk-panel-list,.tk-statusbar .tk-panel-detail-list{display:flex;flex-direction:column;gap:8px}
-.tk-statusbar .tk-panel-list-item{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
-.tk-statusbar .tk-panel-list-title{font-size:13px;font-weight:700;color:#f6dfb5}.tk-statusbar .tk-panel-list-meta{margin-top:4px;font-size:11px;color:#d6bb91}.tk-statusbar .tk-panel-list-desc{margin-top:6px;font-size:12px;color:#f2eadc;opacity:.88}
-.tk-statusbar .tk-panel-detail{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
-.tk-statusbar .tk-panel-detail summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:10px 12px;color:#f6dfb5;font-size:13px}.tk-statusbar .tk-panel-detail summary::-webkit-details-marker{display:none}
-.tk-statusbar .tk-panel-detail-body{padding:0 12px 12px}
-.tk-statusbar .tk-panel-empty{padding:18px 12px;text-align:center;color:#bda681;font-size:12px}
-.tk-statusbar .tk-panel-bar-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
-.tk-statusbar .tk-panel-bar-label,.tk-statusbar .tk-panel-bar-value{font-size:11px;color:#d8bf93}.tk-statusbar .tk-panel-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
-.tk-statusbar .tk-panel-bar-fill{display:block;height:100%}.tk-statusbar .tk-panel-bar-fill.is-hp{background:linear-gradient(90deg,#7f1d1d,#dc2626)}.tk-statusbar .tk-panel-bar-fill.is-sp{background:linear-gradient(90deg,#0f3d73,#3b82f6)}.tk-statusbar .tk-panel-bar-fill.is-morale{background:linear-gradient(90deg,#7c5c12,#f59e0b)}.tk-statusbar .tk-panel-bar-fill.is-fatigue{background:linear-gradient(90deg,#3f3f46,#a1a1aa)}.tk-statusbar .tk-panel-bar-fill.is-gold{background:linear-gradient(90deg,#8b5e00,#facc15)}
-@media (max-width:720px){.tk-statusbar .tk-panel-page-grid.cols-2,.tk-statusbar .tk-panel-kv-grid,.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:1fr}.tk-statusbar .cols-span-2{grid-column:span 1}}
-</style>`;
-}
-function stripStatusBar(content) {
-  return String(content || "").replace(/\s*<StatusBar>[\s\S]*?<\/StatusBar>\s*$/i, "").trim();
-}
-function buildStatusBar(state, messageId) {
-  const header = `${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u65F6\u95F4 || "\u672A\u77E5\u65F6\u523B")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5730\u70B9 || "\u672A\u77E5\u5730\u70B9")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5929\u6C14 || "\u672A\u77E5\u5929\u6C14")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5267\u672C || "\u672A\u77E5\u5267\u672C")}`;
-  const suffix = String(messageId ?? "latest");
-  const group = `tk-panel-tab-${suffix}`;
-  const ids = {
-    hero: `tk-tab-hero-${suffix}`,
-    npc: `tk-tab-npc-${suffix}`,
-    quest: `tk-tab-quest-${suffix}`,
-    shop: `tk-tab-shop-${suffix}`,
-    army: `tk-tab-army-${suffix}`,
-    faction: `tk-tab-faction-${suffix}`
-  };
-  return `${STATUS_BAR_START}<div class="tk-statusbar"><div class="tk-panel-shell">${\u6837\u5F0F(ids)}<input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.hero}" checked><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.npc}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.quest}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.shop}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.army}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.faction}"><div class="tk-panel-head"><div class="tk-panel-title">\u4E09\u56FD\u9738\u4E3B \xB7 \u7CFB\u7EDF\u9762\u677F</div><div class="tk-panel-subtitle"><span>${header}</span></div></div><div class="tk-panel-tabs"><label class="tk-panel-tab-label" for="${ids.hero}">\u4E3B\u89D2</label><label class="tk-panel-tab-label" for="${ids.npc}">\u5F53\u524D\u5730\u70B9NPC</label><label class="tk-panel-tab-label" for="${ids.quest}">\u4EFB\u52A1</label><label class="tk-panel-tab-label" for="${ids.shop}">\u5546\u57CE</label><label class="tk-panel-tab-label" for="${ids.army}">\u519B\u961F</label><label class="tk-panel-tab-label" for="${ids.faction}">\u52BF\u529B</label></div><div class="tk-panel-pages"><div class="tk-panel-page is-hero">${\u6E32\u67D3\u4E3B\u89D2\u9875(state)}</div><div class="tk-panel-page is-npc">${\u6E32\u67D3NPC\u9875(state)}</div><div class="tk-panel-page is-quest">${\u6E32\u67D3\u4EFB\u52A1\u9875(state)}</div><div class="tk-panel-page is-shop">${\u6E32\u67D3\u5546\u57CE\u9875(state)}</div><div class="tk-panel-page is-army">${\u6E32\u67D3\u519B\u961F\u9875(state)}</div><div class="tk-panel-page is-faction">${\u6E32\u67D3\u52BF\u529B\u9875(state)}</div></div></div></div>${STATUS_BAR_END}`;
-}
-function appendStatusBar(content, state, messageId) {
-  const cleaned = stripStatusBar(content);
-  return `${cleaned}
-
-${buildStatusBar(state, messageId)}`.trim();
-}
-
-// src/bridge.ts
 function buildInjectedContext(state) {
   return \u6784\u5EFA\u6CE8\u5165\u6587\u672C(state);
 }
@@ -2466,6 +2672,7 @@ var ThreeKingdomsStateKit = {
     create\u4EFB\u52A1,
     create\u5546\u54C1\u6761\u76EE,
     create\u52BF\u529B,
+    create\u52BF\u529B\u96C6\u5408,
     create\u57CE\u6C60,
     create\u519B\u961F,
     create\u653F\u7B56,
@@ -2498,6 +2705,7 @@ var ThreeKingdomsStateKit = {
     recompute\u57CE\u6C60,
     recompute\u519B\u961F,
     recompute\u52BF\u529B,
+    recompute\u52BF\u529B\u96C6\u5408,
     recomputeNPC,
     recompute\u4E3B\u89D2,
     recompute\u5168\u5C40
@@ -2548,6 +2756,7 @@ export {
   create\u519B\u961F,
   create\u521D\u59CB\u72B6\u6001,
   create\u52BF\u529B,
+  create\u52BF\u529B\u96C6\u5408,
   create\u5546\u54C1\u6761\u76EE,
   create\u57CE\u6C60,
   create\u653F\u7B56,
@@ -2574,6 +2783,7 @@ export {
   recompute\u516D\u7EF4,
   recompute\u519B\u961F,
   recompute\u52BF\u529B,
+  recompute\u52BF\u529B\u96C6\u5408,
   recompute\u57CE\u6C60,
   recompute\u7F8E\u4EBA\u5C5E\u6027,
   recompute\u89D2\u8272\u6218\u6597\u6570\u636E,
@@ -2626,7 +2836,6 @@ export {
   \u6C47\u603B\u88C5\u5907\u52A0\u503C,
   \u75B2\u60EB\u7B49\u7EA7,
   \u75B2\u60EB\u7CFB\u6570,
-  \u79FB\u9664\u547D\u4EE4\u5757,
   \u7B49\u7EA7\u7CFB\u6570,
   \u7EDF\u7387\u7CFB\u6570,
   \u89E3\u6790\u547D\u4EE4\u5757,
