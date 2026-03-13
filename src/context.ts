@@ -1,0 +1,62 @@
+import { type NPC, type 状态总表 } from './state';
+
+export const MAX_CONTEXT_NPCS = 8;
+export const MAX_CONTEXT_QUESTS = 8;
+export const MAX_CONTEXT_SHOP_ITEMS = 12;
+
+export type 注入视图 = {
+  世界: 状态总表['世界'];
+  主角: 状态总表['主角'];
+  当前地点相关NPC: Record<string, NPC>;
+  进行中任务: 状态总表['任务'];
+  商城: 状态总表['商城'];
+};
+
+function 是否当前地点相关(npc: NPC, 当前地点: string): boolean {
+  if (!当前地点) {
+    return true;
+  }
+  if (npc.武将信息?.驻扎地 === 当前地点) {
+    return true;
+  }
+  return String(npc.定位 || '').includes(当前地点) || String(npc.简述 || '').includes(当前地点);
+}
+
+export function 选择当前地点相关NPC(state: 状态总表, limit = MAX_CONTEXT_NPCS): Record<string, NPC> {
+  const 当前地点 = state.世界.当前地点;
+  const entries = Object.entries(state.NPC || {});
+  const matched = entries.filter(([, npc]) => 是否当前地点相关(npc, 当前地点));
+  const selected = (matched.length > 0 ? matched : entries).slice(0, limit);
+  return Object.fromEntries(selected);
+}
+
+export function 选择进行中任务(state: 状态总表, limit = MAX_CONTEXT_QUESTS): 状态总表['任务'] {
+  const selected = Object.entries(state.任务 || {}).filter(([, task]) => ['进行中', '可提交', '可接取'].includes(task.状态));
+  return Object.fromEntries(selected.slice(0, limit));
+}
+
+export function 选择商城条目(state: 状态总表, limit = MAX_CONTEXT_SHOP_ITEMS): 状态总表['商城'] {
+  return Object.fromEntries(Object.entries(state.商城 || {}).slice(0, limit));
+}
+
+export function 构建注入视图(state: 状态总表): 注入视图 {
+  return {
+    世界: _.cloneDeep(state.世界),
+    主角: _.cloneDeep(state.主角),
+    当前地点相关NPC: _.cloneDeep(选择当前地点相关NPC(state)),
+    进行中任务: _.cloneDeep(选择进行中任务(state)),
+    商城: _.cloneDeep(选择商城条目(state)),
+  };
+}
+
+export function 构建注入文本(state: 状态总表, space = 2): string {
+  return [
+    '[三国霸主系统状态]',
+    '以下状态为只读上下文；下划线字段代表只读派生字段，AI 不可直接修改。',
+    JSON.stringify(构建注入视图(state), null, space),
+  ].join('\n');
+}
+
+export function 构建宏注入文本(state: 状态总表, space = 2): string {
+  return 构建注入文本(state, space);
+}

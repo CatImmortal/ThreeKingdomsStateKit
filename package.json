@@ -1,0 +1,14 @@
+{
+  "name": "three-kingdoms-state-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --platform browser --target es2020 --out-dir dist --clean"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.2"
+  }
+}
