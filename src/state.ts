@@ -126,6 +126,7 @@ export type 美人属性 = {
 };
 
 export type NPC = {
+  名称: string;
   品质: 品质;
   阵营: string;
   定位: string;
@@ -155,6 +156,7 @@ export type 任务 = {
 };
 
 export type 商品条目 = {
+  名称: string;
   分类: string;
   价格: number;
   描述: string;
@@ -283,6 +285,7 @@ export function create美人属性(data: Partial<美人属性> = {}): 美人属�
 
 export function createNPC(data: Partial<NPC> = {}): NPC {
   return {
+    名称: String(data.名称 || ''),
     品质: 枚举.品质.includes(data.品质 as 品质) ? (data.品质 as 品质) : 'N',
     阵营: String(data.阵营 || ''),
     定位: String(data.定位 || ''),
@@ -315,6 +318,7 @@ export function create任务(data: Partial<任务> = {}): 任务 {
 
 export function create商品条目(data: Partial<商品条目> = {}): 商品条目 {
   return {
+    名称: String(data.名称 || ''),
     分类: String(data.分类 || ''),
     价格: Math.max(0, 数值(data.价格)),
     描述: String(data.描述 || ''),
