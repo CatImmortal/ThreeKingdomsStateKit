@@ -19,6 +19,7 @@ type ChatMessageLike = {
 type RuntimeApi = {
   eventOn?: (eventName: string, listener: (...args: any[]) => void) => EventBinding | void;
   eventRemoveListener?: (eventName: string, listener: (...args: any[]) => void) => void;
+  getButtonEvent?: (buttonName: string) => string;
   tavern_events?: {
     MESSAGE_RECEIVED?: string;
   };
@@ -29,10 +30,20 @@ type RuntimeApi = {
 };
 
 let 已注册回复钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
+let 已注册按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 最近处理记录: { messageId: number | null; message: string } = { messageId: null, message: '' };
 
 function 获取运行时接口(): RuntimeApi {
-  return globalThis as typeof globalThis & RuntimeApi;
+  const globalApi = globalThis as typeof globalThis & RuntimeApi;
+  const windowApi = typeof window !== 'undefined' ? (window as typeof window & RuntimeApi) : undefined;
+  return {
+    eventOn: globalApi.eventOn ?? windowApi?.eventOn,
+    eventRemoveListener: globalApi.eventRemoveListener ?? windowApi?.eventRemoveListener,
+    getButtonEvent: globalApi.getButtonEvent ?? windowApi?.getButtonEvent,
+    tavern_events: globalApi.tavern_events ?? windowApi?.tavern_events,
+    getChatMessages: globalApi.getChatMessages ?? windowApi?.getChatMessages,
+    TavernHelper: globalApi.TavernHelper ?? windowApi?.TavernHelper,
+  };
 }
 
 function 获取消息读取函数() {
@@ -66,6 +77,70 @@ function 记录最近消息(message: ChatMessageLike): void {
     messageId: typeof message.message_id === 'number' ? message.message_id : null,
     message: String(message.message || ''),
   };
+}
+
+export function teardownDebugParseButtonHook(): void {
+  if (!已注册按钮钩子) {
+    return;
+  }
+  const runtime = 获取运行时接口();
+  const { eventName, listener, binding } = 已注册按钮钩子;
+  binding?.removeListener?.();
+  binding?.off?.();
+  binding?.unsubscribe?.();
+  binding?.unregister?.();
+  runtime.eventRemoveListener?.(eventName, listener);
+  已注册按钮钩子 = null;
+  debugLog('runtime', '已卸载解析命令按钮钩子', { eventName });
+}
+
+export function setupDebugParseButtonHook(buttonName = '解析命令', options: 自动接线选项 = {}): boolean {
+  teardownDebugParseButtonHook();
+  const runtime = 获取运行时接口();
+  const eventName = runtime.getButtonEvent?.(buttonName);
+  if (!eventName || typeof runtime.eventOn !== 'function') {
+    debugLog('runtime', '未找到按钮事件或 eventOn，无法注册解析命令按钮', {
+      buttonName,
+      hasEventOn: typeof runtime.eventOn === 'function',
+      eventName,
+    });
+    return false;
+  }
+
+  const listener = () => {
+    debugLog('runtime', '收到解析命令按钮点击事件', { buttonName, eventName });
+    try {
+      const message = 读取消息(-1);
+      if (!message) {
+        debugLog('runtime', '按钮调试未读取到最新消息，跳过处理');
+        return;
+      }
+      if (message.role !== 'assistant') {
+        debugLog('runtime', '按钮调试读取到的最新消息不是 assistant，跳过处理', {
+          role: message.role ?? null,
+          messageId: message.message_id ?? null,
+        });
+        return;
+      }
+      const result = handleAssistantReply(String(message.message || ''), {
+        ...options,
+        refreshMacroOnNoCommands: false,
+      });
+      debugLog('runtime', '按钮触发的 assistant 消息处理完成', {
+        buttonName,
+        messageId: message.message_id ?? null,
+        applied: result.applied.length,
+        hasCommandsText: Boolean(result.commandsText),
+      });
+    } catch (error) {
+      debugError('runtime', '按钮触发的 assistant 消息处理失败', error);
+    }
+  };
+
+  const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
+  已注册按钮钩子 = { eventName, listener, binding: binding ?? undefined };
+  debugLog('runtime', '已注册解析命令按钮钩子', { buttonName, eventName });
+  return true;
 }
 
 export function teardownAssistantReplyHook(): void {

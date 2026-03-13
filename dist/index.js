@@ -1524,12 +1524,24 @@ function registerSgbzMacros(rootKey = STATE_ROOT_KEY) {
 var runtime_exports = {};
 __export(runtime_exports, {
   setupAssistantReplyHook: () => setupAssistantReplyHook,
-  teardownAssistantReplyHook: () => teardownAssistantReplyHook
+  setupDebugParseButtonHook: () => setupDebugParseButtonHook,
+  teardownAssistantReplyHook: () => teardownAssistantReplyHook,
+  teardownDebugParseButtonHook: () => teardownDebugParseButtonHook
 });
 var \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = null;
+var \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50 = null;
 var \u6700\u8FD1\u5904\u7406\u8BB0\u5F55 = { messageId: null, message: "" };
 function \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3() {
-  return globalThis;
+  const globalApi = globalThis;
+  const windowApi = typeof window !== "undefined" ? window : void 0;
+  return {
+    eventOn: globalApi.eventOn ?? windowApi?.eventOn,
+    eventRemoveListener: globalApi.eventRemoveListener ?? windowApi?.eventRemoveListener,
+    getButtonEvent: globalApi.getButtonEvent ?? windowApi?.getButtonEvent,
+    tavern_events: globalApi.tavern_events ?? windowApi?.tavern_events,
+    getChatMessages: globalApi.getChatMessages ?? windowApi?.getChatMessages,
+    TavernHelper: globalApi.TavernHelper ?? windowApi?.TavernHelper
+  };
 }
 function \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570() {
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
@@ -1559,6 +1571,66 @@ function \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message) {
     messageId: typeof message.message_id === "number" ? message.message_id : null,
     message: String(message.message || "")
   };
+}
+function teardownDebugParseButtonHook() {
+  if (!\u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50) {
+    return;
+  }
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const { eventName, listener, binding } = \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50;
+  binding?.removeListener?.();
+  binding?.off?.();
+  binding?.unsubscribe?.();
+  binding?.unregister?.();
+  runtime.eventRemoveListener?.(eventName, listener);
+  \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50 = null;
+  debugLog("runtime", "\u5DF2\u5378\u8F7D\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u94A9\u5B50", { eventName });
+}
+function setupDebugParseButtonHook(buttonName = "\u89E3\u6790\u547D\u4EE4", options = {}) {
+  teardownDebugParseButtonHook();
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const eventName = runtime.getButtonEvent?.(buttonName);
+  if (!eventName || typeof runtime.eventOn !== "function") {
+    debugLog("runtime", "\u672A\u627E\u5230\u6309\u94AE\u4E8B\u4EF6\u6216 eventOn\uFF0C\u65E0\u6CD5\u6CE8\u518C\u89E3\u6790\u547D\u4EE4\u6309\u94AE", {
+      buttonName,
+      hasEventOn: typeof runtime.eventOn === "function",
+      eventName
+    });
+    return false;
+  }
+  const listener = () => {
+    debugLog("runtime", "\u6536\u5230\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u70B9\u51FB\u4E8B\u4EF6", { buttonName, eventName });
+    try {
+      const message = \u8BFB\u53D6\u6D88\u606F(-1);
+      if (!message) {
+        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
+        return;
+      }
+      if (message.role !== "assistant") {
+        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u8BFB\u53D6\u5230\u7684\u6700\u65B0\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+          role: message.role ?? null,
+          messageId: message.message_id ?? null
+        });
+        return;
+      }
+      const result = handleAssistantReply(String(message.message || ""), {
+        ...options,
+        refreshMacroOnNoCommands: false
+      });
+      debugLog("runtime", "\u6309\u94AE\u89E6\u53D1\u7684 assistant \u6D88\u606F\u5904\u7406\u5B8C\u6210", {
+        buttonName,
+        messageId: message.message_id ?? null,
+        applied: result.applied.length,
+        hasCommandsText: Boolean(result.commandsText)
+      });
+    } catch (error) {
+      debugError("runtime", "\u6309\u94AE\u89E6\u53D1\u7684 assistant \u6D88\u606F\u5904\u7406\u5931\u8D25", error);
+    }
+  };
+  const binding = runtime.eventOn(eventName, listener);
+  \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50 = { eventName, listener, binding: binding ?? void 0 };
+  debugLog("runtime", "\u5DF2\u6CE8\u518C\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u94A9\u5B50", { buttonName, eventName });
+  return true;
 }
 function teardownAssistantReplyHook() {
   if (!\u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50) {
@@ -1636,6 +1708,11 @@ try {
 } catch (error) {
   console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
+try {
+  setupDebugParseButtonHook("\u89E3\u6790\u547D\u4EE4");
+} catch (error) {
+  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C\u201C\u89E3\u6790\u547D\u4EE4\u201D\u6309\u94AE\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+}
 
 // src/index.ts
 var ThreeKingdomsStateKit = {
@@ -1660,6 +1737,8 @@ var ThreeKingdomsStateKit = {
   handleAssistantReply,
   setupAssistantReplyHook,
   teardownAssistantReplyHook,
+  setupDebugParseButtonHook,
+  teardownDebugParseButtonHook,
   setDebug: setDebugEnabled,
   getDebug: getDebugEnabled,
   \u91CD\u7B97: {
@@ -1735,9 +1814,11 @@ export {
   renderSgbzContextMacro,
   setDebugEnabled,
   setupAssistantReplyHook,
+  setupDebugParseButtonHook,
   summarizeState,
   summarizeValue,
   teardownAssistantReplyHook,
+  teardownDebugParseButtonHook,
   unregisterSgbzMacros,
   \u4EA4\u60C5\u7B49\u7EA7,
   \u4F9D\u8D56\u7B49\u7EA7,

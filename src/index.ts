@@ -54,6 +54,8 @@ export const ThreeKingdomsStateKit = {
   handleAssistantReply: bridge.handleAssistantReply,
   setupAssistantReplyHook: runtime.setupAssistantReplyHook,
   teardownAssistantReplyHook: runtime.teardownAssistantReplyHook,
+  setupDebugParseButtonHook: runtime.setupDebugParseButtonHook,
+  teardownDebugParseButtonHook: runtime.teardownDebugParseButtonHook,
   setDebug: debug.setDebugEnabled,
   getDebug: debug.getDebugEnabled,
   重算: {
