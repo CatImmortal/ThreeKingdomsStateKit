@@ -318,6 +318,84 @@ __export(commands_exports, {
   \u6821\u9A8C\u547D\u4EE4: () => \u6821\u9A8C\u547D\u4EE4,
   \u89E3\u6790\u547D\u4EE4\u8F93\u5165: () => \u89E3\u6790\u547D\u4EE4\u8F93\u5165
 });
+
+// src/debug.ts
+var debug_exports = {};
+__export(debug_exports, {
+  debugError: () => debugError,
+  debugLog: () => debugLog,
+  getDebugEnabled: () => getDebugEnabled,
+  setDebugEnabled: () => setDebugEnabled,
+  summarizeState: () => summarizeState,
+  summarizeValue: () => summarizeValue
+});
+var DEBUG_PREFIX = "[ThreeKingdomsStateKit]";
+var debugEnabled = false;
+function formatPrefix(scope) {
+  return `${DEBUG_PREFIX}[${scope}]`;
+}
+function setDebugEnabled(enabled) {
+  debugEnabled = Boolean(enabled);
+  console.log(`${DEBUG_PREFIX}[debug] ${debugEnabled ? "enabled" : "disabled"}`);
+  return debugEnabled;
+}
+function getDebugEnabled() {
+  return debugEnabled;
+}
+function debugLog(scope, message, payload) {
+  if (!debugEnabled) return;
+  if (payload === void 0) {
+    console.log(formatPrefix(scope), message);
+    return;
+  }
+  console.log(formatPrefix(scope), message, payload);
+}
+function debugError(scope, message, error) {
+  if (!debugEnabled) return;
+  if (error === void 0) {
+    console.error(formatPrefix(scope), message);
+    return;
+  }
+  console.error(formatPrefix(scope), message, error);
+}
+function summarizeState(state) {
+  return {
+    \u4E16\u754C: {
+      \u5F53\u524D\u65F6\u95F4: state.\u4E16\u754C?.\u5F53\u524D\u65F6\u95F4 || "",
+      \u5F53\u524D\u5730\u70B9: state.\u4E16\u754C?.\u5F53\u524D\u5730\u70B9 || "",
+      \u5F53\u524D\u5267\u672C: state.\u4E16\u754C?.\u5F53\u524D\u5267\u672C || "",
+      \u8FD1\u671F\u4E8B\u4EF6\u6570: state.\u4E16\u754C?.\u8FD1\u671F\u4E8B\u4EF6?.length || 0
+    },
+    \u4E3B\u89D2: {
+      \u5F53\u524D\u751F\u547D\u503C: state.\u4E3B\u89D2?.\u5F53\u524D\u751F\u547D\u503C ?? 0,
+      \u5F53\u524D\u4F53\u529B\u503C: state.\u4E3B\u89D2?.\u5F53\u524D\u4F53\u529B\u503C ?? 0,
+      \u91D1\u94B1: state.\u4E3B\u89D2?.\u91D1\u94B1 ?? 0,
+      \u79EF\u5206: state.\u4E3B\u89D2?.\u79EF\u5206 ?? 0,
+      \u58F0\u671B: state.\u4E3B\u89D2?.\u58F0\u671B ?? 0,
+      \u5B98\u804C: state.\u4E3B\u89D2?.\u5B98\u804C || "",
+      \u7235\u4F4D: state.\u4E3B\u89D2?.\u7235\u4F4D || ""
+    },
+    NPC\u6570\u91CF: Object.keys(state.NPC || {}).length,
+    \u4EFB\u52A1\u6570\u91CF: Object.keys(state.\u4EFB\u52A1 || {}).length,
+    \u5546\u57CE\u6570\u91CF: Object.keys(state.\u5546\u57CE || {}).length,
+    updatedAt: state.meta?.updatedAt || ""
+  };
+}
+function summarizeValue(value) {
+  if (Array.isArray(value)) {
+    return { type: "array", length: value.length };
+  }
+  if (_.isPlainObject(value)) {
+    const keys = Object.keys(value);
+    return { type: "object", keys, keyCount: keys.length };
+  }
+  if (typeof value === "string") {
+    return { type: "string", length: value.length, preview: value.slice(0, 120) };
+  }
+  return value;
+}
+
+// src/commands.ts
 var \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355 = {
   UpdateWorld: ["type", "changes"],
   AppendRecentEvent: ["type", "event"],
@@ -606,84 +684,121 @@ function \u6821\u9A8C\u8D44\u6E90\u53D8\u5316(value, path) {
   }
 }
 function \u89E3\u6790\u547D\u4EE4\u8F93\u5165(input) {
-  if (typeof input === "string") {
-    const parsed = JSON.parse(input);
-    return \u89E3\u6790\u547D\u4EE4\u8F93\u5165(parsed);
+  debugLog("commands", "\u5F00\u59CB\u89E3\u6790\u547D\u4EE4\u8F93\u5165", {
+    inputType: typeof input === "string" ? "string" : Array.isArray(input) ? "array" : "object",
+    summary: summarizeValue(input)
+  });
+  try {
+    if (typeof input === "string") {
+      const parsed = JSON.parse(input);
+      debugLog("commands", "\u5B57\u7B26\u4E32\u547D\u4EE4 JSON \u89E3\u6790\u6210\u529F", summarizeValue(parsed));
+      return \u89E3\u6790\u547D\u4EE4\u8F93\u5165(parsed);
+    }
+    const list = Array.isArray(input) ? input : [input];
+    debugLog("commands", "\u5F00\u59CB\u9010\u6761\u6821\u9A8C\u547D\u4EE4", { count: list.length });
+    list.forEach((command, index) => \u6821\u9A8C\u547D\u4EE4(command, index));
+    debugLog("commands", "\u547D\u4EE4\u8F93\u5165\u6821\u9A8C\u5B8C\u6210", {
+      count: list.length,
+      types: list.map((command) => command.type)
+    });
+    return list;
+  } catch (error) {
+    debugError("commands", "\u89E3\u6790\u547D\u4EE4\u8F93\u5165\u5931\u8D25", error);
+    throw error;
   }
-  const list = Array.isArray(input) ? input : [input];
-  list.forEach((command, index) => \u6821\u9A8C\u547D\u4EE4(command, index));
-  return list;
 }
 function \u6821\u9A8C\u547D\u4EE4(command, index = 0) {
   const path = `commands[${index}]`;
+  debugLog("commands", "\u6821\u9A8C\u5355\u6761\u547D\u4EE4", {
+    index,
+    type: _.isPlainObject(command) ? command.type ?? null : null,
+    summary: summarizeValue(command)
+  });
   \u65AD\u8A00\u5BF9\u8C61(command, path);
   \u65AD\u8A00(typeof command.type === "string", `${path}.type \u5FC5\u987B\u662F\u5B57\u7B26\u4E32`);
   \u65AD\u8A00(command.type in \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355, `${path}.type \u4E0D\u662F\u6709\u6548\u547D\u4EE4\u7C7B\u578B: ${String(command.type)}`);
   const allowedKeys = \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355[command.type];
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(command, allowedKeys, path);
   \u65AD\u8A00\u65E0\u4E0B\u5212\u7EBF\u5B57\u6BB5(command, path);
-  switch (command.type) {
-    case "UpdateWorld":
-      \u6821\u9A8C\u4E16\u754C\u66F4\u65B0(command.changes, `${path}.changes`);
-      return;
-    case "AppendRecentEvent":
-      \u6821\u9A8C\u4E16\u754C\u4E8B\u4EF6\u8F93\u5165(command.event, `${path}.event`);
-      return;
-    case "UpdatePlayerBase":
-      \u6821\u9A8C\u4E3B\u89D2\u66F4\u65B0(command.changes, `${path}.changes`);
-      return;
-    case "AdjustPlayerResource":
-      if (command.mode !== void 0) {
-        \u65AD\u8A00\u679A\u4E3E\u503C(command.mode, ["delta", "set"], `${path}.mode`);
-      }
-      \u6821\u9A8C\u8D44\u6E90\u53D8\u5316(command.changes, `${path}.changes`);
-      return;
-    case "UpsertNpc":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      if (command.createIfMissing !== void 0) {
-        \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      \u6821\u9A8CNPC\u66F4\u65B0(command.data, `${path}.data`);
-      return;
-    case "UpdateNpcRelation":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      if (command.mode !== void 0) {
-        \u65AD\u8A00\u679A\u4E3E\u503C(command.mode, ["delta", "set"], `${path}.mode`);
-      }
-      \u65AD\u8A00(command.\u597D\u611F !== void 0 || command.\u7F81\u7ECA !== void 0, `${path} \u81F3\u5C11\u8981\u63D0\u4F9B \u597D\u611F \u6216 \u7F81\u7ECA`);
-      if (command.\u597D\u611F !== void 0) \u65AD\u8A00\u6570\u5B57(command.\u597D\u611F, `${path}.\u597D\u611F`);
-      if (command.\u7F81\u7ECA !== void 0) \u6821\u9A8C\u5B57\u7B26\u4E32\u6620\u5C04(command.\u7F81\u7ECA, `${path}.\u7F81\u7ECA`);
-      return;
-    case "RemoveNpc":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      return;
-    case "UpsertQuest":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      if (command.createIfMissing !== void 0) {
-        \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      \u6821\u9A8C\u4EFB\u52A1\u66F4\u65B0(command.data, `${path}.data`);
-      return;
-    case "UpdateQuestState":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      \u65AD\u8A00\u679A\u4E3E\u503C(command.\u72B6\u6001, \u679A\u4E3E.\u4EFB\u52A1\u72B6\u6001, `${path}.\u72B6\u6001`);
-      if (command.\u76EE\u6807 !== void 0) {
-        \u6821\u9A8C\u4EFB\u52A1\u76EE\u6807\u6620\u5C04(command.\u76EE\u6807, `${path}.\u76EE\u6807`);
-      }
-      return;
-    case "RemoveQuest":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      return;
-    case "UpsertShopItem":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      if (command.createIfMissing !== void 0) {
-        \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      \u6821\u9A8C\u5546\u54C1\u6761\u76EE(command.data, `${path}.data`);
-      return;
-    case "RemoveShopItem":
-      \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
-      return;
+  try {
+    switch (command.type) {
+      case "UpdateWorld":
+        debugLog("commands", "\u6821\u9A8C UpdateWorld", { index });
+        \u6821\u9A8C\u4E16\u754C\u66F4\u65B0(command.changes, `${path}.changes`);
+        return;
+      case "AppendRecentEvent":
+        debugLog("commands", "\u6821\u9A8C AppendRecentEvent", { index });
+        \u6821\u9A8C\u4E16\u754C\u4E8B\u4EF6\u8F93\u5165(command.event, `${path}.event`);
+        return;
+      case "UpdatePlayerBase":
+        debugLog("commands", "\u6821\u9A8C UpdatePlayerBase", { index });
+        \u6821\u9A8C\u4E3B\u89D2\u66F4\u65B0(command.changes, `${path}.changes`);
+        return;
+      case "AdjustPlayerResource":
+        debugLog("commands", "\u6821\u9A8C AdjustPlayerResource", { index });
+        if (command.mode !== void 0) {
+          \u65AD\u8A00\u679A\u4E3E\u503C(command.mode, ["delta", "set"], `${path}.mode`);
+        }
+        \u6821\u9A8C\u8D44\u6E90\u53D8\u5316(command.changes, `${path}.changes`);
+        return;
+      case "UpsertNpc":
+        debugLog("commands", "\u6821\u9A8C UpsertNpc", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        \u6821\u9A8CNPC\u66F4\u65B0(command.data, `${path}.data`);
+        return;
+      case "UpdateNpcRelation":
+        debugLog("commands", "\u6821\u9A8C UpdateNpcRelation", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.mode !== void 0) {
+          \u65AD\u8A00\u679A\u4E3E\u503C(command.mode, ["delta", "set"], `${path}.mode`);
+        }
+        \u65AD\u8A00(command.\u597D\u611F !== void 0 || command.\u7F81\u7ECA !== void 0, `${path} \u81F3\u5C11\u8981\u63D0\u4F9B \u597D\u611F \u6216 \u7F81\u7ECA`);
+        if (command.\u597D\u611F !== void 0) \u65AD\u8A00\u6570\u5B57(command.\u597D\u611F, `${path}.\u597D\u611F`);
+        if (command.\u7F81\u7ECA !== void 0) \u6821\u9A8C\u5B57\u7B26\u4E32\u6620\u5C04(command.\u7F81\u7ECA, `${path}.\u7F81\u7ECA`);
+        return;
+      case "RemoveNpc":
+        debugLog("commands", "\u6821\u9A8C RemoveNpc", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        return;
+      case "UpsertQuest":
+        debugLog("commands", "\u6821\u9A8C UpsertQuest", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        \u6821\u9A8C\u4EFB\u52A1\u66F4\u65B0(command.data, `${path}.data`);
+        return;
+      case "UpdateQuestState":
+        debugLog("commands", "\u6821\u9A8C UpdateQuestState", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        \u65AD\u8A00\u679A\u4E3E\u503C(command.\u72B6\u6001, \u679A\u4E3E.\u4EFB\u52A1\u72B6\u6001, `${path}.\u72B6\u6001`);
+        if (command.\u76EE\u6807 !== void 0) {
+          \u6821\u9A8C\u4EFB\u52A1\u76EE\u6807\u6620\u5C04(command.\u76EE\u6807, `${path}.\u76EE\u6807`);
+        }
+        return;
+      case "RemoveQuest":
+        debugLog("commands", "\u6821\u9A8C RemoveQuest", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        return;
+      case "UpsertShopItem":
+        debugLog("commands", "\u6821\u9A8C UpsertShopItem", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        \u6821\u9A8C\u5546\u54C1\u6761\u76EE(command.data, `${path}.data`);
+        return;
+      case "RemoveShopItem":
+        debugLog("commands", "\u6821\u9A8C RemoveShopItem", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        return;
+    }
+  } catch (error) {
+    debugError("commands", `\u547D\u4EE4\u6821\u9A8C\u5931\u8D25: ${path}`, error);
+    throw error;
   }
 }
 function \u521B\u5EFA\u547D\u4EE4\u6267\u884C\u5FEB\u7167(state) {
@@ -786,8 +901,14 @@ var STATE_ROOT_KEY = "sgbz_state";
 var CONTEXT_MACRO_KEY = "sgbz_context";
 function \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3() {
   const helper = window.TavernHelper;
+  debugLog("storage", "\u68C0\u67E5 TavernHelper \u53D8\u91CF\u63A5\u53E3", {
+    hasGetVariables: Boolean(helper?.getVariables),
+    hasReplaceVariables: Boolean(helper?.replaceVariables)
+  });
   if (!helper?.getVariables || !helper?.replaceVariables) {
-    throw new Error("\u672A\u627E\u5230 TavernHelper.getVariables / replaceVariables\uFF0C\u65E0\u6CD5\u8BFB\u5199\u804A\u5929\u5B58\u6863");
+    const error = new Error("\u672A\u627E\u5230 TavernHelper.getVariables / replaceVariables\uFF0C\u65E0\u6CD5\u8BFB\u5199\u804A\u5929\u5B58\u6863");
+    debugError("storage", "\u83B7\u53D6\u53D8\u91CF\u63A5\u53E3\u5931\u8D25", error);
+    throw error;
   }
   return {
     getVariables: helper.getVariables,
@@ -795,29 +916,75 @@ function \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3() {
   };
 }
 function \u8BFB\u53D6\u804A\u5929\u53D8\u91CF() {
-  return \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().getVariables({ type: "chat" }) ?? {};
+  const variables = \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().getVariables({ type: "chat" }) ?? {};
+  debugLog("storage", "\u8BFB\u53D6\u804A\u5929\u53D8\u91CF\u5B8C\u6210", summarizeValue(variables));
+  return variables;
 }
 function \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(rootKey = STATE_ROOT_KEY) {
-  return _.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey);
+  const raw = _.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey);
+  debugLog("storage", "\u8BFB\u53D6\u539F\u59CB\u72B6\u6001", {
+    rootKey,
+    summary: summarizeValue(raw)
+  });
+  return raw;
 }
 function \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F(rootKey = CONTEXT_MACRO_KEY) {
-  return String(_.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey, ""));
+  const content = String(_.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey, ""));
+  debugLog("storage", "\u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F", {
+    rootKey,
+    summary: summarizeValue(content)
+  });
+  return content;
 }
 function \u52A0\u8F7D\u72B6\u6001(rootKey = STATE_ROOT_KEY) {
   const raw = \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(rootKey);
-  return recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(raw));
+  const state = recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(raw));
+  debugLog("storage", "\u52A0\u8F7D\u72B6\u6001\u5B8C\u6210", {
+    rootKey,
+    raw: summarizeValue(raw),
+    state: summarizeState(state)
+  });
+  return state;
 }
 function \u4FDD\u5B58\u72B6\u6001(state, rootKey = STATE_ROOT_KEY) {
   const next = recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(state));
   const variables = \u8BFB\u53D6\u804A\u5929\u53D8\u91CF();
+  debugLog("storage", "\u51C6\u5907\u4FDD\u5B58\u72B6\u6001", {
+    rootKey,
+    before: summarizeValue(_.get(variables, rootKey)),
+    next: summarizeState(next)
+  });
   _.set(variables, rootKey, next);
-  \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
+  try {
+    \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
+    debugLog("storage", "replaceVariables \u8C03\u7528\u5B8C\u6210", {
+      rootKey,
+      after: summarizeValue(_.get(variables, rootKey))
+    });
+  } catch (error) {
+    debugError("storage", "\u4FDD\u5B58\u72B6\u6001\u5931\u8D25", error);
+    throw error;
+  }
   return next;
 }
 function \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F(content, rootKey = CONTEXT_MACRO_KEY) {
   const variables = \u8BFB\u53D6\u804A\u5929\u53D8\u91CF();
+  debugLog("storage", "\u51C6\u5907\u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F", {
+    rootKey,
+    before: summarizeValue(_.get(variables, rootKey, "")),
+    next: summarizeValue(content)
+  });
   _.set(variables, rootKey, String(content || ""));
-  \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
+  try {
+    \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
+    debugLog("storage", "\u4E0A\u4E0B\u6587\u5B8F\u4FDD\u5B58\u5B8C\u6210", {
+      rootKey,
+      after: summarizeValue(_.get(variables, rootKey, ""))
+    });
+  } catch (error) {
+    debugError("storage", "\u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F\u5931\u8D25", error);
+    throw error;
+  }
   return String(_.get(variables, rootKey, ""));
 }
 function \u521D\u59CB\u5316\u72B6\u6001(seed = {}, rootKey = STATE_ROOT_KEY) {
@@ -921,58 +1088,89 @@ function \u5E94\u7528\u5546\u54C1\u66F4\u65B0(state, command) {
   state.\u5546\u57CE[command.id] = next;
 }
 function \u6267\u884C\u547D\u4EE4(state, commandInput) {
-  const commands = \u89E3\u6790\u547D\u4EE4\u8F93\u5165(commandInput);
-  const next = _.cloneDeep(state);
-  for (const command of commands) {
-    switch (command.type) {
-      case "UpdateWorld":
-        \u5E94\u7528\u4E16\u754C\u66F4\u65B0(next, command);
-        break;
-      case "AppendRecentEvent":
-        \u5E94\u7528\u8FD1\u671F\u4E8B\u4EF6(next, command);
-        break;
-      case "UpdatePlayerBase":
-        \u5E94\u7528\u4E3B\u89D2\u57FA\u7840\u66F4\u65B0(next, command);
-        break;
-      case "AdjustPlayerResource":
-        \u5E94\u7528\u4E3B\u89D2\u8D44\u6E90\u53D8\u66F4(next, command);
-        break;
-      case "UpsertNpc":
-        \u5E94\u7528NPC\u66F4\u65B0(next, command);
-        break;
-      case "UpdateNpcRelation":
-        \u5E94\u7528NPC\u5173\u7CFB\u66F4\u65B0(next, command);
-        break;
-      case "RemoveNpc":
-        delete next.NPC[command.id];
-        break;
-      case "UpsertQuest":
-        \u5E94\u7528\u4EFB\u52A1\u66F4\u65B0(next, command);
-        break;
-      case "UpdateQuestState":
-        \u5E94\u7528\u4EFB\u52A1\u72B6\u6001(next, command);
-        break;
-      case "RemoveQuest":
-        delete next.\u4EFB\u52A1[command.id];
-        break;
-      case "UpsertShopItem":
-        \u5E94\u7528\u5546\u54C1\u66F4\u65B0(next, command);
-        break;
-      case "RemoveShopItem":
-        delete next.\u5546\u57CE[command.id];
-        break;
+  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u547D\u4EE4", {
+    input: summarizeValue(commandInput),
+    before: summarizeState(state)
+  });
+  try {
+    const commands = \u89E3\u6790\u547D\u4EE4\u8F93\u5165(commandInput);
+    const next = _.cloneDeep(state);
+    for (const [index, command] of commands.entries()) {
+      debugLog("executor", "\u6267\u884C\u5355\u6761\u547D\u4EE4", {
+        index,
+        type: command.type,
+        id: "id" in command ? command.id : void 0
+      });
+      switch (command.type) {
+        case "UpdateWorld":
+          \u5E94\u7528\u4E16\u754C\u66F4\u65B0(next, command);
+          break;
+        case "AppendRecentEvent":
+          \u5E94\u7528\u8FD1\u671F\u4E8B\u4EF6(next, command);
+          break;
+        case "UpdatePlayerBase":
+          \u5E94\u7528\u4E3B\u89D2\u57FA\u7840\u66F4\u65B0(next, command);
+          break;
+        case "AdjustPlayerResource":
+          \u5E94\u7528\u4E3B\u89D2\u8D44\u6E90\u53D8\u66F4(next, command);
+          break;
+        case "UpsertNpc":
+          \u5E94\u7528NPC\u66F4\u65B0(next, command);
+          break;
+        case "UpdateNpcRelation":
+          \u5E94\u7528NPC\u5173\u7CFB\u66F4\u65B0(next, command);
+          break;
+        case "RemoveNpc":
+          delete next.NPC[command.id];
+          break;
+        case "UpsertQuest":
+          \u5E94\u7528\u4EFB\u52A1\u66F4\u65B0(next, command);
+          break;
+        case "UpdateQuestState":
+          \u5E94\u7528\u4EFB\u52A1\u72B6\u6001(next, command);
+          break;
+        case "RemoveQuest":
+          delete next.\u4EFB\u52A1[command.id];
+          break;
+        case "UpsertShopItem":
+          \u5E94\u7528\u5546\u54C1\u66F4\u65B0(next, command);
+          break;
+        case "RemoveShopItem":
+          delete next.\u5546\u57CE[command.id];
+          break;
+      }
+      debugLog("executor", "\u5355\u6761\u547D\u4EE4\u6267\u884C\u540E\u72B6\u6001\u6458\u8981", {
+        index,
+        type: command.type,
+        state: summarizeState(next)
+      });
     }
+    const finalState = recompute\u5168\u5C40(next);
+    debugLog("executor", "\u547D\u4EE4\u6267\u884C\u5B8C\u6210", {
+      applied: commands.length,
+      after: summarizeState(finalState)
+    });
+    return {
+      state: finalState,
+      applied: commands
+    };
+  } catch (error) {
+    debugError("executor", "\u6267\u884C\u547D\u4EE4\u5931\u8D25", error);
+    throw error;
   }
-  return {
-    state: recompute\u5168\u5C40(next),
-    applied: commands
-  };
 }
 function \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, commandInput, rootKey = STATE_ROOT_KEY) {
+  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4", { rootKey });
   const result = \u6267\u884C\u547D\u4EE4(state, commandInput);
+  const savedState = \u4FDD\u5B58\u72B6\u6001(result.state, rootKey);
+  debugLog("executor", "\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
+    rootKey,
+    applied: result.applied.length,
+    state: summarizeState(savedState)
+  });
   return {
     ...result,
-    state: \u4FDD\u5B58\u72B6\u6001(result.state, rootKey)
+    state: savedState
   };
 }
 
@@ -1071,22 +1269,37 @@ function \u5305\u88C5\u547D\u4EE4\u5757(commands, analysis = "", space = 2) {
 function \u63D0\u53D6\u66F4\u65B0\u5757(replyText) {
   const start = replyText.indexOf(UPDATE_VARIABLE_START);
   const end = replyText.indexOf(UPDATE_VARIABLE_END);
+  debugLog("protocol", "\u626B\u63CF UpdateVariable \u5305\u88C5", {
+    hasStart: start >= 0,
+    hasEnd: end >= 0,
+    reply: summarizeValue(replyText)
+  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  return replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
+  const block = replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
+  debugLog("protocol", "\u63D0\u53D6\u5230 UpdateVariable \u5185\u5BB9", summarizeValue(block));
+  return block;
 }
 function \u63D0\u53D6\u547D\u4EE4\u5757(replyText) {
   const block = \u63D0\u53D6\u66F4\u65B0\u5757(replyText);
   if (!block) {
+    debugLog("protocol", "\u672A\u63D0\u53D6\u5230 UpdateVariable \u5185\u5BB9");
     return null;
   }
   const start = block.indexOf(COMMAND_BLOCK_START);
   const end = block.indexOf(COMMAND_BLOCK_END);
+  debugLog("protocol", "\u626B\u63CF Commands \u5305\u88C5", {
+    hasStart: start >= 0,
+    hasEnd: end >= 0,
+    block: summarizeValue(block)
+  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  return block.slice(start + COMMAND_BLOCK_START.length, end).trim();
+  const commandsText = block.slice(start + COMMAND_BLOCK_START.length, end).trim();
+  debugLog("protocol", "\u63D0\u53D6\u5230 Commands \u5185\u5BB9", summarizeValue(commandsText));
+  return commandsText;
 }
 function \u79FB\u9664\u547D\u4EE4\u5757(replyText) {
   const pattern = new RegExp(`${_.escapeRegExp(UPDATE_VARIABLE_START)}[\\s\\S]*?${_.escapeRegExp(UPDATE_VARIABLE_END)}`, "g");
@@ -1095,18 +1308,29 @@ function \u79FB\u9664\u547D\u4EE4\u5757(replyText) {
 function \u89E3\u6790\u547D\u4EE4\u5757(replyText) {
   const commandsText = \u63D0\u53D6\u547D\u4EE4\u5757(replyText);
   if (!commandsText) {
+    debugLog("protocol", "\u672A\u627E\u5230\u53EF\u89E3\u6790\u7684\u547D\u4EE4\u5757");
     return {
       commandsText: null,
       commands: [],
       replyText
     };
   }
-  const parsed = JSON.parse(commandsText);
-  return {
-    commandsText,
-    commands: Array.isArray(parsed) ? parsed : [parsed],
-    replyText: \u79FB\u9664\u547D\u4EE4\u5757(replyText)
-  };
+  try {
+    const parsed = JSON.parse(commandsText);
+    const commands = Array.isArray(parsed) ? parsed : [parsed];
+    debugLog("protocol", "\u547D\u4EE4\u5757 JSON \u89E3\u6790\u6210\u529F", {
+      count: commands.length,
+      firstType: commands[0]?.type ?? null
+    });
+    return {
+      commandsText,
+      commands,
+      replyText: \u79FB\u9664\u547D\u4EE4\u5757(replyText)
+    };
+  } catch (error) {
+    debugError("protocol", "\u547D\u4EE4\u5757 JSON \u89E3\u6790\u5931\u8D25", error);
+    throw error;
+  }
 }
 
 // src/bridge.ts
@@ -1131,22 +1355,41 @@ function buildContextMacroText(state) {
   return \u6784\u5EFA\u5B8F\u6CE8\u5165\u6587\u672C(state);
 }
 function refreshContextMacro(state, macroKey = CONTEXT_MACRO_KEY) {
+  debugLog("bridge", "\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", {
+    macroKey,
+    state: summarizeState(state)
+  });
   return \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F(buildContextMacroText(state), macroKey);
 }
 function refreshContextMacroFromStorage(rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY) {
+  debugLog("bridge", "\u4ECE\u5B58\u6863\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", { rootKey, macroKey });
   return refreshContextMacro(\u52A0\u8F7D\u72B6\u6001(rootKey), macroKey);
 }
 function extractCommands(replyText) {
-  const parsed = \u89E3\u6790\u547D\u4EE4\u5757(replyText);
-  return {
-    commandsText: parsed.commandsText,
-    commands: parsed.commandsText ? \u89E3\u6790\u547D\u4EE4\u8F93\u5165(parsed.commands) : [],
-    cleanedReplyText: parsed.replyText
-  };
+  debugLog("bridge", "\u5F00\u59CB\u4ECE\u56DE\u590D\u63D0\u53D6\u547D\u4EE4", summarizeValue(replyText));
+  try {
+    const parsed = \u89E3\u6790\u547D\u4EE4\u5757(replyText);
+    const commands = parsed.commandsText ? \u89E3\u6790\u547D\u4EE4\u8F93\u5165(parsed.commands) : [];
+    debugLog("bridge", "\u547D\u4EE4\u63D0\u53D6\u5B8C\u6210", {
+      hasCommandsText: Boolean(parsed.commandsText),
+      commandsCount: commands.length,
+      cleanedReply: summarizeValue(parsed.replyText)
+    });
+    return {
+      commandsText: parsed.commandsText,
+      commands,
+      cleanedReplyText: parsed.replyText
+    };
+  } catch (error) {
+    debugError("bridge", "\u63D0\u53D6\u547D\u4EE4\u5931\u8D25", error);
+    throw error;
+  }
 }
 function extractAndApplyCommands(replyText, state) {
+  debugLog("bridge", "\u5F00\u59CB\u63D0\u53D6\u5E76\u5E94\u7528\u547D\u4EE4", { state: summarizeState(state) });
   const extracted = extractCommands(replyText);
   if (extracted.commands.length === 0) {
+    debugLog("bridge", "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u8DF3\u8FC7\u6267\u884C");
     return {
       state: _.cloneDeep(state),
       applied: [],
@@ -1155,6 +1398,10 @@ function extractAndApplyCommands(replyText, state) {
     };
   }
   const result = \u6267\u884C\u547D\u4EE4(state, extracted.commands);
+  debugLog("bridge", "\u63D0\u53D6\u5E76\u5E94\u7528\u547D\u4EE4\u5B8C\u6210", {
+    applied: result.applied.length,
+    state: summarizeState(result.state)
+  });
   return {
     ...result,
     commandsText: extracted.commandsText,
@@ -1162,8 +1409,14 @@ function extractAndApplyCommands(replyText, state) {
   };
 }
 function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY) {
+  debugLog("bridge", "\u5F00\u59CB\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4", {
+    rootKey,
+    macroKey,
+    state: summarizeState(state)
+  });
   const extracted = extractCommands(replyText);
   if (extracted.commands.length === 0) {
+    debugLog("bridge", "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", { macroKey });
     refreshContextMacro(state, macroKey);
     return {
       state: _.cloneDeep(state),
@@ -1174,6 +1427,10 @@ function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY,
   }
   const result = \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, rootKey);
   refreshContextMacro(result.state, macroKey);
+  debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
+    applied: result.applied.length,
+    state: summarizeState(result.state)
+  });
   return {
     ...result,
     commandsText: extracted.commandsText,
@@ -1243,6 +1500,9 @@ var ThreeKingdomsStateKit = {
   \u534F\u8BAE: protocol_exports,
   \u6865\u63A5: bridge_exports,
   \u5B8F: macro_exports,
+  \u8C03\u8BD5: debug_exports,
+  setDebug: setDebugEnabled,
+  getDebug: getDebugEnabled,
   \u91CD\u7B97: {
     recompute\u516D\u7EF4,
     recompute\u89D2\u8272\u6218\u6597\u6570\u636E,
@@ -1296,10 +1556,13 @@ export {
   create\u88C5\u5907\u6761\u76EE,
   create\u88C5\u5907\u680F,
   create\u89D2\u8272\u6218\u6597\u6570\u636E,
+  debugError,
+  debugLog,
   index_default as default,
   extractAndApplyCommands,
   extractApplyAndSaveCommands,
   extractCommands,
+  getDebugEnabled,
   recomputeNPC,
   recompute\u4E3B\u89D2,
   recompute\u5168\u5C40,
@@ -1310,6 +1573,9 @@ export {
   refreshContextMacroFromStorage,
   registerSgbzMacros,
   renderSgbzContextMacro,
+  setDebugEnabled,
+  summarizeState,
+  summarizeValue,
   unregisterSgbzMacros,
   \u4EA4\u60C5\u7B49\u7EA7,
   \u4F9D\u8D56\u7B49\u7EA7,

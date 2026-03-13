@@ -14,6 +14,7 @@ import * as context from './context';
 import * as protocol from './protocol';
 import * as bridge from './bridge';
 import * as macro from './macro';
+import * as debug from './debug';
 import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据 } from './recompute';
 
 export * from './state';
@@ -26,6 +27,7 @@ export * from './context';
 export * from './protocol';
 export * from './bridge';
 export * from './macro';
+export * from './debug';
 
 export const ThreeKingdomsStateKit = {
   结构: {
@@ -44,6 +46,9 @@ export const ThreeKingdomsStateKit = {
   协议: protocol,
   桥接: bridge,
   宏: macro,
+  调试: debug,
+  setDebug: debug.setDebugEnabled,
+  getDebug: debug.getDebugEnabled,
   重算: {
     recompute六维,
     recompute角色战斗数据,

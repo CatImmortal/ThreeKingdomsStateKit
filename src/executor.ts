@@ -1,5 +1,6 @@
 import { type 状态命令, 解析命令输入 } from './commands';
 import { recomputeNPC, recompute主角, recompute全局 } from './recompute';
+import { debugError, debugLog, summarizeState, summarizeValue } from './debug';
 import {
   createNPC,
   create任务,
@@ -118,54 +119,78 @@ function 应用商品更新(state: 状态总表, command: Extract<状态命令, 
 }
 
 export function 执行命令(state: 状态总表, commandInput: string | 状态命令 | 状态命令[]): 执行结果 {
-  const commands = 解析命令输入(commandInput);
-  const next = _.cloneDeep(state);
+  debugLog('executor', '开始执行命令', {
+    input: summarizeValue(commandInput),
+    before: summarizeState(state),
+  });
+  try {
+    const commands = 解析命令输入(commandInput);
+    const next = _.cloneDeep(state);
 
-  for (const command of commands) {
-    switch (command.type) {
-      case 'UpdateWorld':
-        应用世界更新(next, command);
-        break;
-      case 'AppendRecentEvent':
-        应用近期事件(next, command);
-        break;
-      case 'UpdatePlayerBase':
-        应用主角基础更新(next, command);
-        break;
-      case 'AdjustPlayerResource':
-        应用主角资源变更(next, command);
-        break;
-      case 'UpsertNpc':
-        应用NPC更新(next, command);
-        break;
-      case 'UpdateNpcRelation':
-        应用NPC关系更新(next, command);
-        break;
-      case 'RemoveNpc':
-        delete next.NPC[command.id];
-        break;
-      case 'UpsertQuest':
-        应用任务更新(next, command);
-        break;
-      case 'UpdateQuestState':
-        应用任务状态(next, command);
-        break;
-      case 'RemoveQuest':
-        delete next.任务[command.id];
-        break;
-      case 'UpsertShopItem':
-        应用商品更新(next, command);
-        break;
-      case 'RemoveShopItem':
-        delete next.商城[command.id];
-        break;
+    for (const [index, command] of commands.entries()) {
+      debugLog('executor', '执行单条命令', {
+        index,
+        type: command.type,
+        id: 'id' in command ? command.id : undefined,
+      });
+      switch (command.type) {
+        case 'UpdateWorld':
+          应用世界更新(next, command);
+          break;
+        case 'AppendRecentEvent':
+          应用近期事件(next, command);
+          break;
+        case 'UpdatePlayerBase':
+          应用主角基础更新(next, command);
+          break;
+        case 'AdjustPlayerResource':
+          应用主角资源变更(next, command);
+          break;
+        case 'UpsertNpc':
+          应用NPC更新(next, command);
+          break;
+        case 'UpdateNpcRelation':
+          应用NPC关系更新(next, command);
+          break;
+        case 'RemoveNpc':
+          delete next.NPC[command.id];
+          break;
+        case 'UpsertQuest':
+          应用任务更新(next, command);
+          break;
+        case 'UpdateQuestState':
+          应用任务状态(next, command);
+          break;
+        case 'RemoveQuest':
+          delete next.任务[command.id];
+          break;
+        case 'UpsertShopItem':
+          应用商品更新(next, command);
+          break;
+        case 'RemoveShopItem':
+          delete next.商城[command.id];
+          break;
+      }
+      debugLog('executor', '单条命令执行后状态摘要', {
+        index,
+        type: command.type,
+        state: summarizeState(next),
+      });
     }
-  }
 
-  return {
-    state: recompute全局(next),
-    applied: commands,
-  };
+    const finalState = recompute全局(next);
+    debugLog('executor', '命令执行完成', {
+      applied: commands.length,
+      after: summarizeState(finalState),
+    });
+    return {
+      state: finalState,
+      applied: commands,
+    };
+  } catch (error) {
+    debugError('executor', '执行命令失败', error);
+    throw error;
+  }
 }
 
 export function 执行并保存命令(
@@ -173,9 +198,16 @@ export function 执行并保存命令(
   commandInput: string | 状态命令 | 状态命令[],
   rootKey: string = STATE_ROOT_KEY,
 ): 执行结果 {
+  debugLog('executor', '开始执行并保存命令', { rootKey });
   const result = 执行命令(state, commandInput);
+  const savedState = 保存状态(result.state, rootKey);
+  debugLog('executor', '执行并保存命令完成', {
+    rootKey,
+    applied: result.applied.length,
+    state: summarizeState(savedState),
+  });
   return {
     ...result,
-    state: 保存状态(result.state, rootKey),
+    state: savedState,
   };
 }

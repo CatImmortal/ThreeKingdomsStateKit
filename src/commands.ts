@@ -1,5 +1,6 @@
 import type { NPC, 世界, 主角, 商品条目, 状态总表, 任务, 任务目标 } from './state';
 import { 枚举, type 任务状态 } from './rules';
+import { debugError, debugLog, summarizeValue } from './debug';
 
 export type 基础字段<T> = {
   [K in keyof T as K extends `_${string}` ? never : K]: T[K];
@@ -409,17 +410,37 @@ function 校验资源变化(value: unknown, path: string): void {
 }
 
 export function 解析命令输入(input: 命令输入): 状态命令[] {
-  if (typeof input === 'string') {
-    const parsed = JSON.parse(input) as unknown;
-    return 解析命令输入(parsed as 状态命令[]);
+  debugLog('commands', '开始解析命令输入', {
+    inputType: typeof input === 'string' ? 'string' : Array.isArray(input) ? 'array' : 'object',
+    summary: summarizeValue(input),
+  });
+  try {
+    if (typeof input === 'string') {
+      const parsed = JSON.parse(input) as unknown;
+      debugLog('commands', '字符串命令 JSON 解析成功', summarizeValue(parsed));
+      return 解析命令输入(parsed as 状态命令[]);
+    }
+    const list: 状态命令[] = Array.isArray(input) ? input : [input];
+    debugLog('commands', '开始逐条校验命令', { count: list.length });
+    list.forEach((command, index) => 校验命令(command, index));
+    debugLog('commands', '命令输入校验完成', {
+      count: list.length,
+      types: list.map(command => command.type),
+    });
+    return list;
+  } catch (error) {
+    debugError('commands', '解析命令输入失败', error);
+    throw error;
   }
-  const list: 状态命令[] = Array.isArray(input) ? input : [input];
-  list.forEach((command, index) => 校验命令(command, index));
-  return list;
 }
 
 export function 校验命令(command: 状态命令, index = 0): void {
   const path = `commands[${index}]`;
+  debugLog('commands', '校验单条命令', {
+    index,
+    type: _.isPlainObject(command) ? (command as { type?: unknown }).type ?? null : null,
+    summary: summarizeValue(command),
+  });
   断言对象(command, path);
   断言(typeof command.type === 'string', `${path}.type 必须是字符串`);
   断言(command.type in 命令字段白名单, `${path}.type 不是有效命令类型: ${String(command.type)}`);
@@ -427,68 +448,85 @@ export function 校验命令(command: 状态命令, index = 0): void {
   断言字段白名单(command, allowedKeys, path);
   断言无下划线字段(command, path);
 
-  switch (command.type) {
-    case 'UpdateWorld':
-      校验世界更新(command.changes, `${path}.changes`);
-      return;
-    case 'AppendRecentEvent':
-      校验世界事件输入(command.event, `${path}.event`);
-      return;
-    case 'UpdatePlayerBase':
-      校验主角更新(command.changes, `${path}.changes`);
-      return;
-    case 'AdjustPlayerResource':
-      if (command.mode !== undefined) {
-        断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
-      }
-      校验资源变化(command.changes, `${path}.changes`);
-      return;
-    case 'UpsertNpc':
-      断言字符串(command.id, `${path}.id`);
-      if (command.createIfMissing !== undefined) {
-        断言布尔(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      校验NPC更新(command.data, `${path}.data`);
-      return;
-    case 'UpdateNpcRelation':
-      断言字符串(command.id, `${path}.id`);
-      if (command.mode !== undefined) {
-        断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
-      }
-      断言(command.好感 !== undefined || command.羁绊 !== undefined, `${path} 至少要提供 好感 或 羁绊`);
-      if (command.好感 !== undefined) 断言数字(command.好感, `${path}.好感`);
-      if (command.羁绊 !== undefined) 校验字符串映射(command.羁绊, `${path}.羁绊`);
-      return;
-    case 'RemoveNpc':
-      断言字符串(command.id, `${path}.id`);
-      return;
-    case 'UpsertQuest':
-      断言字符串(command.id, `${path}.id`);
-      if (command.createIfMissing !== undefined) {
-        断言布尔(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      校验任务更新(command.data, `${path}.data`);
-      return;
-    case 'UpdateQuestState':
-      断言字符串(command.id, `${path}.id`);
-      断言枚举值(command.状态, 枚举.任务状态, `${path}.状态`);
-      if (command.目标 !== undefined) {
-        校验任务目标映射(command.目标, `${path}.目标`);
-      }
-      return;
-    case 'RemoveQuest':
-      断言字符串(command.id, `${path}.id`);
-      return;
-    case 'UpsertShopItem':
-      断言字符串(command.id, `${path}.id`);
-      if (command.createIfMissing !== undefined) {
-        断言布尔(command.createIfMissing, `${path}.createIfMissing`);
-      }
-      校验商品条目(command.data, `${path}.data`);
-      return;
-    case 'RemoveShopItem':
-      断言字符串(command.id, `${path}.id`);
-      return;
+  try {
+    switch (command.type) {
+      case 'UpdateWorld':
+        debugLog('commands', '校验 UpdateWorld', { index });
+        校验世界更新(command.changes, `${path}.changes`);
+        return;
+      case 'AppendRecentEvent':
+        debugLog('commands', '校验 AppendRecentEvent', { index });
+        校验世界事件输入(command.event, `${path}.event`);
+        return;
+      case 'UpdatePlayerBase':
+        debugLog('commands', '校验 UpdatePlayerBase', { index });
+        校验主角更新(command.changes, `${path}.changes`);
+        return;
+      case 'AdjustPlayerResource':
+        debugLog('commands', '校验 AdjustPlayerResource', { index });
+        if (command.mode !== undefined) {
+          断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
+        }
+        校验资源变化(command.changes, `${path}.changes`);
+        return;
+      case 'UpsertNpc':
+        debugLog('commands', '校验 UpsertNpc', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        校验NPC更新(command.data, `${path}.data`);
+        return;
+      case 'UpdateNpcRelation':
+        debugLog('commands', '校验 UpdateNpcRelation', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.mode !== undefined) {
+          断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
+        }
+        断言(command.好感 !== undefined || command.羁绊 !== undefined, `${path} 至少要提供 好感 或 羁绊`);
+        if (command.好感 !== undefined) 断言数字(command.好感, `${path}.好感`);
+        if (command.羁绊 !== undefined) 校验字符串映射(command.羁绊, `${path}.羁绊`);
+        return;
+      case 'RemoveNpc':
+        debugLog('commands', '校验 RemoveNpc', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        return;
+      case 'UpsertQuest':
+        debugLog('commands', '校验 UpsertQuest', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        校验任务更新(command.data, `${path}.data`);
+        return;
+      case 'UpdateQuestState':
+        debugLog('commands', '校验 UpdateQuestState', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        断言枚举值(command.状态, 枚举.任务状态, `${path}.状态`);
+        if (command.目标 !== undefined) {
+          校验任务目标映射(command.目标, `${path}.目标`);
+        }
+        return;
+      case 'RemoveQuest':
+        debugLog('commands', '校验 RemoveQuest', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        return;
+      case 'UpsertShopItem':
+        debugLog('commands', '校验 UpsertShopItem', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        校验商品条目(command.data, `${path}.data`);
+        return;
+      case 'RemoveShopItem':
+        debugLog('commands', '校验 RemoveShopItem', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        return;
+    }
+  } catch (error) {
+    debugError('commands', `命令校验失败: ${path}`, error);
+    throw error;
   }
 }
 

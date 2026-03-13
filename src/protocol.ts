@@ -1,4 +1,5 @@
 import type { 状态命令 } from './commands';
+import { debugError, debugLog, summarizeValue } from './debug';
 
 export const UPDATE_VARIABLE_START = '<UpdateVariable>';
 export const UPDATE_VARIABLE_END = '</UpdateVariable>';
@@ -30,23 +31,38 @@ export function 包装命令块(commands: 状态命令[] | 状态命令, analysi
 function 提取更新块(replyText: string): string | null {
   const start = replyText.indexOf(UPDATE_VARIABLE_START);
   const end = replyText.indexOf(UPDATE_VARIABLE_END);
+  debugLog('protocol', '扫描 UpdateVariable 包装', {
+    hasStart: start >= 0,
+    hasEnd: end >= 0,
+    reply: summarizeValue(replyText),
+  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  return replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
+  const block = replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
+  debugLog('protocol', '提取到 UpdateVariable 内容', summarizeValue(block));
+  return block;
 }
 
 export function 提取命令块(replyText: string): string | null {
   const block = 提取更新块(replyText);
   if (!block) {
+    debugLog('protocol', '未提取到 UpdateVariable 内容');
     return null;
   }
   const start = block.indexOf(COMMAND_BLOCK_START);
   const end = block.indexOf(COMMAND_BLOCK_END);
+  debugLog('protocol', '扫描 Commands 包装', {
+    hasStart: start >= 0,
+    hasEnd: end >= 0,
+    block: summarizeValue(block),
+  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  return block.slice(start + COMMAND_BLOCK_START.length, end).trim();
+  const commandsText = block.slice(start + COMMAND_BLOCK_START.length, end).trim();
+  debugLog('protocol', '提取到 Commands 内容', summarizeValue(commandsText));
+  return commandsText;
 }
 
 export function 移除命令块(replyText: string): string {
@@ -57,6 +73,7 @@ export function 移除命令块(replyText: string): string {
 export function 解析命令块(replyText: string): 命令块提取结果 {
   const commandsText = 提取命令块(replyText);
   if (!commandsText) {
+    debugLog('protocol', '未找到可解析的命令块');
     return {
       commandsText: null,
       commands: [],
@@ -64,10 +81,20 @@ export function 解析命令块(replyText: string): 命令块提取结果 {
     };
   }
 
-  const parsed = JSON.parse(commandsText) as 状态命令[] | 状态命令;
-  return {
-    commandsText,
-    commands: Array.isArray(parsed) ? parsed : [parsed],
-    replyText: 移除命令块(replyText),
-  };
+  try {
+    const parsed = JSON.parse(commandsText) as 状态命令[] | 状态命令;
+    const commands = Array.isArray(parsed) ? parsed : [parsed];
+    debugLog('protocol', '命令块 JSON 解析成功', {
+      count: commands.length,
+      firstType: commands[0]?.type ?? null,
+    });
+    return {
+      commandsText,
+      commands,
+      replyText: 移除命令块(replyText),
+    };
+  } catch (error) {
+    debugError('protocol', '命令块 JSON 解析失败', error);
+    throw error;
+  }
 }
