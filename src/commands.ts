@@ -105,7 +105,7 @@ const 命令字段白名单 = {
 const 世界字段 = ['当前时间', '当前地点', '当前剧本', '天气', '近期事件'] as const;
 const 主角资源字段 = ['当前生命值', '当前体力值', '声望', '金钱', '积分', '后宫和谐度'] as const;
 const 六维字段 = ['武力', '智力', '统率', '政治', '魅力', '体质'] as const;
-const 装备条目字段 = ['名称', '品质', '类型', '先攻加值', '攻击加值', '防御DC加值', '伤害减免', '效果'] as const;
+const 装备条目字段 = ['名称', '品质', '类型', '描述', '伤害骰', '先攻加值', '攻击加值', '防御DC加值', '伤害减免', '其他效果'] as const;
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
 const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度', '体力消耗'] as const;
 const 专长条目字段 = ['名称', '等级', '效果'] as const;
@@ -205,10 +205,12 @@ function 校验装备条目(value: unknown, path: string): void {
   if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.品质 !== undefined) 断言枚举值(value.品质, 枚举.装备品质, `${path}.品质`);
   if (value.类型 !== undefined) 断言字符串(value.类型, `${path}.类型`);
+  if (value.描述 !== undefined) 断言字符串(value.描述, `${path}.描述`);
+  if (value.伤害骰 !== undefined) 断言字符串(value.伤害骰, `${path}.伤害骰`);
   for (const key of ['先攻加值', '攻击加值', '防御DC加值', '伤害减免'] as const) {
     if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
   }
-  if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
+  if (value.其他效果 !== undefined) 断言字符串(value.其他效果, `${path}.其他效果`);
 }
 
 function 校验装备栏位(value: unknown, path: string): void {

@@ -4,8 +4,8 @@ const DEBUG_PREFIX = '[ThreeKingdomsStateKit]';
 
 let debugEnabled = false;
 
-function formatPrefix(scope: string): string {
-  return `${DEBUG_PREFIX}[${scope}]`;
+function formatPrefix(scope: string, level?: 'info' | 'warn' | 'error'): string {
+  return level ? `${DEBUG_PREFIX}[${level}][${scope}]` : `${DEBUG_PREFIX}[${scope}]`;
 }
 
 export function setDebugEnabled(enabled: boolean): boolean {
@@ -18,6 +18,15 @@ export function getDebugEnabled(): boolean {
   return debugEnabled;
 }
 
+export function debugInfo(scope: string, message: string, payload?: unknown): void {
+  if (!debugEnabled) return;
+  if (payload === undefined) {
+    console.info(formatPrefix(scope, 'info'), message);
+    return;
+  }
+  console.info(formatPrefix(scope, 'info'), message, payload);
+}
+
 export function debugLog(scope: string, message: string, payload?: unknown): void {
   if (!debugEnabled) return;
   if (payload === undefined) {
@@ -27,13 +36,20 @@ export function debugLog(scope: string, message: string, payload?: unknown): voi
   console.log(formatPrefix(scope), message, payload);
 }
 
-export function debugError(scope: string, message: string, error?: unknown): void {
-  if (!debugEnabled) return;
-  if (error === undefined) {
-    console.error(formatPrefix(scope), message);
+export function debugWarn(scope: string, message: string, payload?: unknown): void {
+  if (payload === undefined) {
+    console.warn(formatPrefix(scope, 'warn'), message);
     return;
   }
-  console.error(formatPrefix(scope), message, error);
+  console.warn(formatPrefix(scope, 'warn'), message, payload);
+}
+
+export function debugError(scope: string, message: string, error?: unknown): void {
+  if (error === undefined) {
+    console.error(formatPrefix(scope, 'error'), message);
+    return;
+  }
+  console.error(formatPrefix(scope, 'error'), message, error);
 }
 
 export function summarizeState(state: 状态总表) {

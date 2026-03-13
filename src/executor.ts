@@ -1,6 +1,6 @@
 import { type 状态命令, 解析命令输入 } from './commands';
 import { recomputeNPC, recompute主角, recompute全局 } from './recompute';
-import { debugError, debugLog, summarizeState, summarizeValue } from './debug';
+import { debugError, debugInfo, debugLog, summarizeState, summarizeValue } from './debug';
 import {
   createNPC,
   create任务,
@@ -119,7 +119,7 @@ function 应用商品更新(state: 状态总表, command: Extract<状态命令, 
 }
 
 export function 执行命令(state: 状态总表, commandInput: string | 状态命令 | 状态命令[]): 执行结果 {
-  debugLog('executor', '开始执行命令', {
+  debugInfo('executor', '开始执行命令', {
     input: summarizeValue(commandInput),
     before: summarizeState(state),
   });
@@ -179,7 +179,7 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
     }
 
     const finalState = recompute全局(next);
-    debugLog('executor', '命令执行完成', {
+    debugInfo('executor', '命令执行完成', {
       applied: commands.length,
       after: summarizeState(finalState),
     });
@@ -198,10 +198,10 @@ export async function 执行并保存命令(
   commandInput: string | 状态命令 | 状态命令[],
   messageId: number,
 ): Promise<执行结果> {
-  debugLog('executor', '开始执行并保存命令', { messageId });
+  debugInfo('executor', '开始执行并保存命令', { messageId });
   const result = 执行命令(state, commandInput);
   const savedState = await 保存状态(result.state, messageId);
-  debugLog('executor', '执行并保存命令完成', {
+  debugInfo('executor', '执行并保存命令完成', {
     messageId,
     applied: result.applied.length,
     state: summarizeState(savedState),

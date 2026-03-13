@@ -157,11 +157,13 @@ function create\u88C5\u5907\u6761\u76EE(data = {}) {
     \u540D\u79F0: String(data.\u540D\u79F0 || ""),
     \u54C1\u8D28: \u679A\u4E3E.\u88C5\u5907\u54C1\u8D28.includes(data.\u54C1\u8D28) ? data.\u54C1\u8D28 : "\u51E1\u54C1",
     \u7C7B\u578B: String(data.\u7C7B\u578B || ""),
+    \u63CF\u8FF0: String(data.\u63CF\u8FF0 || ""),
+    \u4F24\u5BB3\u9AB0: String(data.\u4F24\u5BB3\u9AB0 || ""),
     \u5148\u653B\u52A0\u503C: \u6570\u503C(data.\u5148\u653B\u52A0\u503C),
     \u653B\u51FB\u52A0\u503C: \u6570\u503C(data.\u653B\u51FB\u52A0\u503C),
     \u9632\u5FA1DC\u52A0\u503C: \u6570\u503C(data.\u9632\u5FA1DC\u52A0\u503C),
     \u4F24\u5BB3\u51CF\u514D: \u6570\u503C(data.\u4F24\u5BB3\u51CF\u514D),
-    \u6548\u679C: String(data.\u6548\u679C || "")
+    \u5176\u4ED6\u6548\u679C: String(data.\u5176\u4ED6\u6548\u679C || "")
   };
 }
 function create\u88C5\u5907\u680F(data = {}) {
@@ -327,7 +329,9 @@ __export(commands_exports, {
 var debug_exports = {};
 __export(debug_exports, {
   debugError: () => debugError,
+  debugInfo: () => debugInfo,
   debugLog: () => debugLog,
+  debugWarn: () => debugWarn,
   getDebugEnabled: () => getDebugEnabled,
   setDebugEnabled: () => setDebugEnabled,
   summarizeState: () => summarizeState,
@@ -335,8 +339,8 @@ __export(debug_exports, {
 });
 var DEBUG_PREFIX = "[ThreeKingdomsStateKit]";
 var debugEnabled = false;
-function formatPrefix(scope) {
-  return `${DEBUG_PREFIX}[${scope}]`;
+function formatPrefix(scope, level) {
+  return level ? `${DEBUG_PREFIX}[${level}][${scope}]` : `${DEBUG_PREFIX}[${scope}]`;
 }
 function setDebugEnabled(enabled) {
   debugEnabled = Boolean(enabled);
@@ -346,6 +350,14 @@ function setDebugEnabled(enabled) {
 function getDebugEnabled() {
   return debugEnabled;
 }
+function debugInfo(scope, message, payload) {
+  if (!debugEnabled) return;
+  if (payload === void 0) {
+    console.info(formatPrefix(scope, "info"), message);
+    return;
+  }
+  console.info(formatPrefix(scope, "info"), message, payload);
+}
 function debugLog(scope, message, payload) {
   if (!debugEnabled) return;
   if (payload === void 0) {
@@ -354,13 +366,19 @@ function debugLog(scope, message, payload) {
   }
   console.log(formatPrefix(scope), message, payload);
 }
-function debugError(scope, message, error) {
-  if (!debugEnabled) return;
-  if (error === void 0) {
-    console.error(formatPrefix(scope), message);
+function debugWarn(scope, message, payload) {
+  if (payload === void 0) {
+    console.warn(formatPrefix(scope, "warn"), message);
     return;
   }
-  console.error(formatPrefix(scope), message, error);
+  console.warn(formatPrefix(scope, "warn"), message, payload);
+}
+function debugError(scope, message, error) {
+  if (error === void 0) {
+    console.error(formatPrefix(scope, "error"), message);
+    return;
+  }
+  console.error(formatPrefix(scope, "error"), message, error);
 }
 function summarizeState(state) {
   return {
@@ -417,7 +435,7 @@ var \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355 = {
 var \u4E16\u754C\u5B57\u6BB5 = ["\u5F53\u524D\u65F6\u95F4", "\u5F53\u524D\u5730\u70B9", "\u5F53\u524D\u5267\u672C", "\u5929\u6C14", "\u8FD1\u671F\u4E8B\u4EF6"];
 var \u4E3B\u89D2\u8D44\u6E90\u5B57\u6BB5 = ["\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u58F0\u671B", "\u91D1\u94B1", "\u79EF\u5206", "\u540E\u5BAB\u548C\u8C10\u5EA6"];
 var \u516D\u7EF4\u5B57\u6BB5 = ["\u6B66\u529B", "\u667A\u529B", "\u7EDF\u7387", "\u653F\u6CBB", "\u9B45\u529B", "\u4F53\u8D28"];
-var \u88C5\u5907\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u7C7B\u578B", "\u5148\u653B\u52A0\u503C", "\u653B\u51FB\u52A0\u503C", "\u9632\u5FA1DC\u52A0\u503C", "\u4F24\u5BB3\u51CF\u514D", "\u6548\u679C"];
+var \u88C5\u5907\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u7C7B\u578B", "\u63CF\u8FF0", "\u4F24\u5BB3\u9AB0", "\u5148\u653B\u52A0\u503C", "\u653B\u51FB\u52A0\u503C", "\u9632\u5FA1DC\u52A0\u503C", "\u4F24\u5BB3\u51CF\u514D", "\u5176\u4ED6\u6548\u679C"];
 var \u88C5\u5907\u680F\u5B57\u6BB5 = ["\u4E3B\u6B66\u5668", "\u526F\u6B66\u5668", "\u62A4\u7532", "\u5750\u9A91", "\u9970\u54C11", "\u9970\u54C12", "\u9970\u54C13"];
 var \u6B66\u6280\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u7C7B\u578B", "\u6548\u679C", "\u719F\u7EC3\u5EA6", "\u4F53\u529B\u6D88\u8017"];
 var \u4E13\u957F\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u6548\u679C"];
@@ -503,10 +521,12 @@ function \u6821\u9A8C\u88C5\u5907\u6761\u76EE(value, path) {
   if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
   if (value.\u54C1\u8D28 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u54C1\u8D28, \u679A\u4E3E.\u88C5\u5907\u54C1\u8D28, `${path}.\u54C1\u8D28`);
   if (value.\u7C7B\u578B !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u7C7B\u578B, `${path}.\u7C7B\u578B`);
+  if (value.\u63CF\u8FF0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u63CF\u8FF0, `${path}.\u63CF\u8FF0`);
+  if (value.\u4F24\u5BB3\u9AB0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u4F24\u5BB3\u9AB0, `${path}.\u4F24\u5BB3\u9AB0`);
   for (const key of ["\u5148\u653B\u52A0\u503C", "\u653B\u51FB\u52A0\u503C", "\u9632\u5FA1DC\u52A0\u503C", "\u4F24\u5BB3\u51CF\u514D"]) {
     if (value[key] !== void 0) \u65AD\u8A00\u6570\u5B57(value[key], `${path}.${key}`);
   }
-  if (value.\u6548\u679C !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u6548\u679C, `${path}.\u6548\u679C`);
+  if (value.\u5176\u4ED6\u6548\u679C !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u5176\u4ED6\u6548\u679C, `${path}.\u5176\u4ED6\u6548\u679C`);
 }
 function \u6821\u9A8C\u88C5\u5907\u680F\u4F4D(value, path) {
   if (value === "\u65E0") {
@@ -1144,7 +1164,7 @@ function \u5E94\u7528\u5546\u54C1\u66F4\u65B0(state, command) {
   state.\u5546\u57CE[command.id] = next;
 }
 function \u6267\u884C\u547D\u4EE4(state, commandInput) {
-  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u547D\u4EE4", {
+  debugInfo("executor", "\u5F00\u59CB\u6267\u884C\u547D\u4EE4", {
     input: summarizeValue(commandInput),
     before: summarizeState(state)
   });
@@ -1202,7 +1222,7 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
       });
     }
     const finalState = recompute\u5168\u5C40(next);
-    debugLog("executor", "\u547D\u4EE4\u6267\u884C\u5B8C\u6210", {
+    debugInfo("executor", "\u547D\u4EE4\u6267\u884C\u5B8C\u6210", {
       applied: commands.length,
       after: summarizeState(finalState)
     });
@@ -1216,10 +1236,10 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
   }
 }
 async function \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, commandInput, messageId) {
-  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4", { messageId });
+  debugInfo("executor", "\u5F00\u59CB\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4", { messageId });
   const result = \u6267\u884C\u547D\u4EE4(state, commandInput);
   const savedState = await \u4FDD\u5B58\u72B6\u6001(result.state, messageId);
-  debugLog("executor", "\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
+  debugInfo("executor", "\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
     messageId,
     applied: result.applied.length,
     state: summarizeState(savedState)
@@ -1427,7 +1447,7 @@ function extractCommands(replyText) {
   try {
     const parsed = \u89E3\u6790\u547D\u4EE4\u5757(replyText);
     const commands = parsed.commandsText ? \u89E3\u6790\u547D\u4EE4\u8F93\u5165(parsed.commands) : [];
-    debugLog("bridge", "\u547D\u4EE4\u63D0\u53D6\u5B8C\u6210", {
+    debugInfo("bridge", "\u547D\u4EE4\u63D0\u53D6\u5B8C\u6210", {
       hasCommandsText: Boolean(parsed.commandsText),
       commandsCount: commands.length,
       cleanedReply: summarizeValue(parsed.replyText)
@@ -1446,7 +1466,7 @@ function extractAndApplyCommands(replyText, state) {
   debugLog("bridge", "\u5F00\u59CB\u63D0\u53D6\u5E76\u5E94\u7528\u547D\u4EE4", { state: summarizeState(state) });
   const extracted = extractCommands(replyText);
   if (extracted.commands.length === 0) {
-    debugLog("bridge", "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u8DF3\u8FC7\u6267\u884C");
+    debugInfo("bridge", "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u8DF3\u8FC7\u6267\u884C");
     return {
       state: _.cloneDeep(state),
       applied: [],
@@ -1455,7 +1475,7 @@ function extractAndApplyCommands(replyText, state) {
     };
   }
   const result = \u6267\u884C\u547D\u4EE4(state, extracted.commands);
-  debugLog("bridge", "\u63D0\u53D6\u5E76\u5E94\u7528\u547D\u4EE4\u5B8C\u6210", {
+  debugInfo("bridge", "\u63D0\u53D6\u5E76\u5E94\u7528\u547D\u4EE4\u5B8C\u6210", {
     applied: result.applied.length,
     state: summarizeState(result.state)
   });
@@ -1479,7 +1499,7 @@ async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey
     commandsCount: extracted.commands.length
   });
   if (extracted.commands.length === 0) {
-    debugLog("bridge", refreshMacroOnNoCommands ? "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F" : "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u8BB0\u5F55\u65E5\u5FD7", {
+    debugInfo("bridge", refreshMacroOnNoCommands ? "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F" : "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u8BB0\u5F55\u65E5\u5FD7", {
       macroKey,
       refreshMacroOnNoCommands
     });
@@ -1495,7 +1515,7 @@ async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey
   }
   const result = await \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, messageId);
   refreshContextMacro(result.state, macroKey);
-  debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
+  debugInfo("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
     messageId,
     macroKey,
     applied: result.applied.length,
@@ -1509,7 +1529,7 @@ async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey
 }
 async function handleAssistantReply(replyText, options = {}) {
   const { messageId, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
-  debugLog("bridge", "\u5F00\u59CB\u5904\u7406 AI \u56DE\u590D", {
+  debugInfo("bridge", "\u5F00\u59CB\u5904\u7406 AI \u56DE\u590D", {
     messageId: messageId ?? null,
     macroKey,
     refreshMacroOnNoCommands,
@@ -1521,7 +1541,7 @@ async function handleAssistantReply(replyText, options = {}) {
     }
     const state = \u52A0\u8F7D\u72B6\u6001(messageId - 1);
     const result = await extractApplyAndSaveCommands(replyText, state, messageId, macroKey, refreshMacroOnNoCommands);
-    debugLog("bridge", "AI \u56DE\u590D\u5904\u7406\u5B8C\u6210", {
+    debugInfo("bridge", "AI \u56DE\u590D\u5904\u7406\u5B8C\u6210", {
       messageId,
       macroKey,
       applied: result.applied.length,
@@ -1583,12 +1603,15 @@ function registerSgbzMacros() {
 var runtime_exports = {};
 __export(runtime_exports, {
   setupAssistantReplyHook: () => setupAssistantReplyHook,
+  setupDebugLogToggleButtonHook: () => setupDebugLogToggleButtonHook,
   setupDebugParseButtonHook: () => setupDebugParseButtonHook,
   teardownAssistantReplyHook: () => teardownAssistantReplyHook,
+  teardownDebugLogToggleButtonHook: () => teardownDebugLogToggleButtonHook,
   teardownDebugParseButtonHook: () => teardownDebugParseButtonHook
 });
 var \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = null;
 var \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50 = null;
+var \u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50 = null;
 var \u6700\u8FD1\u5904\u7406\u8BB0\u5F55 = { messageId: null, message: "" };
 function \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3() {
   const globalApi = globalThis;
@@ -1631,17 +1654,24 @@ function \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message) {
     message: String(message.message || "")
   };
 }
-function teardownDebugParseButtonHook() {
-  if (!\u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50) {
+function \u5378\u8F7D\u4E8B\u4EF6\u7ED1\u5B9A(bindingState) {
+  if (!bindingState) {
     return;
   }
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
-  const { eventName, listener, binding } = \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50;
+  const { eventName, listener, binding } = bindingState;
   binding?.removeListener?.();
   binding?.off?.();
   binding?.unsubscribe?.();
   binding?.unregister?.();
   runtime.eventRemoveListener?.(eventName, listener);
+}
+function teardownDebugParseButtonHook() {
+  if (!\u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50) {
+    return;
+  }
+  const { eventName } = \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50;
+  \u5378\u8F7D\u4E8B\u4EF6\u7ED1\u5B9A(\u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50);
   \u5DF2\u6CE8\u518C\u6309\u94AE\u94A9\u5B50 = null;
   debugLog("runtime", "\u5DF2\u5378\u8F7D\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u94A9\u5B50", { eventName });
 }
@@ -1658,15 +1688,15 @@ function setupDebugParseButtonHook(buttonName = "\u89E3\u6790\u547D\u4EE4", opti
     return false;
   }
   const listener = async () => {
-    debugLog("runtime", "\u6536\u5230\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u70B9\u51FB\u4E8B\u4EF6", { buttonName, eventName });
+    debugInfo("runtime", "\u6536\u5230\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u70B9\u51FB\u4E8B\u4EF6", { buttonName, eventName });
     try {
       const message = \u8BFB\u53D6\u6D88\u606F2(-1);
       if (!message) {
-        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
+        debugInfo("runtime", "\u6309\u94AE\u8C03\u8BD5\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
         return;
       }
       if (message.role !== "assistant" || typeof message.message_id !== "number") {
-        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u8BFB\u53D6\u5230\u7684\u6700\u65B0\u6D88\u606F\u4E0D\u662F\u53EF\u5904\u7406 assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+        debugInfo("runtime", "\u6309\u94AE\u8C03\u8BD5\u8BFB\u53D6\u5230\u7684\u6700\u65B0\u6D88\u606F\u4E0D\u662F\u53EF\u5904\u7406 assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
           role: message.role ?? null,
           messageId: message.message_id ?? null
         });
@@ -1677,7 +1707,7 @@ function setupDebugParseButtonHook(buttonName = "\u89E3\u6790\u547D\u4EE4", opti
         messageId: message.message_id,
         refreshMacroOnNoCommands: false
       });
-      debugLog("runtime", "\u6309\u94AE\u89E6\u53D1\u7684 assistant \u6D88\u606F\u5904\u7406\u5B8C\u6210", {
+      debugInfo("runtime", "\u6309\u94AE\u89E6\u53D1\u7684 assistant \u6D88\u606F\u5904\u7406\u5B8C\u6210", {
         buttonName,
         messageId: message.message_id,
         applied: result.applied.length,
@@ -1696,15 +1726,41 @@ function teardownAssistantReplyHook() {
   if (!\u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50) {
     return;
   }
-  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
-  const { eventName, listener, binding } = \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50;
-  binding?.removeListener?.();
-  binding?.off?.();
-  binding?.unsubscribe?.();
-  binding?.unregister?.();
-  runtime.eventRemoveListener?.(eventName, listener);
+  const { eventName } = \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50;
+  \u5378\u8F7D\u4E8B\u4EF6\u7ED1\u5B9A(\u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50);
   \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = null;
   debugLog("runtime", "\u5DF2\u5378\u8F7D AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50", { eventName });
+}
+function teardownDebugLogToggleButtonHook() {
+  if (!\u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50) {
+    return;
+  }
+  const { eventName } = \u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50;
+  \u5378\u8F7D\u4E8B\u4EF6\u7ED1\u5B9A(\u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50);
+  \u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50 = null;
+  debugLog("runtime", "\u5DF2\u5378\u8F7D\u65E5\u5FD7\u5F00\u5173\u6309\u94AE\u94A9\u5B50", { eventName });
+}
+function setupDebugLogToggleButtonHook(buttonName = "\u65E5\u5FD7\u5F00\u5173") {
+  teardownDebugLogToggleButtonHook();
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const eventName = runtime.getButtonEvent?.(buttonName);
+  if (!eventName || typeof runtime.eventOn !== "function") {
+    debugLog("runtime", "\u672A\u627E\u5230\u6309\u94AE\u4E8B\u4EF6\u6216 eventOn\uFF0C\u65E0\u6CD5\u6CE8\u518C\u65E5\u5FD7\u5F00\u5173\u6309\u94AE", {
+      buttonName,
+      hasEventOn: typeof runtime.eventOn === "function",
+      eventName
+    });
+    return false;
+  }
+  const listener = () => {
+    const nextEnabled = !getDebugEnabled();
+    setDebugEnabled(nextEnabled);
+    console.log("[ThreeKingdomsStateKit][debug]", `\u65E5\u5FD7\u5F00\u5173\u5DF2${nextEnabled ? "\u5F00\u542F" : "\u5173\u95ED"}\uFF08info/log ${nextEnabled ? "\u542F\u7528" : "\u7981\u7528"}\uFF0Cwarning/error \u59CB\u7EC8\u8F93\u51FA\uFF09`);
+  };
+  const binding = runtime.eventOn(eventName, listener);
+  \u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50 = { eventName, listener, binding: binding ?? void 0 };
+  debugLog("runtime", "\u5DF2\u6CE8\u518C\u65E5\u5FD7\u5F00\u5173\u6309\u94AE\u94A9\u5B50", { buttonName, eventName });
+  return true;
 }
 function setupAssistantReplyHook(options = {}) {
   teardownAssistantReplyHook();
@@ -1718,7 +1774,7 @@ function setupAssistantReplyHook(options = {}) {
     return false;
   }
   const listener = async (messageId, type) => {
-    debugLog("runtime", "\u6536\u5230 MESSAGE_RECEIVED \u4E8B\u4EF6", {
+    debugInfo("runtime", "\u6536\u5230 MESSAGE_RECEIVED \u4E8B\u4EF6", {
       eventName,
       messageId,
       type: type ?? null
@@ -1726,18 +1782,18 @@ function setupAssistantReplyHook(options = {}) {
     try {
       const message = \u8BFB\u53D6\u6D88\u606F2(messageId);
       if (!message) {
-        debugLog("runtime", "\u672A\u8BFB\u53D6\u5230\u76EE\u6807\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", { messageId });
+        debugInfo("runtime", "\u672A\u8BFB\u53D6\u5230\u76EE\u6807\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", { messageId });
         return;
       }
       if (message.role !== "assistant") {
-        debugLog("runtime", "\u76EE\u6807\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+        debugInfo("runtime", "\u76EE\u6807\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
           role: message.role ?? null,
           messageId: message.message_id ?? messageId
         });
         return;
       }
       if (\u662F\u5426\u91CD\u590D\u6D88\u606F(message)) {
-        debugLog("runtime", "\u68C0\u6D4B\u5230\u91CD\u590D assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+        debugInfo("runtime", "\u68C0\u6D4B\u5230\u91CD\u590D assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
           messageId: message.message_id ?? messageId
         });
         return;
@@ -1748,7 +1804,7 @@ function setupAssistantReplyHook(options = {}) {
         refreshMacroOnNoCommands: false
       });
       \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message);
-      debugLog("runtime", "assistant \u6D88\u606F\u81EA\u52A8\u5904\u7406\u5B8C\u6210", {
+      debugInfo("runtime", "assistant \u6D88\u606F\u81EA\u52A8\u5904\u7406\u5B8C\u6210", {
         messageId: message.message_id ?? messageId,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText)
@@ -1767,12 +1823,17 @@ function setupAssistantReplyHook(options = {}) {
 try {
   setupAssistantReplyHook();
 } catch (error) {
-  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+  debugWarn("runtime-auto", "\u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
 try {
   setupDebugParseButtonHook("\u89E3\u6790\u547D\u4EE4");
 } catch (error) {
-  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C\u201C\u89E3\u6790\u547D\u4EE4\u201D\u6309\u94AE\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+  debugWarn("runtime-auto", "\u6CE8\u518C\u201C\u89E3\u6790\u547D\u4EE4\u201D\u6309\u94AE\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+}
+try {
+  setupDebugLogToggleButtonHook("\u65E5\u5FD7\u5F00\u5173");
+} catch (error) {
+  debugWarn("runtime-auto", "\u6CE8\u518C\u201C\u65E5\u5FD7\u5F00\u5173\u201D\u6309\u94AE\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
 
 // src/index.ts
@@ -1800,6 +1861,8 @@ var ThreeKingdomsStateKit = {
   teardownAssistantReplyHook,
   setupDebugParseButtonHook,
   teardownDebugParseButtonHook,
+  setupDebugLogToggleButtonHook,
+  teardownDebugLogToggleButtonHook,
   setDebug: setDebugEnabled,
   getDebug: getDebugEnabled,
   \u91CD\u7B97: {
@@ -1818,7 +1881,7 @@ window.ThreeKingdomsStateKit = ThreeKingdomsStateKit;
 try {
   registerSgbzMacros();
 } catch (error) {
-  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C\u5B8F\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+  debugWarn("index", "\u6CE8\u518C\u5B8F\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
 var index_default = ThreeKingdomsStateKit;
 export {
@@ -1857,7 +1920,9 @@ export {
   create\u88C5\u5907\u680F,
   create\u89D2\u8272\u6218\u6597\u6570\u636E,
   debugError,
+  debugInfo,
   debugLog,
+  debugWarn,
   index_default as default,
   extractAndApplyCommands,
   extractApplyAndSaveCommands,
@@ -1876,10 +1941,12 @@ export {
   renderSgbzContextMacro,
   setDebugEnabled,
   setupAssistantReplyHook,
+  setupDebugLogToggleButtonHook,
   setupDebugParseButtonHook,
   summarizeState,
   summarizeValue,
   teardownAssistantReplyHook,
+  teardownDebugLogToggleButtonHook,
   teardownDebugParseButtonHook,
   unregisterSgbzMacros,
   \u4EA4\u60C5\u7B49\u7EA7,

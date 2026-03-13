@@ -56,6 +56,8 @@ export const ThreeKingdomsStateKit = {
   teardownAssistantReplyHook: runtime.teardownAssistantReplyHook,
   setupDebugParseButtonHook: runtime.setupDebugParseButtonHook,
   teardownDebugParseButtonHook: runtime.teardownDebugParseButtonHook,
+  setupDebugLogToggleButtonHook: runtime.setupDebugLogToggleButtonHook,
+  teardownDebugLogToggleButtonHook: runtime.teardownDebugLogToggleButtonHook,
   setDebug: debug.setDebugEnabled,
   getDebug: debug.getDebugEnabled,
   重算: {
@@ -77,7 +79,7 @@ if (typeof initializeGlobal === 'function') {
 try {
   macro.registerSgbzMacros();
 } catch (error) {
-  console.warn('[ThreeKingdomsStateKit] 注册宏失败，脚本主体仍可使用。', error);
+  debug.debugWarn('index', '注册宏失败，脚本主体仍可使用。', error);
 }
 
 export default ThreeKingdomsStateKit;

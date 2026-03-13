@@ -1,5 +1,5 @@
 import { handleAssistantReply, type 处理回复选项 } from './bridge';
-import { debugError, debugLog, summarizeValue } from './debug';
+import { debugError, debugInfo, debugLog, getDebugEnabled, setDebugEnabled, summarizeValue } from './debug';
 
 export type 自动接线选项 = 处理回复选项;
 
@@ -31,6 +31,7 @@ type RuntimeApi = {
 
 let 已注册回复钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
+let 已注册日志按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 最近处理记录: { messageId: number | null; message: string } = { messageId: null, message: '' };
 
 function 获取运行时接口(): RuntimeApi {
@@ -79,17 +80,25 @@ function 记录最近消息(message: ChatMessageLike): void {
   };
 }
 
-export function teardownDebugParseButtonHook(): void {
-  if (!已注册按钮钩子) {
+function 卸载事件绑定(bindingState: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null): void {
+  if (!bindingState) {
     return;
   }
   const runtime = 获取运行时接口();
-  const { eventName, listener, binding } = 已注册按钮钩子;
+  const { eventName, listener, binding } = bindingState;
   binding?.removeListener?.();
   binding?.off?.();
   binding?.unsubscribe?.();
   binding?.unregister?.();
   runtime.eventRemoveListener?.(eventName, listener);
+}
+
+export function teardownDebugParseButtonHook(): void {
+  if (!已注册按钮钩子) {
+    return;
+  }
+  const { eventName } = 已注册按钮钩子;
+  卸载事件绑定(已注册按钮钩子);
   已注册按钮钩子 = null;
   debugLog('runtime', '已卸载解析命令按钮钩子', { eventName });
 }
@@ -108,15 +117,15 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
   }
 
   const listener = async () => {
-    debugLog('runtime', '收到解析命令按钮点击事件', { buttonName, eventName });
+    debugInfo('runtime', '收到解析命令按钮点击事件', { buttonName, eventName });
     try {
       const message = 读取消息(-1);
       if (!message) {
-        debugLog('runtime', '按钮调试未读取到最新消息，跳过处理');
+        debugInfo('runtime', '按钮调试未读取到最新消息，跳过处理');
         return;
       }
       if (message.role !== 'assistant' || typeof message.message_id !== 'number') {
-        debugLog('runtime', '按钮调试读取到的最新消息不是可处理 assistant 消息，跳过处理', {
+        debugInfo('runtime', '按钮调试读取到的最新消息不是可处理 assistant 消息，跳过处理', {
           role: message.role ?? null,
           messageId: message.message_id ?? null,
         });
@@ -127,7 +136,7 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
         messageId: message.message_id,
         refreshMacroOnNoCommands: false,
       });
-      debugLog('runtime', '按钮触发的 assistant 消息处理完成', {
+      debugInfo('runtime', '按钮触发的 assistant 消息处理完成', {
         buttonName,
         messageId: message.message_id,
         applied: result.applied.length,
@@ -148,15 +157,45 @@ export function teardownAssistantReplyHook(): void {
   if (!已注册回复钩子) {
     return;
   }
-  const runtime = 获取运行时接口();
-  const { eventName, listener, binding } = 已注册回复钩子;
-  binding?.removeListener?.();
-  binding?.off?.();
-  binding?.unsubscribe?.();
-  binding?.unregister?.();
-  runtime.eventRemoveListener?.(eventName, listener);
+  const { eventName } = 已注册回复钩子;
+  卸载事件绑定(已注册回复钩子);
   已注册回复钩子 = null;
   debugLog('runtime', '已卸载 AI 回复完成钩子', { eventName });
+}
+
+export function teardownDebugLogToggleButtonHook(): void {
+  if (!已注册日志按钮钩子) {
+    return;
+  }
+  const { eventName } = 已注册日志按钮钩子;
+  卸载事件绑定(已注册日志按钮钩子);
+  已注册日志按钮钩子 = null;
+  debugLog('runtime', '已卸载日志开关按钮钩子', { eventName });
+}
+
+export function setupDebugLogToggleButtonHook(buttonName = '日志开关'): boolean {
+  teardownDebugLogToggleButtonHook();
+  const runtime = 获取运行时接口();
+  const eventName = runtime.getButtonEvent?.(buttonName);
+  if (!eventName || typeof runtime.eventOn !== 'function') {
+    debugLog('runtime', '未找到按钮事件或 eventOn，无法注册日志开关按钮', {
+      buttonName,
+      hasEventOn: typeof runtime.eventOn === 'function',
+      eventName,
+    });
+    return false;
+  }
+
+  const listener = () => {
+    const nextEnabled = !getDebugEnabled();
+    setDebugEnabled(nextEnabled);
+    console.log('[ThreeKingdomsStateKit][debug]', `日志开关已${nextEnabled ? '开启' : '关闭'}（info/log ${nextEnabled ? '启用' : '禁用'}，warning/error 始终输出）`);
+  };
+
+  const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
+  已注册日志按钮钩子 = { eventName, listener, binding: binding ?? undefined };
+  debugLog('runtime', '已注册日志开关按钮钩子', { buttonName, eventName });
+  return true;
 }
 
 export function setupAssistantReplyHook(options: 自动接线选项 = {}): boolean {
@@ -172,7 +211,7 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
   }
 
   const listener = async (messageId: number, type?: string) => {
-    debugLog('runtime', '收到 MESSAGE_RECEIVED 事件', {
+    debugInfo('runtime', '收到 MESSAGE_RECEIVED 事件', {
       eventName,
       messageId,
       type: type ?? null,
@@ -180,18 +219,18 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
     try {
       const message = 读取消息(messageId);
       if (!message) {
-        debugLog('runtime', '未读取到目标消息，跳过处理', { messageId });
+        debugInfo('runtime', '未读取到目标消息，跳过处理', { messageId });
         return;
       }
       if (message.role !== 'assistant') {
-        debugLog('runtime', '目标消息不是 assistant，跳过处理', {
+        debugInfo('runtime', '目标消息不是 assistant，跳过处理', {
           role: message.role ?? null,
           messageId: message.message_id ?? messageId,
         });
         return;
       }
       if (是否重复消息(message)) {
-        debugLog('runtime', '检测到重复 assistant 消息，跳过处理', {
+        debugInfo('runtime', '检测到重复 assistant 消息，跳过处理', {
           messageId: message.message_id ?? messageId,
         });
         return;
@@ -202,7 +241,7 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
         refreshMacroOnNoCommands: false,
       });
       记录最近消息(message);
-      debugLog('runtime', 'assistant 消息自动处理完成', {
+      debugInfo('runtime', 'assistant 消息自动处理完成', {
         messageId: message.message_id ?? messageId,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText),

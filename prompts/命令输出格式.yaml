@@ -1,28 +1,18 @@
 命令输出格式:
   目标:
-    - 你的主要任务仍然是正常叙事、描写、推进剧情。
-    - 只有当本次回复实际导致世界状态变化时，才在回复末尾额外输出命令块。
-    - 命令块用于驱动三国霸主系统的数据层，不是给玩家看的正文内容。
-    - 你只能输出本文件白名单中定义的命令与字段。
+    - 正文正常输出；只有发生状态变化时，才在回复末尾追加命令块。
+    - 命令块只用于驱动三国霸主系统数据层，不属于正文内容。
+    - 只能输出白名单命令与字段。
   全局规则:
-    - 正文先正常输出，更新块必须位于整个回复最末尾。
-    - 更新块必须使用以下固定包裹格式：
-      - <UpdateVariable>
-      - <Analysis>分析文本</Analysis>
-      - <Commands>JSON数组</Commands>
-      - </UpdateVariable>
-    - `Analysis` 必须存在，用于解释本回合为什么需要或不需要更新。
-    - `Commands` 中只能放当前白名单命令数组。
+    - 更新块固定放在回复最末尾，格式必须为 `<UpdateVariable><Analysis>...</Analysis><Commands>...</Commands></UpdateVariable>`。
+    - `Commands` 必须是合法 JSON 数组，不带注释、解释或 markdown 代码块。
+    - 每个命令对象都必须有 `type`，且只能使用白名单字段。
+    - 不允许输出任何 `_` 开头字段。
+    - 同一回合可输出多条命令，按数组顺序执行。
+    - 只写本回合实际发生变化的字段；不要写推测性变化。
+    - `id` 必须稳定可复用。
+    - 名称字段必须显式提供，不能依赖外层 key 推断。
     - 没有状态变化时，不要输出 `UpdateVariable` 块。
-    - `Commands` 中的内容必须是合法 JSON，不能带注释、不能带额外解释、不能带 markdown 代码块。
-    - 每个命令对象必须包含 `type` 字段，且值必须是白名单中的固定字面量。
-    - 不允许输出白名单外命令/字段。
-    - 不允许直接修改任何以下划线 `_` 开头的字段。
-    - 同一回合可以输出多条命令，按数组顺序依次执行。
-    - 数值变化优先使用专用命令，不要为小改动整体重写对象。
-    - id 必须稳定且可复用；同一 NPC/任务/商品后续必须继续使用相同 id。
-    - 对 NPC 和商品，建议同时输出中文 `名称` 字段，作为正文语义锚点，避免 AI 只记住机器 id。
-    - 只有剧情中已经明确发生的变化才允许写入，不要提前写入推测性变化。
   标签模板: |-
     ${正常叙事正文}
 
@@ -39,261 +29,123 @@
     </Commands>
     </UpdateVariable>
   枚举白名单:
-    当前剧本:
-      - S1黄巾起义
-      - S2讨伐董卓
-    品质:
-      - N
-      - R
-      - SR
-      - SSR
-      - UR
-    装备品质:
-      - 凡品
-      - 良品
-      - 上品
-      - 极品
-      - 传说
-      - 神话
-      - 无
-    武技等级:
-      - 入门
-      - 精通
-      - 大成
-      - 绝学
-      - 神技
-    武技类型:
-      - 攻击
-      - 防御
-      - 辅助
-      - 反击
-    武将性格:
-      - 义士
-      - 利己
-      - 野心家
-      - 愚忠
-      - 傲气
-      - 感恩
-    武将状态:
-      - 待命
-      - 驻守
-      - 随军
-      - 执行指令
-      - 受伤
-      - 被俘
-      - 阵亡
-    美人位份:
-      - 未纳入
-      - 通房
-      - 侍妾
-      - 姬妾
-      - 侧妃
-      - 正妻
-      - 禁脔
-    美人性格:
-      - 温柔
-      - 贞烈
-      - 高冷
-      - 娇蛮
-      - 多情
-      - 病娇
-      - 善妒
-    美人状态:
-      - 正常
-      - 怀孕
-      - 产后
-      - 生病
-      - 被囚
-      - 失踪
-    任务类型:
-      - 主线
-      - 支线
-      - 隐藏
-      - 史诗
-      - 成就
-      - 委托
-    任务状态:
-      - 可接取
-      - 进行中
-      - 可提交
-      - 已完成
-      - 已失败
-      - 已过期
-    任务目标类型:
-      - 主要
-      - 次要
-      - 隐藏
-    任务目标状态:
-      - 未发现
-      - 未完成
-      - 已完成
+    当前剧本: [S1黄巾起义, S2讨伐董卓]
+    品质: [N, R, SR, SSR, UR]
+    装备品质: [凡品, 良品, 上品, 极品, 传说, 神话, 无]
+    武技等级: [入门, 精通, 大成, 绝学, 神技]
+    武技类型: [攻击, 防御, 辅助, 反击]
+    武将性格: [义士, 利己, 野心家, 愚忠, 傲气, 感恩]
+    武将状态: [待命, 驻守, 随军, 执行指令, 受伤, 被俘, 阵亡]
+    美人位份: [未纳入, 通房, 侍妾, 姬妾, 侧妃, 正妻, 禁脔]
+    美人性格: [温柔, 贞烈, 高冷, 娇蛮, 多情, 病娇, 善妒]
+    美人状态: [正常, 怀孕, 产后, 生病, 被囚, 失踪]
+    任务类型: [主线, 支线, 隐藏, 史诗, 成就, 委托]
+    任务状态: [可接取, 进行中, 可提交, 已完成, 已失败, 已过期]
+    任务目标类型: [主要, 次要, 隐藏]
+    任务目标状态: [未发现, 未完成, 已完成]
   共享子结构:
-    世界事件输入: |-
-      {
-        "事件名": string,
-        "简述": string,
-        "日期": string
-      }
-    六维基础字段: |-
-      {
-        "武力"?: number,
-        "智力"?: number,
-        "统率"?: number,
-        "政治"?: number,
-        "魅力"?: number,
-        "体质"?: number
-      }
-      约束:
-        - 每项建议在 0 ~ 120 之间
-        - 只允许基础值，不允许 `_武力加值` 等派生字段
-    装备条目: |-
-      {
-        "名称": string,
-        "品质": 装备品质,
-        "类型": string,
-        "先攻加值": number,
-        "攻击加值": number,
-        "防御DC加值": number,
-        "伤害减免": number,
-        "效果": string
-      }
-    装备栏位: |-
-      装备条目 | "无"
-    装备栏: |-
-      {
-        "主武器"?: 装备栏位,
-        "副武器"?: 装备栏位,
-        "护甲"?: 装备栏位,
-        "坐骑"?: 装备栏位,
-        "饰品1"?: 装备栏位,
-        "饰品2"?: 装备栏位,
-        "饰品3"?: 装备栏位
-      }
-    状态记录: |-
-      Record<string, {
-        "效果": string,
-        "剩余": string
-      }>
-    武技条目: |-
-      {
-        "名称": string,
-        "等级": 武技等级,
-        "类型": 武技类型,
-        "效果": string,
-        "熟练度"?: number,
-        "体力消耗"?: number
-      }
-    专长条目: |-
-      {
-        "名称": string,
-        "等级": string,
-        "效果": string
-      }
-    角色战斗数据基础字段: |-
-      {
-        "六维"?: 六维基础字段,
-        "当前生命值"?: number,
-        "当前体力值"?: number,
-        "装备"?: 装备栏,
-        "武技"?: Record<string, 武技条目>,
-        "专长"?: Record<string, 专长条目>,
-        "状态"?: 状态记录
-      }
-      约束:
-        - 不允许 `_生命上限`、`_先攻值`、`_伤势` 等派生字段
-    物品栏条目: |-
-      {
-        "品质": 装备品质,
-        "描述": string,
-        "数量": number
-      }
-      约束:
-        - `数量` 应 >= 0
-    武将信息: |-
-      {
-        "野心值"?: number,
-        "性格"?: 武将性格,
-        "官职"?: string,
-        "当前状态"?: 武将状态,
-        "状态描述"?: string,
-        "驻扎地"?: string,
-        "特技"?: Record<string, string>
-      }
-      约束:
-        - `野心值` 建议在 0 ~ 100 之间
-    美人属性: |-
-      {
-        "依赖度"?: number,
-        "敏感度"?: number,
-        "贞洁度"?: number,
-        "位份"?: 美人位份,
-        "性格"?: 美人性格,
-        "当前状态"?: 美人状态
-      }
-      约束:
-        - 三项数值建议在 0 ~ 100 之间
-        - 不允许 `_依赖等级`、`_敏感等级`、`_贞洁等级`
-    任务目标更新: |-
-      {
-        "类型"?: 任务目标类型,
-        "状态"?: 任务目标状态,
-        "描述"?: string,
-        "积分"?: number,
-        "其他奖励"?: string
-      }
-    商品条目: |-
-      {
-        "名称"?: string,
-        "分类"?: string,
-        "价格"?: number,
-        "描述"?: string
-      }
-      约束:
-        - `价格` 应 >= 0
+    世界事件输入:
+      事件名: string
+      简述: string
+      日期: string
+    六维基础字段:
+      武力: number
+      智力: number
+      统率: number
+      政治: number
+      魅力: number
+      体质: number
+    装备条目:
+      名称: string
+      品质: 装备品质
+      类型: string
+      描述: string
+      伤害骰: string
+      先攻加值: number
+      攻击加值: number
+      防御DC加值: number
+      伤害减免: number
+      其他效果: string
+    装备栏:
+      主武器: 装备条目 | 无
+      副武器: 装备条目 | 无
+      护甲: 装备条目 | 无
+      坐骑: 装备条目 | 无
+      饰品1: 装备条目 | 无
+      饰品2: 装备条目 | 无
+      饰品3: 装备条目 | 无
+    状态记录: Record<string, { 效果: string, 剩余: string }>
+    武技条目:
+      名称: string
+      等级: 武技等级
+      类型: 武技类型
+      效果: string
+      熟练度: number
+      体力消耗: number
+    专长条目:
+      名称: string
+      等级: string
+      效果: string
+    角色战斗数据基础字段:
+      六维: 六维基础字段
+      当前生命值: number
+      当前体力值: number
+      装备: 装备栏
+      武技: Record<string, 武技条目>
+      专长: Record<string, 专长条目>
+      状态: 状态记录
+    物品栏条目:
+      品质: 装备品质
+      描述: string
+      数量: number
+    武将信息:
+      野心值: number
+      性格: 武将性格
+      官职: string
+      当前状态: 武将状态
+      状态描述: string
+      驻扎地: string
+      特技: Record<string, string>
+    美人属性:
+      依赖度: number
+      敏感度: number
+      贞洁度: number
+      位份: 美人位份
+      性格: 美人性格
+      当前状态: 美人状态
+    任务目标更新:
+      类型: 任务目标类型
+      状态: 任务目标状态
+      描述: string
+      积分: number
+      其他奖励: string
+    商品条目:
+      名称: string
+      分类: string
+      价格: number
+      描述: string
   命令白名单:
     UpdateWorld:
-      type: UpdateWorld
-      必填字段:
-        - type
-        - changes
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "UpdateWorld",
-          "changes": {
-            "当前时间"?: string,
-            "当前地点"?: string,
-            "当前剧本"?: 当前剧本,
-            "天气"?: string,
-            "近期事件"?: 世界事件输入[]
-          }
-        }
-      额外约束:
+      必填字段: [type, changes]
+      changes可填字段:
+        当前时间: string
+        当前地点: string
+        当前剧本: 当前剧本
+        天气: string
+        近期事件: 世界事件输入[]
+      关键约束:
         - `changes` 至少包含一个字段
-        - 通常优先用它更新时间、地点、剧本、天气
-        - 如果只是追加一条事件，优先使用 `AppendRecentEvent`
+        - 追加单条事件优先用 `AppendRecentEvent`
       示例: |-
         {
           "type": "UpdateWorld",
-          "changes": {
-            "当前时间": "建安元年三月初三",
-            "当前地点": "洛阳"
-          }
+          "changes": { "当前时间": "建安元年三月初三", "当前地点": "洛阳" }
         }
     AppendRecentEvent:
-      type: AppendRecentEvent
-      必填字段:
-        - type
-        - event
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "AppendRecentEvent",
-          "event": 世界事件输入
-        }
-      额外约束:
-        - 用于追加单条新事件
-        - 不要用它替代世界字段更新
+      必填字段: [type, event]
+      event字段: 世界事件输入
+      关键约束:
+        - 仅用于追加单条新事件
       示例: |-
         {
           "type": "AppendRecentEvent",
@@ -304,113 +156,74 @@
           }
         }
     UpdatePlayerBase:
-      type: UpdatePlayerBase
-      必填字段:
-        - type
-        - changes
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "UpdatePlayerBase",
-          "changes": {
-            "六维"?: 六维基础字段,
-            "当前生命值"?: number,
-            "当前体力值"?: number,
-            "装备"?: 装备栏,
-            "武技"?: Record<string, 武技条目>,
-            "专长"?: Record<string, 专长条目>,
-            "状态"?: 状态记录,
-            "物品栏"?: Record<string, 物品栏条目>,
-            "声望"?: number,
-            "金钱"?: number,
-            "积分"?: number,
-            "官职"?: string,
-            "爵位"?: string,
-            "后宫和谐度"?: number
-          }
-        }
-      额外约束:
+      必填字段: [type, changes]
+      changes可填字段:
+        六维: 六维基础字段
+        当前生命值: number
+        当前体力值: number
+        装备: 装备栏
+        武技: Record<string, 武技条目>
+        专长: Record<string, 专长条目>
+        状态: 状态记录
+        物品栏: Record<string, 物品栏条目>
+        声望: number
+        金钱: number
+        积分: number
+        官职: string
+        爵位: string
+        后宫和谐度: number
+      关键约束:
         - `changes` 至少包含一个字段
-        - 不允许任何 `_` 开头字段
-        - 小幅资源增减优先使用 `AdjustPlayerResource`
-        - 复杂对象整体变化时才使用本命令
+        - 小幅资源增减优先用 `AdjustPlayerResource`
       示例: |-
         {
           "type": "UpdatePlayerBase",
           "changes": {
             "官职": "校尉",
-            "六维": {
-              "武力": 68,
-              "统率": 61
-            }
+            "六维": { "武力": 68, "统率": 61 }
           }
         }
     AdjustPlayerResource:
-      type: AdjustPlayerResource
-      必填字段:
-        - type
-        - changes
-      可选字段:
-        - mode
-      参数结构: |-
-        {
-          "type": "AdjustPlayerResource",
-          "mode"?: "delta" | "set",
-          "changes": {
-            "当前生命值"?: number,
-            "当前体力值"?: number,
-            "声望"?: number,
-            "金钱"?: number,
-            "积分"?: number,
-            "后宫和谐度"?: number
-          }
-        }
-      额外约束:
-        - `changes` 至少包含一个字段
-        - `mode` 缺省时视为 `delta`
-        - `delta` 表示增减值，`set` 表示直接设为目标值
-        - 不允许写入其他主角字段
+      必填字段: [type, changes]
+      可选字段: [mode]
+      changes可填字段:
+        当前生命值: number
+        当前体力值: number
+        声望: number
+        金钱: number
+        积分: number
+        后宫和谐度: number
+      关键约束:
+        - `mode` 缺省时为 `delta`
+        - 只允许资源字段
       示例: |-
         {
           "type": "AdjustPlayerResource",
           "mode": "delta",
-          "changes": {
-            "当前生命值": -12,
-            "声望": 3
-          }
+          "changes": { "当前生命值": -12, "声望": 3 }
         }
     UpsertNpc:
-      type: UpsertNpc
-      必填字段:
-        - type
-        - id
-        - data
-      可选字段:
-        - createIfMissing
-      参数结构: |-
-        {
-          "type": "UpsertNpc",
-          "id": string,
-          "data": {
-            "名称"?: string,
-            "品质"?: 品质,
-            "阵营"?: string,
-            "定位"?: string,
-            "好感"?: number,
-            "简述"?: string,
-            "羁绊"?: Record<string, string>,
-            "角色数据"?: 角色战斗数据基础字段,
-            "武将信息"?: 武将信息,
-            "美人属性"?: 美人属性
-          },
-          "createIfMissing"?: boolean
-        }
-      额外约束:
-        - `id` 必须为稳定字符串，推荐如 `npc_zhaoyun`
+      必填字段: [type, id, data]
+      可选字段: [createIfMissing]
+      data可填字段:
+        名称: string
+        品质: 品质
+        阵营: string
+        定位: string
+        好感: number
+        简述: string
+        羁绊: Record<string, string>
+        角色数据: 角色战斗数据基础字段
+        武将信息: 武将信息
+        美人属性: 美人属性
+      关键约束:
         - `data` 至少包含一个字段
-        - 建议同时提供中文 `名称`，用于和正文里的人物称呼对齐
-        - 不允许任何 `_` 开头字段
-        - 仅关系小改动时优先使用 `UpdateNpcRelation`
+        - 名称建议显式提供
+        - 只填写正文中明确出现或可直接推出的 NPC 信息
+        - 若正文只出现基础身份信息，则只写基础字段；不要自动补全详细面板
+        - `角色数据` / `武将信息` / `美人属性` 只有正文明确出现对应具体数据时才允许写入
+        - 正文未提及的详细字段不要猜测、不要臆造、不要输出空对象
+        - 正文未提及详细字段时，不输出这些字段即可，旧详细数据会保持不变
       示例: |-
         {
           "type": "UpsertNpc",
@@ -418,183 +231,87 @@
           "data": {
             "名称": "赵云",
             "品质": "SSR",
-            "阵营": "中立",
+            "阵营": "蜀",
             "定位": "武将",
-            "简述": "白袍银枪，初至营中。",
-            "武将信息": {
-              "性格": "义士",
-              "当前状态": "待命",
-              "驻扎地": "洛阳"
-            }
+            "简述": "白马银枪，随刘备同行。"
           }
         }
     UpdateNpcRelation:
-      type: UpdateNpcRelation
-      必填字段:
-        - type
-        - id
-      可选字段:
-        - mode
-        - 好感
-        - 羁绊
-      参数结构: |-
-        {
-          "type": "UpdateNpcRelation",
-          "id": string,
-          "mode"?: "delta" | "set",
-          "好感"?: number,
-          "羁绊"?: Record<string, string>
-        }
-      额外约束:
+      必填字段: [type, id]
+      可选字段: [mode, 好感, 羁绊]
+      关键约束:
         - `好感` 与 `羁绊` 至少提供一个
-        - `mode` 对 `好感` 生效；缺省时视为 `delta`
-        - 如果需要整体改写 NPC，请改用 `UpsertNpc`
+        - `mode` 仅对 `好感` 生效
       示例: |-
         {
           "type": "UpdateNpcRelation",
           "id": "npc_zhaoyun",
           "mode": "delta",
-          "好感": 6,
-          "羁绊": {
-            "长坂旧谊": "赵云开始认可主角的胆略。"
-          }
+          "好感": 6
         }
     RemoveNpc:
-      type: RemoveNpc
-      必填字段:
-        - type
-        - id
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "RemoveNpc",
-          "id": string
-        }
-      额外约束:
-        - 仅在明确退场、阵亡、消失且不再保留时使用
+      必填字段: [type, id]
       示例: |-
         {
           "type": "RemoveNpc",
           "id": "bandit_leader"
         }
     UpsertQuest:
-      type: UpsertQuest
-      必填字段:
-        - type
-        - id
-        - data
-      可选字段:
-        - createIfMissing
-      参数结构: |-
-        {
-          "type": "UpsertQuest",
-          "id": string,
-          "data": {
-            "名称"?: string,
-            "类型"?: 任务类型,
-            "状态"?: 任务状态,
-            "时限"?: string,
-            "目标"?: Record<string, {
-              "类型"?: 任务目标类型,
-              "状态"?: 任务目标状态,
-              "描述"?: string,
-              "积分"?: number,
-              "其他奖励"?: string
-            }>
-          },
-          "createIfMissing"?: boolean
-        }
-      额外约束:
+      必填字段: [type, id, data]
+      可选字段: [createIfMissing]
+      data可填字段:
+        名称: string
+        类型: 任务类型
+        状态: 任务状态
+        时限: string
+        目标: Record<string, 任务目标更新>
+      关键约束:
         - `data` 至少包含一个字段
-        - 只推进任务状态时优先使用 `UpdateQuestState`
+        - 名称必须显式提供
       示例: |-
         {
           "type": "UpsertQuest",
-          "id": "qingjiaofengzhai",
+          "id": "quest_bandit_camp",
           "data": {
-            "类型": "支线",
-            "状态": "可接取",
-            "时限": "三日内"
+            "名称": "清剿山匪营地",
+            "状态": "进行中"
           }
         }
     UpdateQuestState:
-      type: UpdateQuestState
-      必填字段:
-        - type
-        - id
-        - 状态
-      可选字段:
-        - 目标
-      参数结构: |-
-        {
-          "type": "UpdateQuestState",
-          "id": string,
-          "状态": 任务状态,
-          "目标"?: Record<string, {
-            "类型"?: 任务目标类型,
-            "状态"?: 任务目标状态,
-            "描述"?: string,
-            "积分"?: number,
-            "其他奖励"?: string
-          }>
-        }
-      额外约束:
-        - `状态` 必须来自任务状态白名单
-        - `目标` 中每个目标值必须符合 `任务目标更新`
-        - 不要用它重写整个任务结构
+      必填字段: [type, id, 状态]
+      可选字段: [目标]
+      目标可填字段:
+        类型: 任务目标类型
+        状态: 任务目标状态
+        描述: string
+        积分: number
+        其他奖励: string
+      关键约束:
+        - 只推进状态，不重写整个任务
       示例: |-
         {
           "type": "UpdateQuestState",
-          "id": "qingjiaofengzhai",
-          "状态": "进行中",
-          "目标": {
-            "find_camp": {
-              "状态": "已完成"
-            }
-          }
+          "id": "quest_bandit_camp",
+          "状态": "可提交"
         }
     RemoveQuest:
-      type: RemoveQuest
-      必填字段:
-        - type
-        - id
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "RemoveQuest",
-          "id": string
-        }
-      额外约束:
-        - 仅在确认该任务应从任务表移除时使用
+      必填字段: [type, id]
       示例: |-
         {
           "type": "RemoveQuest",
           "id": "expired_side_001"
         }
     UpsertShopItem:
-      type: UpsertShopItem
-      必填字段:
-        - type
-        - id
-        - data
-      可选字段:
-        - createIfMissing
-      参数结构: |-
-        {
-          "type": "UpsertShopItem",
-          "id": string,
-          "data": {
-            "名称"?: string,
-            "分类"?: string,
-            "价格"?: number,
-            "描述"?: string
-          },
-          "createIfMissing"?: boolean
-        }
-      额外约束:
+      必填字段: [type, id, data]
+      可选字段: [createIfMissing]
+      data可填字段:
+        名称: string
+        分类: string
+        价格: number
+        描述: string
+      关键约束:
         - `data` 至少包含一个字段
-        - 建议同时提供中文 `名称`，用于和正文里的商品名对齐
-        - `价格` 应 >= 0
+        - 名称建议显式提供
       示例: |-
         {
           "type": "UpsertShopItem",
@@ -607,27 +324,15 @@
           }
         }
     RemoveShopItem:
-      type: RemoveShopItem
-      必填字段:
-        - type
-        - id
-      可选字段: []
-      参数结构: |-
-        {
-          "type": "RemoveShopItem",
-          "id": string
-        }
-      额外约束:
-        - 仅在商品应被移出商城时使用
+      必填字段: [type, id]
       示例: |-
         {
           "type": "RemoveShopItem",
           "id": "limited_offer_001"
         }
   最终检查清单:
-    - 是否先写了正文，再在末尾追加命令块
-    - 是否只使用了白名单命令
-    - 是否只使用了白名单字段
+    - 是否先写正文，再在最末尾输出命令块
+    - 是否只使用了白名单命令与字段
+    - 是否显式提供了需要的名称字段
     - 是否误写了 `_` 开头字段
     - 是否输出了合法 JSON
-    - 是否在没有变化时省略了命令块
