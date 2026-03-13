@@ -69,7 +69,6 @@ export type 武技条目 = {
 export type 专长条目 = {
   等级: string;
   效果: string;
-  加值?: number;
 };
 
 export type 角色战斗数据 = {
@@ -240,11 +239,10 @@ export function create武技条目(data: Partial<武技条目> = {}, { 完整 = 
   };
 }
 
-export function create专长条目(data: Partial<专长条目> = {}, { 完整 = true } = {}): 专长条目 {
+export function create专长条目(data: Partial<专长条目> = {}): 专长条目 {
   return {
     等级: String(data.等级 || ''),
     效果: String(data.效果 || ''),
-    ...(完整 ? { 加值: 数值(data.加值) } : {}),
   };
 }
 
@@ -255,7 +253,7 @@ export function create角色战斗数据(data: Partial<角色战斗数据> = {},
     当前体力值: 数值(data.当前体力值),
     装备: create装备栏(data.装备),
     武技: _.mapValues(data.武技 || {}, item => create武技条目(item, { 完整 })),
-    专长: _.mapValues(data.专长 || {}, item => create专长条目(item, { 完整 })),
+    专长: _.mapValues(data.专长 || {}, item => create专长条目(item)),
     状态: create状态记录(data.状态),
   };
 }

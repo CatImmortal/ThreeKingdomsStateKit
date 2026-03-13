@@ -107,7 +107,7 @@ const 六维字段 = ['武力', '智力', '统率', '政治', '魅力', '体质'
 const 装备条目字段 = ['名称', '品质', '类型', '先攻加值', '攻击加值', '防御DC加值', '伤害减免', '效果'] as const;
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
 const 武技条目字段 = ['等级', '类型', '效果', '熟练度', '体力消耗'] as const;
-const 专长条目字段 = ['等级', '效果', '加值'] as const;
+const 专长条目字段 = ['等级', '效果'] as const;
 const 主角字段 = ['六维', '当前生命值', '当前体力值', '装备', '武技', '专长', '状态', '物品栏', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['品质', '描述', '数量'] as const;
 const NPC字段 = ['名称', '品质', '阵营', '定位', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
@@ -240,7 +240,6 @@ function 校验专长条目(value: unknown, path: string): void {
   断言字段白名单(value, 专长条目字段, path);
   if (value.等级 !== undefined) 断言字符串(value.等级, `${path}.等级`);
   if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
-  if (value.加值 !== undefined) 断言数字(value.加值, `${path}.加值`);
 }
 
 function 校验状态记录(value: unknown, path: string): void {
