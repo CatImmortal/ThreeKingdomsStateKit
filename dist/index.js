@@ -1342,6 +1342,7 @@ __export(bridge_exports, {
   extractAndApplyCommands: () => extractAndApplyCommands,
   extractApplyAndSaveCommands: () => extractApplyAndSaveCommands,
   extractCommands: () => extractCommands,
+  handleAssistantReply: () => handleAssistantReply,
   refreshContextMacro: () => refreshContextMacro,
   refreshContextMacroFromStorage: () => refreshContextMacroFromStorage
 });
@@ -1408,16 +1409,27 @@ function extractAndApplyCommands(replyText, state) {
     cleanedReplyText: extracted.cleanedReplyText
   };
 }
-function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY) {
+function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = true) {
   debugLog("bridge", "\u5F00\u59CB\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4", {
     rootKey,
     macroKey,
     state: summarizeState(state)
   });
   const extracted = extractCommands(replyText);
+  debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u63D0\u53D6\u7ED3\u679C", {
+    rootKey,
+    macroKey,
+    hasCommandsText: Boolean(extracted.commandsText),
+    commandsCount: extracted.commands.length
+  });
   if (extracted.commands.length === 0) {
-    debugLog("bridge", "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", { macroKey });
-    refreshContextMacro(state, macroKey);
+    debugLog("bridge", refreshMacroOnNoCommands ? "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F" : "\u672A\u63D0\u53D6\u5230\u547D\u4EE4\uFF0C\u4EC5\u8BB0\u5F55\u65E5\u5FD7", {
+      macroKey,
+      refreshMacroOnNoCommands
+    });
+    if (refreshMacroOnNoCommands) {
+      refreshContextMacro(state, macroKey);
+    }
     return {
       state: _.cloneDeep(state),
       applied: [],
@@ -1428,6 +1440,8 @@ function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY,
   const result = \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, rootKey);
   refreshContextMacro(result.state, macroKey);
   debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
+    rootKey,
+    macroKey,
     applied: result.applied.length,
     state: summarizeState(result.state)
   });
@@ -1436,6 +1450,30 @@ function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY,
     commandsText: extracted.commandsText,
     cleanedReplyText: extracted.cleanedReplyText
   };
+}
+function handleAssistantReply(replyText, options = {}) {
+  const { rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
+  debugLog("bridge", "\u5F00\u59CB\u5904\u7406 AI \u56DE\u590D", {
+    rootKey,
+    macroKey,
+    refreshMacroOnNoCommands,
+    reply: summarizeValue(replyText)
+  });
+  try {
+    const state = \u52A0\u8F7D\u72B6\u6001(rootKey);
+    const result = extractApplyAndSaveCommands(replyText, state, rootKey, macroKey, refreshMacroOnNoCommands);
+    debugLog("bridge", "AI \u56DE\u590D\u5904\u7406\u5B8C\u6210", {
+      rootKey,
+      macroKey,
+      applied: result.applied.length,
+      hasCommandsText: Boolean(result.commandsText),
+      state: summarizeState(result.state)
+    });
+    return result;
+  } catch (error) {
+    debugError("bridge", "\u5904\u7406 AI \u56DE\u590D\u5931\u8D25", error);
+    throw error;
+  }
 }
 
 // src/macro.ts
@@ -1482,6 +1520,109 @@ function registerSgbzMacros(rootKey = STATE_ROOT_KEY) {
   \u5DF2\u6CE8\u518C\u5B8F.push({ regex: SGBZ_CONTEXT_MACRO_REGEX, unregister: entry.unregister });
 }
 
+// src/runtime.ts
+var runtime_exports = {};
+__export(runtime_exports, {
+  setupAssistantReplyHook: () => setupAssistantReplyHook,
+  teardownAssistantReplyHook: () => teardownAssistantReplyHook
+});
+var \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = null;
+var \u6700\u8FD1\u5904\u7406\u8BB0\u5F55 = { messageId: null, message: "" };
+function \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3() {
+  return globalThis;
+}
+function \u83B7\u53D6\u6700\u65B0\u52A9\u624B\u6D88\u606F() {
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const getChatMessages = runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+  if (typeof getChatMessages !== "function") {
+    debugLog("runtime", "\u672A\u627E\u5230 getChatMessages\uFF0C\u65E0\u6CD5\u8BFB\u53D6\u6700\u65B0\u6D88\u606F");
+    return null;
+  }
+  const messages = getChatMessages(-1, { include_swipes: false }) ?? [];
+  const message = Array.isArray(messages) ? messages[0] ?? null : null;
+  debugLog("runtime", "\u8BFB\u53D6\u6700\u65B0\u6D88\u606F\u5B8C\u6210", summarizeValue(message));
+  return message;
+}
+function \u662F\u5426\u91CD\u590D\u6D88\u606F(message) {
+  const messageId = typeof message.message_id === "number" ? message.message_id : null;
+  const text = String(message.message || "");
+  return \u6700\u8FD1\u5904\u7406\u8BB0\u5F55.messageId === messageId && \u6700\u8FD1\u5904\u7406\u8BB0\u5F55.message === text;
+}
+function \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message) {
+  \u6700\u8FD1\u5904\u7406\u8BB0\u5F55 = {
+    messageId: typeof message.message_id === "number" ? message.message_id : null,
+    message: String(message.message || "")
+  };
+}
+function teardownAssistantReplyHook() {
+  if (!\u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50) {
+    return;
+  }
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const { eventName, listener, binding } = \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50;
+  binding?.removeListener?.();
+  binding?.off?.();
+  binding?.unsubscribe?.();
+  binding?.unregister?.();
+  runtime.eventRemoveListener?.(eventName, listener);
+  \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = null;
+  debugLog("runtime", "\u5DF2\u5378\u8F7D AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50", { eventName });
+}
+function setupAssistantReplyHook(options = {}) {
+  teardownAssistantReplyHook();
+  const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
+  const eventName = runtime.tavern_events?.GENERATION_ENDED;
+  if (!eventName || typeof runtime.eventOn !== "function") {
+    debugLog("runtime", "\u672A\u627E\u5230 tavern_events.GENERATION_ENDED \u6216 eventOn\uFF0C\u65E0\u6CD5\u81EA\u52A8\u63A5\u5165", {
+      hasEventOn: typeof runtime.eventOn === "function",
+      eventName
+    });
+    return false;
+  }
+  const listener = (...args) => {
+    debugLog("runtime", "\u6536\u5230 GENERATION_ENDED \u4E8B\u4EF6", {
+      eventName,
+      args: summarizeValue(args)
+    });
+    try {
+      const message = \u83B7\u53D6\u6700\u65B0\u52A9\u624B\u6D88\u606F();
+      if (!message) {
+        debugLog("runtime", "\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
+        return;
+      }
+      if (message.role !== "assistant") {
+        debugLog("runtime", "\u6700\u65B0\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+          role: message.role ?? null,
+          messageId: message.message_id ?? null
+        });
+        return;
+      }
+      if (\u662F\u5426\u91CD\u590D\u6D88\u606F(message)) {
+        debugLog("runtime", "\u68C0\u6D4B\u5230\u91CD\u590D assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+          messageId: message.message_id ?? null
+        });
+        return;
+      }
+      const result = handleAssistantReply(String(message.message || ""), {
+        ...options,
+        refreshMacroOnNoCommands: false
+      });
+      \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message);
+      debugLog("runtime", "assistant \u6D88\u606F\u81EA\u52A8\u5904\u7406\u5B8C\u6210", {
+        messageId: message.message_id ?? null,
+        applied: result.applied.length,
+        hasCommandsText: Boolean(result.commandsText)
+      });
+    } catch (error) {
+      debugError("runtime", "assistant \u6D88\u606F\u81EA\u52A8\u5904\u7406\u5931\u8D25", error);
+    }
+  };
+  const binding = runtime.eventOn(eventName, listener);
+  \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = { eventName, listener, binding: binding ?? void 0 };
+  debugLog("runtime", "\u5DF2\u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50", { eventName });
+  return true;
+}
+
 // src/index.ts
 var ThreeKingdomsStateKit = {
   \u7ED3\u6784: {
@@ -1500,7 +1641,11 @@ var ThreeKingdomsStateKit = {
   \u534F\u8BAE: protocol_exports,
   \u6865\u63A5: bridge_exports,
   \u5B8F: macro_exports,
+  \u8FD0\u884C\u65F6: runtime_exports,
   \u8C03\u8BD5: debug_exports,
+  handleAssistantReply,
+  setupAssistantReplyHook,
+  teardownAssistantReplyHook,
   setDebug: setDebugEnabled,
   getDebug: getDebugEnabled,
   \u91CD\u7B97: {
@@ -1520,6 +1665,11 @@ try {
   registerSgbzMacros();
 } catch (error) {
   console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C\u5B8F\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+}
+try {
+  setupAssistantReplyHook();
+} catch (error) {
+  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
 var index_default = ThreeKingdomsStateKit;
 export {
@@ -1563,6 +1713,7 @@ export {
   extractApplyAndSaveCommands,
   extractCommands,
   getDebugEnabled,
+  handleAssistantReply,
   recomputeNPC,
   recompute\u4E3B\u89D2,
   recompute\u5168\u5C40,
@@ -1574,8 +1725,10 @@ export {
   registerSgbzMacros,
   renderSgbzContextMacro,
   setDebugEnabled,
+  setupAssistantReplyHook,
   summarizeState,
   summarizeValue,
+  teardownAssistantReplyHook,
   unregisterSgbzMacros,
   \u4EA4\u60C5\u7B49\u7EA7,
   \u4F9D\u8D56\u7B49\u7EA7,

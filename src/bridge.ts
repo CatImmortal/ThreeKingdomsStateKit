@@ -11,6 +11,12 @@ export type 命令应用结果 = 执行结果 & {
   cleanedReplyText: string;
 };
 
+export type 处理回复选项 = {
+  rootKey?: string;
+  macroKey?: string;
+  refreshMacroOnNoCommands?: boolean;
+};
+
 export function buildInjectedContext(state: 状态总表): string {
   return 构建注入文本(state);
 }
@@ -86,6 +92,7 @@ export function extractApplyAndSaveCommands(
   state: 状态总表,
   rootKey = STATE_ROOT_KEY,
   macroKey = CONTEXT_MACRO_KEY,
+  refreshMacroOnNoCommands = true,
 ): 命令应用结果 {
   debugLog('bridge', '开始提取、应用并保存命令', {
     rootKey,
@@ -93,9 +100,20 @@ export function extractApplyAndSaveCommands(
     state: summarizeState(state),
   });
   const extracted = extractCommands(replyText);
+  debugLog('bridge', '提取、应用并保存命令提取结果', {
+    rootKey,
+    macroKey,
+    hasCommandsText: Boolean(extracted.commandsText),
+    commandsCount: extracted.commands.length,
+  });
   if (extracted.commands.length === 0) {
-    debugLog('bridge', '未提取到命令，仅刷新上下文宏', { macroKey });
-    refreshContextMacro(state, macroKey);
+    debugLog('bridge', refreshMacroOnNoCommands ? '未提取到命令，仅刷新上下文宏' : '未提取到命令，仅记录日志', {
+      macroKey,
+      refreshMacroOnNoCommands,
+    });
+    if (refreshMacroOnNoCommands) {
+      refreshContextMacro(state, macroKey);
+    }
     return {
       state: _.cloneDeep(state),
       applied: [],
@@ -106,6 +124,8 @@ export function extractApplyAndSaveCommands(
   const result = 执行并保存命令(state, extracted.commands, rootKey);
   refreshContextMacro(result.state, macroKey);
   debugLog('bridge', '提取、应用并保存命令完成', {
+    rootKey,
+    macroKey,
     applied: result.applied.length,
     state: summarizeState(result.state),
   });
@@ -114,4 +134,29 @@ export function extractApplyAndSaveCommands(
     commandsText: extracted.commandsText,
     cleanedReplyText: extracted.cleanedReplyText,
   };
+}
+
+export function handleAssistantReply(replyText: string, options: 处理回复选项 = {}): 命令应用结果 {
+  const { rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
+  debugLog('bridge', '开始处理 AI 回复', {
+    rootKey,
+    macroKey,
+    refreshMacroOnNoCommands,
+    reply: summarizeValue(replyText),
+  });
+  try {
+    const state = 加载状态(rootKey);
+    const result = extractApplyAndSaveCommands(replyText, state, rootKey, macroKey, refreshMacroOnNoCommands);
+    debugLog('bridge', 'AI 回复处理完成', {
+      rootKey,
+      macroKey,
+      applied: result.applied.length,
+      hasCommandsText: Boolean(result.commandsText),
+      state: summarizeState(result.state),
+    });
+    return result;
+  } catch (error) {
+    debugError('bridge', '处理 AI 回复失败', error);
+    throw error;
+  }
 }
