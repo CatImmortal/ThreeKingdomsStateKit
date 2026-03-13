@@ -10,17 +10,28 @@ __export(rules_exports, {
   MAX_RECENT_EVENTS: () => MAX_RECENT_EVENTS,
   \u4EA4\u60C5\u7B49\u7EA7: () => \u4EA4\u60C5\u7B49\u7EA7,
   \u4F9D\u8D56\u7B49\u7EA7: () => \u4F9D\u8D56\u7B49\u7EA7,
+  \u519B\u961F\u88C5\u5907\u7CFB\u6570: () => \u519B\u961F\u88C5\u5907\u7CFB\u6570,
+  \u519B\u9977\u57FA\u6570: () => \u519B\u9977\u57FA\u6570,
   \u548C\u8C10\u7B49\u7EA7: () => \u548C\u8C10\u7B49\u7EA7,
+  \u57CE\u6C60\u57FA\u7840: () => \u57CE\u6C60\u57FA\u7840,
+  \u58EB\u6C14\u7B49\u7EA7: () => \u58EB\u6C14\u7B49\u7EA7,
+  \u58EB\u6C14\u7CFB\u6570: () => \u58EB\u6C14\u7CFB\u6570,
   \u58F0\u671B\u79F0\u53F7: () => \u58F0\u671B\u79F0\u53F7,
+  \u5916\u4EA4\u7B49\u7EA7: () => \u5916\u4EA4\u7B49\u7EA7,
   \u597D\u611F\u7B49\u7EA7: () => \u597D\u611F\u7B49\u7EA7,
   \u5FE0\u8BDA\u7B49\u7EA7: () => \u5FE0\u8BDA\u7B49\u7EA7,
   \u654F\u611F\u7B49\u7EA7: () => \u654F\u611F\u7B49\u7EA7,
   \u6570\u503C: () => \u6570\u503C,
   \u679A\u4E3E: () => \u679A\u4E3E,
   \u6C47\u603B\u88C5\u5907\u52A0\u503C: () => \u6C47\u603B\u88C5\u5907\u52A0\u503C,
+  \u75B2\u60EB\u7B49\u7EA7: () => \u75B2\u60EB\u7B49\u7EA7,
+  \u75B2\u60EB\u7CFB\u6570: () => \u75B2\u60EB\u7CFB\u6570,
+  \u7B49\u7EA7\u7CFB\u6570: () => \u7B49\u7EA7\u7CFB\u6570,
+  \u7EDF\u7387\u7CFB\u6570: () => \u7EDF\u7387\u7CFB\u6570,
   \u8BA1\u7B97\u4F24\u52BF: () => \u8BA1\u7B97\u4F24\u52BF,
   \u8BA1\u7B97\u52A0\u503C: () => \u8BA1\u7B97\u52A0\u503C,
   \u8D1E\u6D01\u7B49\u7EA7: () => \u8D1E\u6D01\u7B49\u7EA7,
+  \u9635\u578B\u6570\u636E: () => \u9635\u578B\u6570\u636E,
   \u9650\u5236\u6570\u503C: () => \u9650\u5236\u6570\u503C
 });
 var MAX_RECENT_EVENTS = 5;
@@ -38,7 +49,33 @@ var \u679A\u4E3E = {
   \u4EFB\u52A1\u7C7B\u578B: ["\u4E3B\u7EBF", "\u652F\u7EBF", "\u9690\u85CF", "\u53F2\u8BD7", "\u6210\u5C31", "\u59D4\u6258"],
   \u4EFB\u52A1\u72B6\u6001: ["\u53EF\u63A5\u53D6", "\u8FDB\u884C\u4E2D", "\u53EF\u63D0\u4EA4", "\u5DF2\u5B8C\u6210", "\u5DF2\u5931\u8D25", "\u5DF2\u8FC7\u671F"],
   \u4EFB\u52A1\u76EE\u6807\u7C7B\u578B: ["\u4E3B\u8981", "\u6B21\u8981", "\u9690\u85CF"],
-  \u4EFB\u52A1\u76EE\u6807\u72B6\u6001: ["\u672A\u53D1\u73B0", "\u672A\u5B8C\u6210", "\u5DF2\u5B8C\u6210"]
+  \u4EFB\u52A1\u76EE\u6807\u72B6\u6001: ["\u672A\u53D1\u73B0", "\u672A\u5B8C\u6210", "\u5DF2\u5B8C\u6210"],
+  \u52BF\u529B\u89C4\u6A21: ["\u65E0", "\u8349\u83BD", "\u53BF\u7EA7", "\u90E1\u7EA7", "\u5DDE\u7EA7", "\u9738\u4E3B", "\u5E1D\u56FD"],
+  \u57CE\u6C60\u7B49\u7EA7: ["\u6751\u843D", "\u53BF\u57CE", "\u90E1\u57CE", "\u5DDE\u57CE", "\u96C4\u57CE", "\u5E1D\u90FD"],
+  \u519B\u961F\u7B49\u7EA7: ["\u65B0\u5175", "\u666E\u901A", "\u8001\u5175", "\u7CBE\u9510", "\u7279\u6B8A\u5175\u79CD"],
+  \u519B\u961F\u88C5\u5907\u7B49\u7EA7: ["\u7B80\u964B", "\u666E\u901A", "\u7CBE\u826F", "\u4E0A\u7B49", "\u7CBE\u9510"],
+  \u9635\u578B: ["\u65E0", "\u950B\u77E2\u9635", "\u9E64\u7FFC\u9635", "\u9C7C\u9CDE\u9635", "\u65B9\u5706\u9635", "\u957F\u86C7\u9635", "\u96C1\u884C\u9635", "\u5043\u6708\u9635"]
+};
+var \u57CE\u6C60\u57FA\u7840 = {
+  \u6751\u843D: { \u7A0E\u6536: 5, \u4EA7\u7CAE: 30, \u57CE\u9632\u4E0A\u9650: 20, \u9A7B\u519B\u4E0A\u9650: 500, \u9632\u5FA1\u7CFB\u6570: 0.3, \u6307\u4EE4\u69FD: 1 },
+  \u53BF\u57CE: { \u7A0E\u6536: 20, \u4EA7\u7CAE: 100, \u57CE\u9632\u4E0A\u9650: 50, \u9A7B\u519B\u4E0A\u9650: 3e3, \u9632\u5FA1\u7CFB\u6570: 0.6, \u6307\u4EE4\u69FD: 2 },
+  \u90E1\u57CE: { \u7A0E\u6536: 60, \u4EA7\u7CAE: 250, \u57CE\u9632\u4E0A\u9650: 70, \u9A7B\u519B\u4E0A\u9650: 8e3, \u9632\u5FA1\u7CFB\u6570: 0.8, \u6307\u4EE4\u69FD: 3 },
+  \u5DDE\u57CE: { \u7A0E\u6536: 150, \u4EA7\u7CAE: 500, \u57CE\u9632\u4E0A\u9650: 85, \u9A7B\u519B\u4E0A\u9650: 2e4, \u9632\u5FA1\u7CFB\u6570: 1, \u6307\u4EE4\u69FD: 4 },
+  \u96C4\u57CE: { \u7A0E\u6536: 300, \u4EA7\u7CAE: 800, \u57CE\u9632\u4E0A\u9650: 95, \u9A7B\u519B\u4E0A\u9650: 4e4, \u9632\u5FA1\u7CFB\u6570: 1.3, \u6307\u4EE4\u69FD: 5 },
+  \u5E1D\u90FD: { \u7A0E\u6536: 500, \u4EA7\u7CAE: 1200, \u57CE\u9632\u4E0A\u9650: 100, \u9A7B\u519B\u4E0A\u9650: 8e4, \u9632\u5FA1\u7CFB\u6570: 1.6, \u6307\u4EE4\u69FD: 6 }
+};
+var \u7B49\u7EA7\u7CFB\u6570 = { \u65B0\u5175: 0.6, \u666E\u901A: 0.8, \u8001\u5175: 1, \u7CBE\u9510: 1.3, \u7279\u6B8A\u5175\u79CD: 1.8 };
+var \u519B\u961F\u88C5\u5907\u7CFB\u6570 = { \u7B80\u964B: 0.7, \u666E\u901A: 0.85, \u7CBE\u826F: 1, \u4E0A\u7B49: 1.15, \u7CBE\u9510: 1.3 };
+var \u519B\u9977\u57FA\u6570 = { \u65B0\u5175: 25, \u666E\u901A: 40, \u8001\u5175: 65, \u7CBE\u9510: 100, \u7279\u6B8A\u5175\u79CD: 250 };
+var \u9635\u578B\u6570\u636E = {
+  \u65E0: { \u653B\u51FB: 1, \u9632\u5FA1: 1 },
+  \u950B\u77E2\u9635: { \u653B\u51FB: 1.15, \u9632\u5FA1: 0.9 },
+  \u9E64\u7FFC\u9635: { \u653B\u51FB: 1.1, \u9632\u5FA1: 1 },
+  \u9C7C\u9CDE\u9635: { \u653B\u51FB: 0.95, \u9632\u5FA1: 1.15 },
+  \u65B9\u5706\u9635: { \u653B\u51FB: 1, \u9632\u5FA1: 1.1 },
+  \u957F\u86C7\u9635: { \u653B\u51FB: 1.05, \u9632\u5FA1: 0.95 },
+  \u96C1\u884C\u9635: { \u653B\u51FB: 1.1, \u9632\u5FA1: 0.95 },
+  \u5043\u6708\u9635: { \u653B\u51FB: 1.05, \u9632\u5FA1: 1.05 }
 };
 function \u6570\u503C(value, fallback = 0) {
   const n = Number(value);
@@ -97,6 +134,29 @@ function \u4EA4\u60C5\u7B49\u7EA7(v) {
   if (v <= 79) return "\u4FE1\u8D56";
   return "\u631A\u53CB";
 }
+function \u5916\u4EA4\u7B49\u7EA7(v) {
+  if (v <= 14) return "\u6B7B\u654C";
+  if (v <= 29) return "\u654C\u5BF9";
+  if (v <= 44) return "\u654C\u89C6";
+  if (v <= 59) return "\u4E2D\u7ACB";
+  if (v <= 74) return "\u53CB\u5584";
+  if (v <= 89) return "\u540C\u76DF";
+  return "\u9644\u5EB8";
+}
+function \u58EB\u6C14\u7B49\u7EA7(v) {
+  if (v <= 19) return "\u5D29\u6E83";
+  if (v <= 39) return "\u4F4E\u843D";
+  if (v <= 59) return "\u666E\u901A";
+  if (v <= 79) return "\u9AD8\u6602";
+  return "\u72C2\u70ED";
+}
+function \u75B2\u60EB\u7B49\u7EA7(v) {
+  if (v <= 19) return "\u7CBE\u529B\u5145\u6C9B";
+  if (v <= 39) return "\u8F7B\u5EA6\u75B2\u60EB";
+  if (v <= 59) return "\u4E2D\u5EA6\u75B2\u60EB";
+  if (v <= 79) return "\u91CD\u5EA6\u75B2\u60EB";
+  return "\u7CBE\u75B2\u529B\u7AED";
+}
 function \u4F9D\u8D56\u7B49\u7EA7(v) {
   if (v <= 19) return "\u65E0\u4F9D\u8D56";
   if (v <= 39) return "\u8F7B\u5FAE\u4F9D\u8D56";
@@ -123,6 +183,24 @@ function \u548C\u8C10\u7B49\u7EA7(v) {
   if (v <= 59) return "\u7D27\u5F20";
   if (v <= 79) return "\u5E73\u7A33";
   return "\u548C\u7766";
+}
+function \u58EB\u6C14\u7CFB\u6570(v) {
+  if (v <= 19) return 0.3;
+  if (v <= 39) return 0.6;
+  if (v <= 59) return 0.8;
+  if (v <= 79) return 1;
+  return 1.2;
+}
+function \u75B2\u60EB\u7CFB\u6570(v) {
+  if (v <= 19) return 1;
+  if (v <= 39) return 0.9;
+  if (v <= 59) return 0.75;
+  if (v <= 79) return 0.6;
+  return 0.4;
+}
+function \u7EDF\u7387\u7CFB\u6570(v) {
+  if (v <= 30) return 1 + v / 100;
+  return 1.3 + (v - 30) / 60;
 }
 function \u6C47\u603B\u88C5\u5907\u52A0\u503C(\u88C5\u5907) {
   const slots = Object.values(\u88C5\u5907 || {});
@@ -209,6 +287,58 @@ function create\u89D2\u8272\u6218\u6597\u6570\u636E(data = {}, { \u5B8C\u6574 = 
     \u6B66\u6280: _.mapValues(data.\u6B66\u6280 || {}, (item) => create\u6B66\u6280\u6761\u76EE(item, { \u5B8C\u6574 })),
     \u4E13\u957F: _.mapValues(data.\u4E13\u957F || {}, (item) => create\u4E13\u957F\u6761\u76EE(item)),
     \u72B6\u6001: create\u72B6\u6001\u8BB0\u5F55(data.\u72B6\u6001)
+  };
+}
+function create\u57CE\u6C60(data = {}) {
+  return {
+    \u7B49\u7EA7: \u679A\u4E3E.\u57CE\u6C60\u7B49\u7EA7.includes(data.\u7B49\u7EA7) ? data.\u7B49\u7EA7 : "\u6751\u843D",
+    \u57CE\u9632: Math.max(0, \u6570\u503C(data.\u57CE\u9632)),
+    \u4EBA\u53E3: Math.max(0, \u6570\u503C(data.\u4EBA\u53E3)),
+    \u519C\u4E1A: \u9650\u5236\u6570\u503C(data.\u519C\u4E1A, 0, 100),
+    \u5546\u4E1A: \u9650\u5236\u6570\u503C(data.\u5546\u4E1A, 0, 100),
+    \u6C11\u5FC3: \u9650\u5236\u6570\u503C(data.\u6C11\u5FC3, 0, 100),
+    \u6CBB\u5B89: \u9650\u5236\u6570\u503C(data.\u6CBB\u5B89, 0, 100),
+    \u7E41\u8363\u5EA6: \u9650\u5236\u6570\u503C(data.\u7E41\u8363\u5EA6, 0, 100),
+    \u592A\u5B88: String(data.\u592A\u5B88 || "\u65E0"),
+    \u8BBE\u65BD: Array.isArray(data.\u8BBE\u65BD) ? data.\u8BBE\u65BD.map((item) => String(item || "")) : []
+  };
+}
+function create\u519B\u961F(data = {}) {
+  return {
+    \u5175\u79CD: String(data.\u5175\u79CD || ""),
+    \u7B49\u7EA7: \u679A\u4E3E.\u519B\u961F\u7B49\u7EA7.includes(data.\u7B49\u7EA7) ? data.\u7B49\u7EA7 : "\u65B0\u5175",
+    \u5175\u529B: Math.max(0, \u6570\u503C(data.\u5175\u529B)),
+    \u58EB\u6C14: \u9650\u5236\u6570\u503C(data.\u58EB\u6C14, 0, 100),
+    \u75B2\u60EB: \u9650\u5236\u6570\u503C(data.\u75B2\u60EB, 0, 100),
+    \u88C5\u5907\u7B49\u7EA7: \u679A\u4E3E.\u519B\u961F\u88C5\u5907\u7B49\u7EA7.includes(data.\u88C5\u5907\u7B49\u7EA7) ? data.\u88C5\u5907\u7B49\u7EA7 : "\u666E\u901A",
+    \u7EDF\u5C5E\u5C06\u9886: String(data.\u7EDF\u5C5E\u5C06\u9886 || ""),
+    \u9A7B\u624E\u5730: String(data.\u9A7B\u624E\u5730 || ""),
+    \u8BAD\u7EC3\u8FDB\u5EA6: Math.max(0, \u6570\u503C(data.\u8BAD\u7EC3\u8FDB\u5EA6)),
+    \u9635\u578B: \u679A\u4E3E.\u9635\u578B.includes(data.\u9635\u578B) ? data.\u9635\u578B : "\u65E0"
+  };
+}
+function create\u653F\u7B56(data = {}) {
+  return {
+    \u5F53\u524D\u7814\u7A76: String(data.\u5F53\u524D\u7814\u7A76 || "\u65E0"),
+    \u7814\u7A76\u8FDB\u5EA6: Math.max(0, \u6570\u503C(data.\u7814\u7A76\u8FDB\u5EA6)),
+    \u5BCC\u56FD: \u9650\u5236\u6570\u503C(data.\u5BCC\u56FD, 0, 5),
+    \u5F3A\u5175: \u9650\u5236\u6570\u503C(data.\u5F3A\u5175, 0, 5),
+    \u9738\u9053: \u9650\u5236\u6570\u503C(data.\u9738\u9053, 0, 5),
+    \u738B\u9053: \u9650\u5236\u6570\u503C(data.\u738B\u9053, 0, 5)
+  };
+}
+function create\u52BF\u529B(data = {}) {
+  return {
+    \u540D\u79F0: String(data.\u540D\u79F0 || "\u65E0"),
+    \u89C4\u6A21: \u679A\u4E3E.\u52BF\u529B\u89C4\u6A21.includes(data.\u89C4\u6A21) ? data.\u89C4\u6A21 : "\u65E0",
+    \u6B63\u7EDF\u6027: \u9650\u5236\u6570\u503C(data.\u6B63\u7EDF\u6027, 0, 100),
+    \u60C5\u62A5\u7F51: \u9650\u5236\u6570\u503C(data.\u60C5\u62A5\u7F51, 0, 100),
+    \u91D1\u94B1: Math.max(0, \u6570\u503C(data.\u91D1\u94B1)),
+    \u7CAE\u8349: Math.max(0, \u6570\u503C(data.\u7CAE\u8349)),
+    \u57CE\u6C60: _.mapValues(data.\u57CE\u6C60 || {}, (item) => create\u57CE\u6C60(item)),
+    \u519B\u961F: _.mapValues(data.\u519B\u961F || {}, (item) => create\u519B\u961F(item)),
+    \u5916\u4EA4: _.mapValues(data.\u5916\u4EA4 || {}, (value) => \u9650\u5236\u6570\u503C(value, 0, 100)),
+    \u653F\u7B56: create\u653F\u7B56(data.\u653F\u7B56)
   };
 }
 function create\u6B66\u5C06\u4FE1\u606F(data = {}) {
@@ -310,6 +440,7 @@ function create\u521D\u59CB\u72B6\u6001(seed = {}) {
     },
     \u4E16\u754C: create\u4E16\u754C(seed.\u4E16\u754C),
     \u4E3B\u89D2: create\u4E3B\u89D2(seed.\u4E3B\u89D2),
+    \u52BF\u529B: create\u52BF\u529B(seed.\u52BF\u529B),
     NPC: _.mapValues(seed.NPC || {}, (item) => createNPC(item)),
     \u4EFB\u52A1: _.mapValues(seed.\u4EFB\u52A1 || {}, (item) => create\u4EFB\u52A1(item)),
     \u5546\u57CE: _.mapValues(seed.\u5546\u57CE || {}, (item) => create\u5546\u54C1\u6761\u76EE(item))
@@ -423,6 +554,13 @@ var \u547D\u4EE4\u5B57\u6BB5\u767D\u540D\u5355 = {
   AppendRecentEvent: ["type", "event"],
   UpdatePlayerBase: ["type", "changes"],
   AdjustPlayerResource: ["type", "mode", "changes"],
+  UpdateFaction: ["type", "changes"],
+  UpsertCity: ["type", "id", "data", "createIfMissing"],
+  RemoveCity: ["type", "id"],
+  UpsertArmy: ["type", "id", "data", "createIfMissing"],
+  RemoveArmy: ["type", "id"],
+  UpdateDiplomacy: ["type", "changes"],
+  UpdatePolicy: ["type", "changes"],
   UpsertNpc: ["type", "id", "data", "createIfMissing"],
   UpdateNpcRelation: ["type", "id", "mode", "\u597D\u611F", "\u7F81\u7ECA"],
   RemoveNpc: ["type", "id"],
@@ -441,6 +579,10 @@ var \u6B66\u6280\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u7
 var \u4E13\u957F\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u6548\u679C"];
 var \u4E3B\u89D2\u5B57\u6BB5 = ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001", "\u7269\u54C1\u680F", "\u58F0\u671B", "\u91D1\u94B1", "\u79EF\u5206", "\u5B98\u804C", "\u7235\u4F4D", "\u540E\u5BAB\u548C\u8C10\u5EA6"];
 var \u7269\u54C1\u680F\u5B57\u6BB5 = ["\u54C1\u8D28", "\u63CF\u8FF0", "\u6570\u91CF"];
+var \u52BF\u529B\u5B57\u6BB5 = ["\u540D\u79F0", "\u89C4\u6A21", "\u6B63\u7EDF\u6027", "\u60C5\u62A5\u7F51", "\u91D1\u94B1", "\u7CAE\u8349", "\u57CE\u6C60", "\u519B\u961F", "\u5916\u4EA4", "\u653F\u7B56"];
+var \u57CE\u6C60\u5B57\u6BB5 = ["\u7B49\u7EA7", "\u57CE\u9632", "\u4EBA\u53E3", "\u519C\u4E1A", "\u5546\u4E1A", "\u6C11\u5FC3", "\u6CBB\u5B89", "\u7E41\u8363\u5EA6", "\u592A\u5B88", "\u8BBE\u65BD"];
+var \u519B\u961F\u5B57\u6BB5 = ["\u5175\u79CD", "\u7B49\u7EA7", "\u5175\u529B", "\u58EB\u6C14", "\u75B2\u60EB", "\u88C5\u5907\u7B49\u7EA7", "\u7EDF\u5C5E\u5C06\u9886", "\u9A7B\u624E\u5730", "\u8BAD\u7EC3\u8FDB\u5EA6", "\u9635\u578B"];
+var \u653F\u7B56\u5B57\u6BB5 = ["\u5F53\u524D\u7814\u7A76", "\u7814\u7A76\u8FDB\u5EA6", "\u5BCC\u56FD", "\u5F3A\u5175", "\u9738\u9053", "\u738B\u9053"];
 var NPC\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u9635\u8425", "\u5B9A\u4F4D", "\u597D\u611F", "\u7B80\u8FF0", "\u7F81\u7ECA", "\u89D2\u8272\u6570\u636E", "\u6B66\u5C06\u4FE1\u606F", "\u7F8E\u4EBA\u5C5E\u6027"];
 var \u6B66\u5C06\u4FE1\u606F\u5B57\u6BB5 = ["\u91CE\u5FC3\u503C", "\u6027\u683C", "\u5B98\u804C", "\u5F53\u524D\u72B6\u6001", "\u72B6\u6001\u63CF\u8FF0", "\u9A7B\u624E\u5730", "\u7279\u6280"];
 var \u7F8E\u4EBA\u5C5E\u6027\u5B57\u6BB5 = ["\u4F9D\u8D56\u5EA6", "\u654F\u611F\u5EA6", "\u8D1E\u6D01\u5EA6", "\u4F4D\u4EFD", "\u6027\u683C", "\u5F53\u524D\u72B6\u6001"];
@@ -499,6 +641,13 @@ function \u6821\u9A8C\u5B57\u7B26\u4E32\u6620\u5C04(value, path) {
   for (const [key, item] of Object.entries(value)) {
     \u65AD\u8A00\u5B57\u7B26\u4E32(key, `${path} \u952E\u540D`);
     \u65AD\u8A00\u5B57\u7B26\u4E32(item, `${path}.${key}`);
+  }
+}
+function \u6821\u9A8C\u6570\u5B57\u6620\u5C04(value, path) {
+  \u65AD\u8A00\u5BF9\u8C61(value, path);
+  for (const [key, item] of Object.entries(value)) {
+    \u65AD\u8A00\u5B57\u7B26\u4E32(key, `${path} \u952E\u540D`);
+    \u65AD\u8A00\u6570\u5B57(item, `${path}.${key}`);
   }
 }
 function \u6821\u9A8C\u4E16\u754C\u4E8B\u4EF6\u8F93\u5165(value, path) {
@@ -681,6 +830,67 @@ function \u6821\u9A8C\u4E3B\u89D2\u66F4\u65B0(value, path) {
   if (value.\u7235\u4F4D !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u7235\u4F4D, `${path}.\u7235\u4F4D`);
   if (value.\u540E\u5BAB\u548C\u8C10\u5EA6 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u540E\u5BAB\u548C\u8C10\u5EA6, `${path}.\u540E\u5BAB\u548C\u8C10\u5EA6`);
 }
+function \u6821\u9A8C\u57CE\u6C60\u66F4\u65B0(value, path) {
+  \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
+  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u57CE\u6C60\u5B57\u6BB5, path);
+  if (value.\u7B49\u7EA7 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7B49\u7EA7, \u679A\u4E3E.\u57CE\u6C60\u7B49\u7EA7, `${path}.\u7B49\u7EA7`);
+  for (const key of ["\u57CE\u9632", "\u4EBA\u53E3", "\u519C\u4E1A", "\u5546\u4E1A", "\u6C11\u5FC3", "\u6CBB\u5B89", "\u7E41\u8363\u5EA6"]) {
+    if (value[key] !== void 0) \u65AD\u8A00\u6570\u5B57(value[key], `${path}.${key}`);
+  }
+  if (value.\u592A\u5B88 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u592A\u5B88, `${path}.\u592A\u5B88`);
+  if (value.\u8BBE\u65BD !== void 0) {
+    \u65AD\u8A00(Array.isArray(value.\u8BBE\u65BD), `${path}.\u8BBE\u65BD \u5FC5\u987B\u662F\u6570\u7EC4`);
+    value.\u8BBE\u65BD.forEach((item, index) => \u65AD\u8A00\u5B57\u7B26\u4E32(item, `${path}.\u8BBE\u65BD[${index}]`));
+  }
+}
+function \u6821\u9A8C\u519B\u961F\u66F4\u65B0(value, path) {
+  \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
+  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u519B\u961F\u5B57\u6BB5, path);
+  if (value.\u5175\u79CD !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u5175\u79CD, `${path}.\u5175\u79CD`);
+  if (value.\u7B49\u7EA7 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7B49\u7EA7, \u679A\u4E3E.\u519B\u961F\u7B49\u7EA7, `${path}.\u7B49\u7EA7`);
+  for (const key of ["\u5175\u529B", "\u58EB\u6C14", "\u75B2\u60EB", "\u8BAD\u7EC3\u8FDB\u5EA6"]) {
+    if (value[key] !== void 0) \u65AD\u8A00\u6570\u5B57(value[key], `${path}.${key}`);
+  }
+  if (value.\u88C5\u5907\u7B49\u7EA7 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u88C5\u5907\u7B49\u7EA7, \u679A\u4E3E.\u519B\u961F\u88C5\u5907\u7B49\u7EA7, `${path}.\u88C5\u5907\u7B49\u7EA7`);
+  if (value.\u7EDF\u5C5E\u5C06\u9886 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u7EDF\u5C5E\u5C06\u9886, `${path}.\u7EDF\u5C5E\u5C06\u9886`);
+  if (value.\u9A7B\u624E\u5730 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u9A7B\u624E\u5730, `${path}.\u9A7B\u624E\u5730`);
+  if (value.\u9635\u578B !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u9635\u578B, \u679A\u4E3E.\u9635\u578B, `${path}.\u9635\u578B`);
+}
+function \u6821\u9A8C\u653F\u7B56\u66F4\u65B0(value, path) {
+  \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
+  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u653F\u7B56\u5B57\u6BB5, path);
+  if (value.\u5F53\u524D\u7814\u7A76 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u5F53\u524D\u7814\u7A76, `${path}.\u5F53\u524D\u7814\u7A76`);
+  for (const key of ["\u7814\u7A76\u8FDB\u5EA6", "\u5BCC\u56FD", "\u5F3A\u5175", "\u9738\u9053", "\u738B\u9053"]) {
+    if (value[key] !== void 0) \u65AD\u8A00\u6570\u5B57(value[key], `${path}.${key}`);
+  }
+}
+function \u6821\u9A8C\u52BF\u529B\u66F4\u65B0(value, path) {
+  \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
+  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u52BF\u529B\u5B57\u6BB5, path);
+  if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
+  if (value.\u89C4\u6A21 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u89C4\u6A21, \u679A\u4E3E.\u52BF\u529B\u89C4\u6A21, `${path}.\u89C4\u6A21`);
+  for (const key of ["\u6B63\u7EDF\u6027", "\u60C5\u62A5\u7F51", "\u91D1\u94B1", "\u7CAE\u8349"]) {
+    if (value[key] !== void 0) \u65AD\u8A00\u6570\u5B57(value[key], `${path}.${key}`);
+  }
+  if (value.\u57CE\u6C60 !== void 0) {
+    \u65AD\u8A00\u5BF9\u8C61(value.\u57CE\u6C60, `${path}.\u57CE\u6C60`);
+    for (const [key, item] of Object.entries(value.\u57CE\u6C60)) {
+      \u65AD\u8A00\u5B57\u7B26\u4E32(key, `${path}.\u57CE\u6C60 \u952E\u540D`);
+      \u6821\u9A8C\u57CE\u6C60\u66F4\u65B0(item, `${path}.\u57CE\u6C60.${key}`);
+    }
+  }
+  if (value.\u519B\u961F !== void 0) {
+    \u65AD\u8A00\u5BF9\u8C61(value.\u519B\u961F, `${path}.\u519B\u961F`);
+    for (const [key, item] of Object.entries(value.\u519B\u961F)) {
+      \u65AD\u8A00\u5B57\u7B26\u4E32(key, `${path}.\u519B\u961F \u952E\u540D`);
+      \u6821\u9A8C\u519B\u961F\u66F4\u65B0(item, `${path}.\u519B\u961F.${key}`);
+    }
+  }
+  if (value.\u5916\u4EA4 !== void 0) {
+    \u6821\u9A8C\u6570\u5B57\u6620\u5C04(value.\u5916\u4EA4, `${path}.\u5916\u4EA4`);
+  }
+  if (value.\u653F\u7B56 !== void 0) \u6821\u9A8C\u653F\u7B56\u66F4\u65B0(value.\u653F\u7B56, `${path}.\u653F\u7B56`);
+}
 function \u6821\u9A8CNPC\u66F4\u65B0(value, path) {
   \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, NPC\u5B57\u6BB5, path);
@@ -768,6 +978,42 @@ function \u6821\u9A8C\u547D\u4EE4(command, index = 0) {
           \u65AD\u8A00\u679A\u4E3E\u503C(command.mode, ["delta", "set"], `${path}.mode`);
         }
         \u6821\u9A8C\u8D44\u6E90\u53D8\u5316(command.changes, `${path}.changes`);
+        return;
+      case "UpdateFaction":
+        debugLog("commands", "\u6821\u9A8C UpdateFaction", { index });
+        \u6821\u9A8C\u52BF\u529B\u66F4\u65B0(command.changes, `${path}.changes`);
+        return;
+      case "UpsertCity":
+        debugLog("commands", "\u6821\u9A8C UpsertCity", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        \u6821\u9A8C\u57CE\u6C60\u66F4\u65B0(command.data, `${path}.data`);
+        return;
+      case "RemoveCity":
+        debugLog("commands", "\u6821\u9A8C RemoveCity", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        return;
+      case "UpsertArmy":
+        debugLog("commands", "\u6821\u9A8C UpsertArmy", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        if (command.createIfMissing !== void 0) {
+          \u65AD\u8A00\u5E03\u5C14(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        \u6821\u9A8C\u519B\u961F\u66F4\u65B0(command.data, `${path}.data`);
+        return;
+      case "RemoveArmy":
+        debugLog("commands", "\u6821\u9A8C RemoveArmy", { index, id: command.id });
+        \u65AD\u8A00\u5B57\u7B26\u4E32(command.id, `${path}.id`);
+        return;
+      case "UpdateDiplomacy":
+        debugLog("commands", "\u6821\u9A8C UpdateDiplomacy", { index });
+        \u6821\u9A8C\u6570\u5B57\u6620\u5C04(command.changes, `${path}.changes`);
+        return;
+      case "UpdatePolicy":
+        debugLog("commands", "\u6821\u9A8C UpdatePolicy", { index });
+        \u6821\u9A8C\u653F\u7B56\u66F4\u65B0(command.changes, `${path}.changes`);
         return;
       case "UpsertNpc":
         debugLog("commands", "\u6821\u9A8C UpsertNpc", { index, id: command.id });
@@ -915,12 +1161,60 @@ function recompute\u4E3B\u89D2(data) {
   next._\u548C\u8C10\u7B49\u7EA7 = \u548C\u8C10\u7B49\u7EA7(next.\u540E\u5BAB\u548C\u8C10\u5EA6);
   return next;
 }
+function recompute\u57CE\u6C60(data) {
+  const next = _.cloneDeep(data);
+  const base = \u57CE\u6C60\u57FA\u7840[next.\u7B49\u7EA7] ?? \u57CE\u6C60\u57FA\u7840.\u6751\u843D;
+  const \u5B98\u5E9C\u6570\u91CF = (next.\u8BBE\u65BD || []).filter((item) => item === "\u5B98\u5E9C").length;
+  next.\u57CE\u9632 = _.clamp(\u6570\u503C(next.\u57CE\u9632), 0, base.\u57CE\u9632\u4E0A\u9650);
+  next._\u57CE\u9632\u4E0A\u9650 = base.\u57CE\u9632\u4E0A\u9650;
+  next._\u9A7B\u519B\u4E0A\u9650 = base.\u9A7B\u519B\u4E0A\u9650;
+  next._\u9632\u5FA1\u7CFB\u6570 = base.\u9632\u5FA1\u7CFB\u6570;
+  next._\u57CE\u6C60\u9632\u5FA1\u529B = Math.floor(next.\u57CE\u9632 * base.\u9632\u5FA1\u7CFB\u6570);
+  next._\u6708\u7A0E\u6536 = Math.floor(base.\u7A0E\u6536 * (1 + next.\u5546\u4E1A / 100) * (1 + next.\u6C11\u5FC3 / 200));
+  next._\u6708\u4EA7\u7CAE = Math.floor(base.\u4EA7\u7CAE * (1 + next.\u519C\u4E1A / 100) * (1 + next.\u6C11\u5FC3 / 200));
+  next._\u6307\u4EE4\u69FD = base.\u6307\u4EE4\u69FD + Math.min(\u5B98\u5E9C\u6570\u91CF, 2);
+  return next;
+}
+function recompute\u519B\u961F(data, state) {
+  const next = _.cloneDeep(data);
+  next._\u58EB\u6C14\u7B49\u7EA7 = \u58EB\u6C14\u7B49\u7EA7(next.\u58EB\u6C14);
+  next._\u75B2\u60EB\u7B49\u7EA7 = \u75B2\u60EB\u7B49\u7EA7(next.\u75B2\u60EB);
+  const \u9635\u578B = \u9635\u578B\u6570\u636E[next.\u9635\u578B] ?? \u9635\u578B\u6570\u636E.\u65E0;
+  next._\u9635\u578B\u653B\u51FB\u4FEE\u6B63 = \u9635\u578B.\u653B\u51FB;
+  next._\u9635\u578B\u9632\u5FA1\u4FEE\u6B63 = \u9635\u578B.\u9632\u5FA1;
+  const \u5C06\u9886\u540D = next.\u7EDF\u5C5E\u5C06\u9886;
+  const \u5C06\u9886\u7EDF\u7387\u52A0\u503C = \u5C06\u9886\u540D ? state?.NPC?.[\u5C06\u9886\u540D]?.\u89D2\u8272\u6570\u636E?.\u516D\u7EF4._\u7EDF\u7387\u52A0\u503C ?? 0 : 0;
+  const \u7EDF\u7387\u7CFB\u6570\u503C = Math.round(\u7EDF\u7387\u7CFB\u6570(\u5C06\u9886\u7EDF\u7387\u52A0\u503C) * 100) / 100;
+  next._\u7EDF\u7387\u7CFB\u6570 = \u7EDF\u7387\u7CFB\u6570\u503C;
+  next._\u7EFC\u5408\u6218\u529B = Math.floor(
+    next.\u5175\u529B * (\u7B49\u7EA7\u7CFB\u6570[next.\u7B49\u7EA7] ?? 0.8) * (\u519B\u961F\u88C5\u5907\u7CFB\u6570[next.\u88C5\u5907\u7B49\u7EA7] ?? 1) * \u58EB\u6C14\u7CFB\u6570(next.\u58EB\u6C14) * \u75B2\u60EB\u7CFB\u6570(next.\u75B2\u60EB) * \u7EDF\u7387\u7CFB\u6570\u503C
+  );
+  next._\u653B\u51FB\u6218\u529B = Math.floor((next._\u7EFC\u5408\u6218\u529B ?? 0) * next._\u9635\u578B\u653B\u51FB\u4FEE\u6B63);
+  next._\u9632\u5FA1\u6218\u529B = Math.floor((next._\u7EFC\u5408\u6218\u529B ?? 0) * next._\u9635\u578B\u9632\u5FA1\u4FEE\u6B63);
+  return next;
+}
+function recompute\u52BF\u529B(data, state) {
+  const next = _.cloneDeep(data);
+  next.\u57CE\u6C60 = _.mapValues(next.\u57CE\u6C60 || {}, (item) => recompute\u57CE\u6C60(item));
+  next.\u519B\u961F = _.mapValues(next.\u519B\u961F || {}, (item) => recompute\u519B\u961F(item, state));
+  next._\u5916\u4EA4\u7B49\u7EA7 = _.mapValues(next.\u5916\u4EA4 || {}, (value) => \u5916\u4EA4\u7B49\u7EA7(value));
+  const \u57CE\u6C60\u5217\u8868 = Object.values(next.\u57CE\u6C60 || {});
+  next._\u6708\u603B\u7A0E\u6536 = _.sumBy(\u57CE\u6C60\u5217\u8868, (item) => item._\u6708\u7A0E\u6536 ?? 0);
+  next._\u6708\u603B\u4EA7\u7CAE = _.sumBy(\u57CE\u6C60\u5217\u8868, (item) => item._\u6708\u4EA7\u7CAE ?? 0);
+  const \u519B\u961F\u5217\u8868 = Object.values(next.\u519B\u961F || {});
+  next._\u603B\u5175\u529B = _.sumBy(\u519B\u961F\u5217\u8868, (item) => item.\u5175\u529B ?? 0);
+  next._\u603B\u6218\u529B = _.sumBy(\u519B\u961F\u5217\u8868, (item) => item._\u7EFC\u5408\u6218\u529B ?? 0);
+  next._\u6708\u519B\u9977\u4F30\u7B97 = _.sumBy(\u519B\u961F\u5217\u8868, (item) => Math.ceil((item.\u5175\u529B ?? 0) / 1e3) * (\u519B\u9977\u57FA\u6570[item.\u7B49\u7EA7] ?? 40));
+  next._\u6708\u7CAE\u8349\u6D88\u8017\u4F30\u7B97 = _.sumBy(\u519B\u961F\u5217\u8868, (item) => Math.ceil((item.\u5175\u529B ?? 0) / 1e3) * 10);
+  return next;
+}
 function recompute\u5168\u5C40(state) {
   const next = _.cloneDeep(state);
   next.\u4E16\u754C = create\u4E16\u754C(next.\u4E16\u754C);
   next.\u4E16\u754C.\u8FD1\u671F\u4E8B\u4EF6 = next.\u4E16\u754C.\u8FD1\u671F\u4E8B\u4EF6.slice(-MAX_RECENT_EVENTS);
   next.\u4E3B\u89D2 = recompute\u4E3B\u89D2(next.\u4E3B\u89D2);
   next.NPC = _.mapValues(next.NPC || {}, (npc) => recomputeNPC(npc));
+  next.\u52BF\u529B = recompute\u52BF\u529B(create\u52BF\u529B(next.\u52BF\u529B), { NPC: next.NPC });
   next.\u4EFB\u52A1 = _.pickBy(next.\u4EFB\u52A1 || {}, (task) => ["\u53EF\u63A5\u53D6", "\u8FDB\u884C\u4E2D", "\u53EF\u63D0\u4EA4"].includes(task.\u72B6\u6001));
   next.meta.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
   return next;
@@ -1111,6 +1405,34 @@ function \u5E94\u7528\u8FD1\u671F\u4E8B\u4EF6(state, command) {
 function \u5E94\u7528\u4E3B\u89D2\u57FA\u7840\u66F4\u65B0(state, command) {
   state.\u4E3B\u89D2 = recompute\u4E3B\u89D2(create\u4E3B\u89D2(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u4E3B\u89D2), command.changes)));
 }
+function \u5E94\u7528\u52BF\u529B\u66F4\u65B0(state, command) {
+  state.\u52BF\u529B = create\u52BF\u529B(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u52BF\u529B), command.changes));
+}
+function \u5E94\u7528\u57CE\u6C60\u66F4\u65B0(state, command) {
+  const current = state.\u52BF\u529B.\u57CE\u6C60[command.id];
+  if (!current && command.createIfMissing === false) {
+    throw new Error(`\u57CE\u6C60\u4E0D\u5B58\u5728: ${command.id}`);
+  }
+  const next = create\u57CE\u6C60(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(current ?? create\u57CE\u6C60()), command.data));
+  state.\u52BF\u529B.\u57CE\u6C60[command.id] = next;
+}
+function \u5E94\u7528\u519B\u961F\u66F4\u65B0(state, command) {
+  const current = state.\u52BF\u529B.\u519B\u961F[command.id];
+  if (!current && command.createIfMissing === false) {
+    throw new Error(`\u519B\u961F\u4E0D\u5B58\u5728: ${command.id}`);
+  }
+  const next = create\u519B\u961F(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(current ?? create\u519B\u961F()), command.data));
+  state.\u52BF\u529B.\u519B\u961F[command.id] = next;
+}
+function \u5E94\u7528\u5916\u4EA4\u66F4\u65B0(state, command) {
+  state.\u52BF\u529B.\u5916\u4EA4 = {
+    ...state.\u52BF\u529B.\u5916\u4EA4,
+    ..._.mapValues(command.changes, (value) => Math.max(0, Math.min(100, \u6570\u503C(value))))
+  };
+}
+function \u5E94\u7528\u653F\u7B56\u66F4\u65B0(state, command) {
+  state.\u52BF\u529B.\u653F\u7B56 = create\u653F\u7B56(\u5408\u5E76\u5BF9\u8C61(_.cloneDeep(state.\u52BF\u529B.\u653F\u7B56), command.changes));
+}
 function \u5E94\u7528NPC\u66F4\u65B0(state, command) {
   const current = state.NPC[command.id];
   if (!current && command.createIfMissing === false) {
@@ -1189,6 +1511,27 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
           break;
         case "AdjustPlayerResource":
           \u5E94\u7528\u4E3B\u89D2\u8D44\u6E90\u53D8\u66F4(next, command);
+          break;
+        case "UpdateFaction":
+          \u5E94\u7528\u52BF\u529B\u66F4\u65B0(next, command);
+          break;
+        case "UpsertCity":
+          \u5E94\u7528\u57CE\u6C60\u66F4\u65B0(next, command);
+          break;
+        case "RemoveCity":
+          delete next.\u52BF\u529B.\u57CE\u6C60[command.id];
+          break;
+        case "UpsertArmy":
+          \u5E94\u7528\u519B\u961F\u66F4\u65B0(next, command);
+          break;
+        case "RemoveArmy":
+          delete next.\u52BF\u529B.\u519B\u961F[command.id];
+          break;
+        case "UpdateDiplomacy":
+          \u5E94\u7528\u5916\u4EA4\u66F4\u65B0(next, command);
+          break;
+        case "UpdatePolicy":
+          \u5E94\u7528\u653F\u7B56\u66F4\u65B0(next, command);
           break;
         case "UpsertNpc":
           \u5E94\u7528NPC\u66F4\u65B0(next, command);
@@ -1293,6 +1636,7 @@ function \u6784\u5EFA\u6CE8\u5165\u89C6\u56FE(state) {
   return {
     \u4E16\u754C: _.cloneDeep(state.\u4E16\u754C),
     \u4E3B\u89D2: _.cloneDeep(state.\u4E3B\u89D2),
+    \u52BF\u529B: _.cloneDeep(state.\u52BF\u529B),
     \u5F53\u524D\u5730\u70B9\u76F8\u5173NPC: _.cloneDeep(\u9009\u62E9\u5F53\u524D\u5730\u70B9\u76F8\u5173NPC(state)),
     \u8FDB\u884C\u4E2D\u4EFB\u52A1: _.cloneDeep(\u9009\u62E9\u8FDB\u884C\u4E2D\u4EFB\u52A1(state)),
     \u5546\u57CE: _.cloneDeep(\u9009\u62E9\u5546\u57CE\u6761\u76EE(state))
@@ -1629,6 +1973,20 @@ function \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570() {
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
   return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
 }
+function \u83B7\u53D6Toastr\u63A5\u53E3() {
+  const globalApi = globalThis;
+  const windowApi = typeof window !== "undefined" ? window : void 0;
+  return globalApi.toastr ?? windowApi?.toastr;
+}
+function \u63D0\u793A\u65E5\u5FD7\u5F00\u5173\u72B6\u6001(enabled) {
+  const message = `\u5DF2${enabled ? "\u5F00\u542F" : "\u5173\u95ED"} log/info \u65E5\u5FD7\u6253\u5370`;
+  const toastr = \u83B7\u53D6Toastr\u63A5\u53E3();
+  if (typeof toastr?.success === "function") {
+    toastr.success(message);
+    return;
+  }
+  console.log("[ThreeKingdomsStateKit][debug]", message);
+}
 function \u8BFB\u53D6\u6D88\u606F2(messageId) {
   const getChatMessages = \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570();
   if (typeof getChatMessages !== "function") {
@@ -1756,6 +2114,7 @@ function setupDebugLogToggleButtonHook(buttonName = "\u65E5\u5FD7\u5F00\u5173") 
     const nextEnabled = !getDebugEnabled();
     setDebugEnabled(nextEnabled);
     console.log("[ThreeKingdomsStateKit][debug]", `\u65E5\u5FD7\u5F00\u5173\u5DF2${nextEnabled ? "\u5F00\u542F" : "\u5173\u95ED"}\uFF08info/log ${nextEnabled ? "\u542F\u7528" : "\u7981\u7528"}\uFF0Cwarning/error \u59CB\u7EC8\u8F93\u51FA\uFF09`);
+    \u63D0\u793A\u65E5\u5FD7\u5F00\u5173\u72B6\u6001(nextEnabled);
   };
   const binding = runtime.eventOn(eventName, listener);
   \u5DF2\u6CE8\u518C\u65E5\u5FD7\u6309\u94AE\u94A9\u5B50 = { eventName, listener, binding: binding ?? void 0 };
@@ -1844,6 +2203,10 @@ var ThreeKingdomsStateKit = {
     createNPC,
     create\u4EFB\u52A1,
     create\u5546\u54C1\u6761\u76EE,
+    create\u52BF\u529B,
+    create\u57CE\u6C60,
+    create\u519B\u961F,
+    create\u653F\u7B56,
     create\u521D\u59CB\u72B6\u6001
   },
   \u89C4\u5219: rules_exports,
@@ -1869,6 +2232,9 @@ var ThreeKingdomsStateKit = {
     recompute\u516D\u7EF4,
     recompute\u89D2\u8272\u6218\u6597\u6570\u636E,
     recompute\u7F8E\u4EBA\u5C5E\u6027,
+    recompute\u57CE\u6C60,
+    recompute\u519B\u961F,
+    recompute\u52BF\u529B,
     recomputeNPC,
     recompute\u4E3B\u89D2,
     recompute\u5168\u5C40
@@ -1910,8 +2276,12 @@ export {
   create\u4EFB\u52A1,
   create\u4EFB\u52A1\u76EE\u6807,
   create\u516D\u7EF4,
+  create\u519B\u961F,
   create\u521D\u59CB\u72B6\u6001,
+  create\u52BF\u529B,
   create\u5546\u54C1\u6761\u76EE,
+  create\u57CE\u6C60,
+  create\u653F\u7B56,
   create\u6B66\u5C06\u4FE1\u606F,
   create\u6B66\u6280\u6761\u76EE,
   create\u72B6\u6001\u8BB0\u5F55,
@@ -1933,6 +2303,9 @@ export {
   recompute\u4E3B\u89D2,
   recompute\u5168\u5C40,
   recompute\u516D\u7EF4,
+  recompute\u519B\u961F,
+  recompute\u52BF\u529B,
+  recompute\u57CE\u6C60,
   recompute\u7F8E\u4EBA\u5C5E\u6027,
   recompute\u89D2\u8272\u6218\u6597\u6570\u636E,
   refreshContextMacro,
@@ -1953,12 +2326,18 @@ export {
   \u4F9D\u8D56\u7B49\u7EA7,
   \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F,
   \u4FDD\u5B58\u72B6\u6001,
+  \u519B\u961F\u88C5\u5907\u7CFB\u6570,
+  \u519B\u9977\u57FA\u6570,
   \u521B\u5EFA\u547D\u4EE4\u6267\u884C\u5FEB\u7167,
   \u521D\u59CB\u5316\u72B6\u6001,
   \u52A0\u8F7D\u72B6\u6001,
   \u5305\u88C5\u547D\u4EE4\u5757,
   \u548C\u8C10\u7B49\u7EA7,
+  \u57CE\u6C60\u57FA\u7840,
+  \u58EB\u6C14\u7B49\u7EA7,
+  \u58EB\u6C14\u7CFB\u6570,
   \u58F0\u671B\u79F0\u53F7,
+  \u5916\u4EA4\u7B49\u7EA7,
   \u597D\u611F\u7B49\u7EA7,
   \u5FE0\u8BDA\u7B49\u7EA7,
   \u6267\u884C\u547D\u4EE4,
@@ -1974,7 +2353,11 @@ export {
   \u679A\u4E3E,
   \u6821\u9A8C\u547D\u4EE4,
   \u6C47\u603B\u88C5\u5907\u52A0\u503C,
+  \u75B2\u60EB\u7B49\u7EA7,
+  \u75B2\u60EB\u7CFB\u6570,
   \u79FB\u9664\u547D\u4EE4\u5757,
+  \u7B49\u7EA7\u7CFB\u6570,
+  \u7EDF\u7387\u7CFB\u6570,
   \u89E3\u6790\u547D\u4EE4\u5757,
   \u89E3\u6790\u547D\u4EE4\u8F93\u5165,
   \u8BA1\u7B97\u4F24\u52BF,
@@ -1987,5 +2370,6 @@ export {
   \u9009\u62E9\u5546\u57CE\u6761\u76EE,
   \u9009\u62E9\u5F53\u524D\u5730\u70B9\u76F8\u5173NPC,
   \u9009\u62E9\u8FDB\u884C\u4E2D\u4EFB\u52A1,
+  \u9635\u578B\u6570\u636E,
   \u9650\u5236\u6570\u503C
 };

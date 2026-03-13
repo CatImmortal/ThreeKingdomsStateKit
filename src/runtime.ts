@@ -29,6 +29,10 @@ type RuntimeApi = {
   };
 };
 
+type ToastrLike = {
+  success?: (message: string) => void;
+};
+
 let 已注册回复钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册日志按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
@@ -50,6 +54,22 @@ function 获取运行时接口(): RuntimeApi {
 function 获取消息读取函数() {
   const runtime = 获取运行时接口();
   return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+}
+
+function 获取Toastr接口(): ToastrLike | undefined {
+  const globalApi = globalThis as typeof globalThis & { toastr?: ToastrLike };
+  const windowApi = typeof window !== 'undefined' ? ((window as typeof window) as typeof window & { toastr?: ToastrLike }) : undefined;
+  return globalApi.toastr ?? windowApi?.toastr;
+}
+
+function 提示日志开关状态(enabled: boolean): void {
+  const message = `已${enabled ? '开启' : '关闭'} log/info 日志打印`;
+  const toastr = 获取Toastr接口();
+  if (typeof toastr?.success === 'function') {
+    toastr.success(message);
+    return;
+  }
+  console.log('[ThreeKingdomsStateKit][debug]', message);
 }
 
 function 读取消息(messageId: number): ChatMessageLike | null {
@@ -190,6 +210,7 @@ export function setupDebugLogToggleButtonHook(buttonName = '日志开关'): bool
     const nextEnabled = !getDebugEnabled();
     setDebugEnabled(nextEnabled);
     console.log('[ThreeKingdomsStateKit][debug]', `日志开关已${nextEnabled ? '开启' : '关闭'}（info/log ${nextEnabled ? '启用' : '禁用'}，warning/error 始终输出）`);
+    提示日志开关状态(nextEnabled);
   };
 
   const binding = runtime.eventOn(eventName, listener) as EventBinding | void;

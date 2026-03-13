@@ -17,6 +17,34 @@ export const 枚举 = {
   任务状态: ['可接取', '进行中', '可提交', '已完成', '已失败', '已过期'],
   任务目标类型: ['主要', '次要', '隐藏'],
   任务目标状态: ['未发现', '未完成', '已完成'],
+  势力规模: ['无', '草莽', '县级', '郡级', '州级', '霸主', '帝国'],
+  城池等级: ['村落', '县城', '郡城', '州城', '雄城', '帝都'],
+  军队等级: ['新兵', '普通', '老兵', '精锐', '特殊兵种'],
+  军队装备等级: ['简陋', '普通', '精良', '上等', '精锐'],
+  阵型: ['无', '锋矢阵', '鹤翼阵', '鱼鳞阵', '方圆阵', '长蛇阵', '雁行阵', '偃月阵'],
+} as const;
+
+export const 城池基础 = {
+  村落: { 税收: 5, 产粮: 30, 城防上限: 20, 驻军上限: 500, 防御系数: 0.3, 指令槽: 1 },
+  县城: { 税收: 20, 产粮: 100, 城防上限: 50, 驻军上限: 3000, 防御系数: 0.6, 指令槽: 2 },
+  郡城: { 税收: 60, 产粮: 250, 城防上限: 70, 驻军上限: 8000, 防御系数: 0.8, 指令槽: 3 },
+  州城: { 税收: 150, 产粮: 500, 城防上限: 85, 驻军上限: 20000, 防御系数: 1.0, 指令槽: 4 },
+  雄城: { 税收: 300, 产粮: 800, 城防上限: 95, 驻军上限: 40000, 防御系数: 1.3, 指令槽: 5 },
+  帝都: { 税收: 500, 产粮: 1200, 城防上限: 100, 驻军上限: 80000, 防御系数: 1.6, 指令槽: 6 },
+} as const;
+
+export const 等级系数 = { 新兵: 0.6, 普通: 0.8, 老兵: 1.0, 精锐: 1.3, 特殊兵种: 1.8 } as const;
+export const 军队装备系数 = { 简陋: 0.7, 普通: 0.85, 精良: 1.0, 上等: 1.15, 精锐: 1.3 } as const;
+export const 军饷基数 = { 新兵: 25, 普通: 40, 老兵: 65, 精锐: 100, 特殊兵种: 250 } as const;
+export const 阵型数据 = {
+  无: { 攻击: 1.0, 防御: 1.0 },
+  锋矢阵: { 攻击: 1.15, 防御: 0.9 },
+  鹤翼阵: { 攻击: 1.1, 防御: 1.0 },
+  鱼鳞阵: { 攻击: 0.95, 防御: 1.15 },
+  方圆阵: { 攻击: 1.0, 防御: 1.1 },
+  长蛇阵: { 攻击: 1.05, 防御: 0.95 },
+  雁行阵: { 攻击: 1.1, 防御: 0.95 },
+  偃月阵: { 攻击: 1.05, 防御: 1.05 },
 } as const;
 
 export type 品质 = (typeof 枚举.品质)[number];
@@ -33,6 +61,11 @@ export type 任务类型 = (typeof 枚举.任务类型)[number];
 export type 任务状态 = (typeof 枚举.任务状态)[number];
 export type 任务目标类型 = (typeof 枚举.任务目标类型)[number];
 export type 任务目标状态 = (typeof 枚举.任务目标状态)[number];
+export type 势力规模 = (typeof 枚举.势力规模)[number];
+export type 城池等级 = (typeof 枚举.城池等级)[number];
+export type 军队等级 = (typeof 枚举.军队等级)[number];
+export type 军队装备等级 = (typeof 枚举.军队装备等级)[number];
+export type 阵型 = (typeof 枚举.阵型)[number];
 
 export function 数值(value: unknown, fallback = 0): number {
   const n = Number(value);
@@ -99,6 +132,32 @@ export function 交情等级(v: number): string {
   return '挚友';
 }
 
+export function 外交等级(v: number): string {
+  if (v <= 14) return '死敌';
+  if (v <= 29) return '敌对';
+  if (v <= 44) return '敌视';
+  if (v <= 59) return '中立';
+  if (v <= 74) return '友善';
+  if (v <= 89) return '同盟';
+  return '附庸';
+}
+
+export function 士气等级(v: number): string {
+  if (v <= 19) return '崩溃';
+  if (v <= 39) return '低落';
+  if (v <= 59) return '普通';
+  if (v <= 79) return '高昂';
+  return '狂热';
+}
+
+export function 疲惫等级(v: number): string {
+  if (v <= 19) return '精力充沛';
+  if (v <= 39) return '轻度疲惫';
+  if (v <= 59) return '中度疲惫';
+  if (v <= 79) return '重度疲惫';
+  return '精疲力竭';
+}
+
 export function 依赖等级(v: number): string {
   if (v <= 19) return '无依赖';
   if (v <= 39) return '轻微依赖';
@@ -128,6 +187,27 @@ export function 和谐等级(v: number): string {
   if (v <= 59) return '紧张';
   if (v <= 79) return '平稳';
   return '和睦';
+}
+
+export function 士气系数(v: number): number {
+  if (v <= 19) return 0.3;
+  if (v <= 39) return 0.6;
+  if (v <= 59) return 0.8;
+  if (v <= 79) return 1.0;
+  return 1.2;
+}
+
+export function 疲惫系数(v: number): number {
+  if (v <= 19) return 1.0;
+  if (v <= 39) return 0.9;
+  if (v <= 59) return 0.75;
+  if (v <= 79) return 0.6;
+  return 0.4;
+}
+
+export function 统率系数(v: number): number {
+  if (v <= 30) return 1 + v / 100;
+  return 1.3 + (v - 30) / 60;
 }
 
 export function 汇总装备加值(装备: 装备栏): {

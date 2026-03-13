@@ -1,11 +1,15 @@
 import {
   create世界,
+  create势力,
   type 六维,
   type 状态总表,
   type 角色战斗数据,
   type 美人属性,
   type NPC,
   type 主角,
+  type 城池,
+  type 军队,
+  type 势力,
 } from './state';
 import {
   MAX_RECENT_EVENTS,
@@ -21,6 +25,17 @@ import {
   计算伤势,
   计算加值,
   贞洁等级,
+  城池基础,
+  外交等级,
+  士气等级,
+  士气系数,
+  疲惫等级,
+  疲惫系数,
+  统率系数,
+  军饷基数,
+  军队装备系数,
+  等级系数,
+  阵型数据,
 } from './rules';
 
 export function recompute六维(stats: 六维): 六维 {
@@ -99,12 +114,71 @@ export function recompute主角(data: 主角): 主角 {
   return next;
 }
 
+export function recompute城池(data: 城池): 城池 {
+  const next = _.cloneDeep(data);
+  const base = 城池基础[next.等级] ?? 城池基础.村落;
+  const 官府数量 = (next.设施 || []).filter(item => item === '官府').length;
+  next.城防 = _.clamp(数值(next.城防), 0, base.城防上限);
+  next._城防上限 = base.城防上限;
+  next._驻军上限 = base.驻军上限;
+  next._防御系数 = base.防御系数;
+  next._城池防御力 = Math.floor(next.城防 * base.防御系数);
+  next._月税收 = Math.floor(base.税收 * (1 + next.商业 / 100) * (1 + next.民心 / 200));
+  next._月产粮 = Math.floor(base.产粮 * (1 + next.农业 / 100) * (1 + next.民心 / 200));
+  next._指令槽 = base.指令槽 + Math.min(官府数量, 2);
+  return next;
+}
+
+export function recompute军队(data: 军队, state?: Pick<状态总表, 'NPC'>): 军队 {
+  const next = _.cloneDeep(data);
+  next._士气等级 = 士气等级(next.士气);
+  next._疲惫等级 = 疲惫等级(next.疲惫);
+  const 阵型 = 阵型数据[next.阵型] ?? 阵型数据.无;
+  next._阵型攻击修正 = 阵型.攻击;
+  next._阵型防御修正 = 阵型.防御;
+
+  const 将领名 = next.统属将领;
+  const 将领统率加值 = 将领名 ? state?.NPC?.[将领名]?.角色数据?.六维._统率加值 ?? 0 : 0;
+  const 统率系数值 = Math.round(统率系数(将领统率加值) * 100) / 100;
+  next._统率系数 = 统率系数值;
+  next._综合战力 = Math.floor(
+    next.兵力 *
+      (等级系数[next.等级] ?? 0.8) *
+      (军队装备系数[next.装备等级] ?? 1.0) *
+      士气系数(next.士气) *
+      疲惫系数(next.疲惫) *
+      统率系数值,
+  );
+  next._攻击战力 = Math.floor((next._综合战力 ?? 0) * next._阵型攻击修正);
+  next._防御战力 = Math.floor((next._综合战力 ?? 0) * next._阵型防御修正);
+  return next;
+}
+
+export function recompute势力(data: 势力, state?: Pick<状态总表, 'NPC'>): 势力 {
+  const next = _.cloneDeep(data);
+  next.城池 = _.mapValues(next.城池 || {}, item => recompute城池(item));
+  next.军队 = _.mapValues(next.军队 || {}, item => recompute军队(item, state));
+  next._外交等级 = _.mapValues(next.外交 || {}, value => 外交等级(value));
+
+  const 城池列表 = Object.values(next.城池 || {});
+  next._月总税收 = _.sumBy(城池列表, item => item._月税收 ?? 0);
+  next._月总产粮 = _.sumBy(城池列表, item => item._月产粮 ?? 0);
+
+  const 军队列表 = Object.values(next.军队 || {});
+  next._总兵力 = _.sumBy(军队列表, item => item.兵力 ?? 0);
+  next._总战力 = _.sumBy(军队列表, item => item._综合战力 ?? 0);
+  next._月军饷估算 = _.sumBy(军队列表, item => Math.ceil((item.兵力 ?? 0) / 1000) * (军饷基数[item.等级] ?? 40));
+  next._月粮草消耗估算 = _.sumBy(军队列表, item => Math.ceil((item.兵力 ?? 0) / 1000) * 10);
+  return next;
+}
+
 export function recompute全局(state: 状态总表): 状态总表 {
   const next = _.cloneDeep(state);
   next.世界 = create世界(next.世界);
   next.世界.近期事件 = next.世界.近期事件.slice(-MAX_RECENT_EVENTS);
   next.主角 = recompute主角(next.主角);
   next.NPC = _.mapValues(next.NPC || {}, npc => recomputeNPC(npc));
+  next.势力 = recompute势力(create势力(next.势力), { NPC: next.NPC });
   next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中', '可提交'].includes(task.状态));
   next.meta.updatedAt = new Date().toISOString();
   return next;

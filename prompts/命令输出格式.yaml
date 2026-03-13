@@ -43,6 +43,11 @@
     任务状态: [可接取, 进行中, 可提交, 已完成, 已失败, 已过期]
     任务目标类型: [主要, 次要, 隐藏]
     任务目标状态: [未发现, 未完成, 已完成]
+    势力规模: [无, 草莽, 县级, 郡级, 州级, 霸主, 帝国]
+    城池等级: [村落, 县城, 郡城, 州城, 雄城, 帝都]
+    军队等级: [新兵, 普通, 老兵, 精锐, 特殊兵种]
+    军队装备等级: [简陋, 普通, 精良, 上等, 精锐]
+    阵型: [无, 锋矢阵, 鹤翼阵, 鱼鳞阵, 方圆阵, 长蛇阵, 雁行阵, 偃月阵]
   共享子结构:
     世界事件输入:
       事件名: string
@@ -124,6 +129,46 @@
       分类: string
       价格: number
       描述: string
+    城池:
+      等级: 城池等级
+      城防: number
+      人口: number
+      农业: number
+      商业: number
+      民心: number
+      治安: number
+      繁荣度: number
+      太守: string
+      设施: string[]
+    军队:
+      兵种: string
+      等级: 军队等级
+      兵力: number
+      士气: number
+      疲惫: number
+      装备等级: 军队装备等级
+      统属将领: string
+      驻扎地: string
+      训练进度: number
+      阵型: 阵型
+    政策:
+      当前研究: string
+      研究进度: number
+      富国: number
+      强兵: number
+      霸道: number
+      王道: number
+    势力:
+      名称: string
+      规模: 势力规模
+      正统性: number
+      情报网: number
+      金钱: number
+      粮草: number
+      城池: Record<string, 城池>
+      军队: Record<string, 军队>
+      外交: Record<string, number>
+      政策: 政策
   命令白名单:
     UpdateWorld:
       必填字段: [type, changes]
@@ -202,6 +247,81 @@
           "mode": "delta",
           "changes": { "当前生命值": -12, "声望": 3 }
         }
+    UpdateFaction:
+      必填字段: [type, changes]
+      changes可填字段:
+        名称: string
+        规模: 势力规模
+        正统性: number
+        情报网: number
+        金钱: number
+        粮草: number
+      关键约束:
+        - `changes` 至少包含一个字段
+        - 不要写入 `城池` / `军队` / `外交` / `政策` 的整块重写；这些优先使用专用命令
+      示例: |-
+        {
+          "type": "UpdateFaction",
+          "changes": { "名称": "刘备军", "规模": "郡级", "粮草": 2400 }
+        }
+    UpsertCity:
+      必填字段: [type, id, data]
+      可选字段: [createIfMissing]
+      data可填字段: 城池
+      关键约束:
+        - `data` 至少包含一个字段
+      示例: |-
+        {
+          "type": "UpsertCity",
+          "id": "xinye",
+          "data": { "等级": "县城", "城防": 42, "太守": "关羽" }
+        }
+    RemoveCity:
+      必填字段: [type, id]
+      示例: |-
+        {
+          "type": "RemoveCity",
+          "id": "abandoned_outpost"
+        }
+    UpsertArmy:
+      必填字段: [type, id, data]
+      可选字段: [createIfMissing]
+      data可填字段: 军队
+      关键约束:
+        - `data` 至少包含一个字段
+      示例: |-
+        {
+          "type": "UpsertArmy",
+          "id": "first_cavalry",
+          "data": { "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
+        }
+    RemoveArmy:
+      必填字段: [type, id]
+      示例: |-
+        {
+          "type": "RemoveArmy",
+          "id": "bandit_raiders"
+        }
+    UpdateDiplomacy:
+      必填字段: [type, changes]
+      changes可填字段: Record<string, number>
+      关键约束:
+        - `changes` 至少包含一个势力关系值
+      示例: |-
+        {
+          "type": "UpdateDiplomacy",
+          "changes": { "曹操": 28, "孙权": 66 }
+        }
+    UpdatePolicy:
+      必填字段: [type, changes]
+      changes可填字段: 政策
+      关键约束:
+        - `changes` 至少包含一个字段
+      示例: |-
+        {
+          "type": "UpdatePolicy",
+          "changes": { "当前研究": "屯田制", "研究进度": 2, "富国": 1 }
+        }
     UpsertNpc:
       必填字段: [type, id, data]
       可选字段: [createIfMissing]
@@ -224,6 +344,7 @@
         - `角色数据` / `武将信息` / `美人属性` 只有正文明确出现对应具体数据时才允许写入
         - 正文未提及的详细字段不要猜测、不要臆造、不要输出空对象
         - 正文未提及详细字段时，不输出这些字段即可，旧详细数据会保持不变
+        - 只填写重要 NPC，或本回合与主角发生了明确互动的 NPC；路人、背景板、杂兵、无名字小兵不要输出 `UpsertNpc`
       示例: |-
         {
           "type": "UpsertNpc",

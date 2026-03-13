@@ -1,4 +1,4 @@
-import type { NPC, 世界, 主角, 商品条目, 状态总表, 任务, 任务目标 } from './state';
+import type { NPC, 世界, 主角, 商品条目, 状态总表, 任务, 任务目标, 势力, 城池, 军队, 政策 } from './state';
 import { 枚举, type 任务状态 } from './rules';
 import { debugError, debugLog, summarizeValue } from './debug';
 
@@ -9,6 +9,10 @@ export type 基础字段<T> = {
 export type 世界更新 = Partial<基础字段<世界>>;
 export type 主角更新 = Partial<基础字段<主角>>;
 export type NPC更新 = Partial<基础字段<NPC>>;
+export type 势力更新 = Partial<基础字段<势力>>;
+export type 城池更新 = Partial<基础字段<城池>>;
+export type 军队更新 = Partial<基础字段<军队>>;
+export type 政策更新 = Partial<基础字段<政策>>;
 export type 任务更新 = Partial<基础字段<任务>>;
 export type 商品更新 = Partial<基础字段<商品条目>>;
 export type 任务目标更新 = Partial<基础字段<任务目标>>;
@@ -38,6 +42,38 @@ export type 状态命令 =
       changes: Partial<
         Pick<主角, '当前生命值' | '当前体力值' | '声望' | '金钱' | '积分' | '后宫和谐度'>
       >;
+    }
+  | {
+      type: 'UpdateFaction';
+      changes: 势力更新;
+    }
+  | {
+      type: 'UpsertCity';
+      id: string;
+      data: 城池更新;
+      createIfMissing?: boolean;
+    }
+  | {
+      type: 'RemoveCity';
+      id: string;
+    }
+  | {
+      type: 'UpsertArmy';
+      id: string;
+      data: 军队更新;
+      createIfMissing?: boolean;
+    }
+  | {
+      type: 'RemoveArmy';
+      id: string;
+    }
+  | {
+      type: 'UpdateDiplomacy';
+      changes: Record<string, number>;
+    }
+  | {
+      type: 'UpdatePolicy';
+      changes: 政策更新;
     }
   | {
       type: 'UpsertNpc';
@@ -92,6 +128,13 @@ const 命令字段白名单 = {
   AppendRecentEvent: ['type', 'event'],
   UpdatePlayerBase: ['type', 'changes'],
   AdjustPlayerResource: ['type', 'mode', 'changes'],
+  UpdateFaction: ['type', 'changes'],
+  UpsertCity: ['type', 'id', 'data', 'createIfMissing'],
+  RemoveCity: ['type', 'id'],
+  UpsertArmy: ['type', 'id', 'data', 'createIfMissing'],
+  RemoveArmy: ['type', 'id'],
+  UpdateDiplomacy: ['type', 'changes'],
+  UpdatePolicy: ['type', 'changes'],
   UpsertNpc: ['type', 'id', 'data', 'createIfMissing'],
   UpdateNpcRelation: ['type', 'id', 'mode', '好感', '羁绊'],
   RemoveNpc: ['type', 'id'],
@@ -111,6 +154,10 @@ const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度',
 const 专长条目字段 = ['名称', '等级', '效果'] as const;
 const 主角字段 = ['六维', '当前生命值', '当前体力值', '装备', '武技', '专长', '状态', '物品栏', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['品质', '描述', '数量'] as const;
+const 势力字段 = ['名称', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
+const 城池字段 = ['等级', '城防', '人口', '农业', '商业', '民心', '治安', '繁荣度', '太守', '设施'] as const;
+const 军队字段 = ['兵种', '等级', '兵力', '士气', '疲惫', '装备等级', '统属将领', '驻扎地', '训练进度', '阵型'] as const;
+const 政策字段 = ['当前研究', '研究进度', '富国', '强兵', '霸道', '王道'] as const;
 const NPC字段 = ['名称', '品质', '阵营', '定位', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
 const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '驻扎地', '特技'] as const;
 const 美人属性字段 = ['依赖度', '敏感度', '贞洁度', '位份', '性格', '当前状态'] as const;
@@ -180,6 +227,14 @@ function 校验字符串映射(value: unknown, path: string): void {
   for (const [key, item] of Object.entries(value)) {
     断言字符串(key, `${path} 键名`);
     断言字符串(item, `${path}.${key}`);
+  }
+}
+
+function 校验数字映射(value: unknown, path: string): void {
+  断言对象(value, path);
+  for (const [key, item] of Object.entries(value)) {
+    断言字符串(key, `${path} 键名`);
+    断言数字(item, `${path}.${key}`);
   }
 }
 
@@ -382,6 +437,71 @@ function 校验主角更新(value: unknown, path: string): void {
   if (value.后宫和谐度 !== undefined) 断言数字(value.后宫和谐度, `${path}.后宫和谐度`);
 }
 
+function 校验城池更新(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 城池字段, path);
+  if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.城池等级, `${path}.等级`);
+  for (const key of ['城防', '人口', '农业', '商业', '民心', '治安', '繁荣度'] as const) {
+    if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
+  }
+  if (value.太守 !== undefined) 断言字符串(value.太守, `${path}.太守`);
+  if (value.设施 !== undefined) {
+    断言(Array.isArray(value.设施), `${path}.设施 必须是数组`);
+    value.设施.forEach((item, index) => 断言字符串(item, `${path}.设施[${index}]`));
+  }
+}
+
+function 校验军队更新(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 军队字段, path);
+  if (value.兵种 !== undefined) 断言字符串(value.兵种, `${path}.兵种`);
+  if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.军队等级, `${path}.等级`);
+  for (const key of ['兵力', '士气', '疲惫', '训练进度'] as const) {
+    if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
+  }
+  if (value.装备等级 !== undefined) 断言枚举值(value.装备等级, 枚举.军队装备等级, `${path}.装备等级`);
+  if (value.统属将领 !== undefined) 断言字符串(value.统属将领, `${path}.统属将领`);
+  if (value.驻扎地 !== undefined) 断言字符串(value.驻扎地, `${path}.驻扎地`);
+  if (value.阵型 !== undefined) 断言枚举值(value.阵型, 枚举.阵型, `${path}.阵型`);
+}
+
+function 校验政策更新(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 政策字段, path);
+  if (value.当前研究 !== undefined) 断言字符串(value.当前研究, `${path}.当前研究`);
+  for (const key of ['研究进度', '富国', '强兵', '霸道', '王道'] as const) {
+    if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
+  }
+}
+
+function 校验势力更新(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 势力字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
+  if (value.规模 !== undefined) 断言枚举值(value.规模, 枚举.势力规模, `${path}.规模`);
+  for (const key of ['正统性', '情报网', '金钱', '粮草'] as const) {
+    if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
+  }
+  if (value.城池 !== undefined) {
+    断言对象(value.城池, `${path}.城池`);
+    for (const [key, item] of Object.entries(value.城池)) {
+      断言字符串(key, `${path}.城池 键名`);
+      校验城池更新(item, `${path}.城池.${key}`);
+    }
+  }
+  if (value.军队 !== undefined) {
+    断言对象(value.军队, `${path}.军队`);
+    for (const [key, item] of Object.entries(value.军队)) {
+      断言字符串(key, `${path}.军队 键名`);
+      校验军队更新(item, `${path}.军队.${key}`);
+    }
+  }
+  if (value.外交 !== undefined) {
+    校验数字映射(value.外交, `${path}.外交`);
+  }
+  if (value.政策 !== undefined) 校验政策更新(value.政策, `${path}.政策`);
+}
+
 function 校验NPC更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, NPC字段, path);
@@ -474,6 +594,42 @@ export function 校验命令(command: 状态命令, index = 0): void {
           断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
         }
         校验资源变化(command.changes, `${path}.changes`);
+        return;
+      case 'UpdateFaction':
+        debugLog('commands', '校验 UpdateFaction', { index });
+        校验势力更新(command.changes, `${path}.changes`);
+        return;
+      case 'UpsertCity':
+        debugLog('commands', '校验 UpsertCity', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        校验城池更新(command.data, `${path}.data`);
+        return;
+      case 'RemoveCity':
+        debugLog('commands', '校验 RemoveCity', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        return;
+      case 'UpsertArmy':
+        debugLog('commands', '校验 UpsertArmy', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        if (command.createIfMissing !== undefined) {
+          断言布尔(command.createIfMissing, `${path}.createIfMissing`);
+        }
+        校验军队更新(command.data, `${path}.data`);
+        return;
+      case 'RemoveArmy':
+        debugLog('commands', '校验 RemoveArmy', { index, id: command.id });
+        断言字符串(command.id, `${path}.id`);
+        return;
+      case 'UpdateDiplomacy':
+        debugLog('commands', '校验 UpdateDiplomacy', { index });
+        校验数字映射(command.changes, `${path}.changes`);
+        return;
+      case 'UpdatePolicy':
+        debugLog('commands', '校验 UpdatePolicy', { index });
+        校验政策更新(command.changes, `${path}.changes`);
         return;
       case 'UpsertNpc':
         debugLog('commands', '校验 UpsertNpc', { index, id: command.id });
