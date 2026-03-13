@@ -3,7 +3,8 @@ import { 构建宏注入文本, 构建注入文本, 构建注入视图, type 注
 import { 解析命令输入, type 状态命令 } from './commands';
 import { debugError, debugInfo, debugLog, summarizeState, summarizeValue } from './debug';
 import { 解析命令块 } from './protocol';
-import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态 } from './storage';
+import { appendStatusBar, buildStatusBar, stripStatusBar } from './status-panel';
+import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态, 更新消息正文 } from './storage';
 import { type 状态总表 } from './state';
 
 export type 命令应用结果 = 执行结果 & {
@@ -27,6 +28,14 @@ export function buildInjectedView(state: 状态总表): 注入视图 {
 
 export function buildContextMacroText(state: 状态总表): string {
   return 构建宏注入文本(state);
+}
+
+export function buildStatusBarHtml(state: 状态总表, messageId?: number): string {
+  return buildStatusBar(state, messageId);
+}
+
+export function appendStatusBarToReply(replyText: string, state: 状态总表, messageId?: number): string {
+  return appendStatusBar(stripStatusBar(replyText), state, messageId);
 }
 
 export function refreshContextMacro(state: 状态总表, macroKey = CONTEXT_MACRO_KEY): string {
@@ -111,6 +120,7 @@ export async function extractApplyAndSaveCommands(
       macroKey,
       refreshMacroOnNoCommands,
     });
+    await 更新消息正文(messageId, appendStatusBarToReply(extracted.cleanedReplyText, state, messageId));
     if (refreshMacroOnNoCommands) {
       refreshContextMacro(state, macroKey);
     }
@@ -122,6 +132,7 @@ export async function extractApplyAndSaveCommands(
     };
   }
   const result = await 执行并保存命令(state, extracted.commands, messageId);
+  await 更新消息正文(messageId, appendStatusBarToReply(extracted.cleanedReplyText, result.state, messageId));
   refreshContextMacro(result.state, macroKey);
   debugInfo('bridge', '提取、应用并保存命令完成', {
     messageId,

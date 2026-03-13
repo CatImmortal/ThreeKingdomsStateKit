@@ -133,6 +133,20 @@ async function 清理过期状态快照(): Promise<void> {
   });
 }
 
+export async function 更新消息正文(messageId: number, message: string): Promise<void> {
+  const currentMessage = 读取消息(messageId);
+  if (!currentMessage) {
+    throw new Error(`未找到要更新正文的消息: ${messageId}`);
+  }
+  debugLog('storage', '准备写入楼层正文', {
+    messageId,
+    before: summarizeValue(currentMessage.message),
+    after: summarizeValue(message),
+  });
+  await 获取消息接口().setChatMessages([{ message_id: messageId, message }], { refresh: 'affected' });
+  debugLog('storage', '楼层正文写入完成', { messageId });
+}
+
 export async function 保存状态(state: 状态总表, messageId: number): Promise<状态总表> {
   const next = recompute全局(create初始状态(state));
   const currentMessage = 读取消息(messageId);

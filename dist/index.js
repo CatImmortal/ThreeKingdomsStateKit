@@ -283,6 +283,8 @@ function create\u89D2\u8272\u6218\u6597\u6570\u636E(data = {}, { \u5B8C\u6574 = 
     \u516D\u7EF4: create\u516D\u7EF4(data.\u516D\u7EF4),
     \u5F53\u524D\u751F\u547D\u503C: \u6570\u503C(data.\u5F53\u524D\u751F\u547D\u503C),
     \u5F53\u524D\u4F53\u529B\u503C: \u6570\u503C(data.\u5F53\u524D\u4F53\u529B\u503C),
+    \u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210: \u6570\u503C(data.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210),
+    \u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210: \u6570\u503C(data.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210),
     \u88C5\u5907: create\u88C5\u5907\u680F(data.\u88C5\u5907),
     \u6B66\u6280: _.mapValues(data.\u6B66\u6280 || {}, (item) => create\u6B66\u6280\u6761\u76EE(item, { \u5B8C\u6574 })),
     \u4E13\u957F: _.mapValues(data.\u4E13\u957F || {}, (item) => create\u4E13\u957F\u6761\u76EE(item)),
@@ -577,7 +579,7 @@ var \u88C5\u5907\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u7
 var \u88C5\u5907\u680F\u5B57\u6BB5 = ["\u4E3B\u6B66\u5668", "\u526F\u6B66\u5668", "\u62A4\u7532", "\u5750\u9A91", "\u9970\u54C11", "\u9970\u54C12", "\u9970\u54C13"];
 var \u6B66\u6280\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u7C7B\u578B", "\u6548\u679C", "\u719F\u7EC3\u5EA6", "\u4F53\u529B\u6D88\u8017"];
 var \u4E13\u957F\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u6548\u679C"];
-var \u4E3B\u89D2\u5B57\u6BB5 = ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001", "\u7269\u54C1\u680F", "\u58F0\u671B", "\u91D1\u94B1", "\u79EF\u5206", "\u5B98\u804C", "\u7235\u4F4D", "\u540E\u5BAB\u548C\u8C10\u5EA6"];
+var \u4E3B\u89D2\u5B57\u6BB5 = ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210", "\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001", "\u7269\u54C1\u680F", "\u58F0\u671B", "\u91D1\u94B1", "\u79EF\u5206", "\u5B98\u804C", "\u7235\u4F4D", "\u540E\u5BAB\u548C\u8C10\u5EA6"];
 var \u7269\u54C1\u680F\u5B57\u6BB5 = ["\u54C1\u8D28", "\u63CF\u8FF0", "\u6570\u91CF"];
 var \u52BF\u529B\u5B57\u6BB5 = ["\u540D\u79F0", "\u89C4\u6A21", "\u6B63\u7EDF\u6027", "\u60C5\u62A5\u7F51", "\u91D1\u94B1", "\u7CAE\u8349", "\u57CE\u6C60", "\u519B\u961F", "\u5916\u4EA4", "\u653F\u7B56"];
 var \u57CE\u6C60\u5B57\u6BB5 = ["\u7B49\u7EA7", "\u57CE\u9632", "\u4EBA\u53E3", "\u519C\u4E1A", "\u5546\u4E1A", "\u6C11\u5FC3", "\u6CBB\u5B89", "\u7E41\u8363\u5EA6", "\u592A\u5B88", "\u8BBE\u65BD"];
@@ -733,10 +735,12 @@ function \u6821\u9A8C\u4E13\u957F\u6620\u5C04(value, path) {
 }
 function \u6821\u9A8C\u89D2\u8272\u6218\u6597\u6570\u636E(value, path) {
   \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
-  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001"], path);
+  \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210", "\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001"], path);
   if (value.\u516D\u7EF4 !== void 0) \u6821\u9A8C\u516D\u7EF4(value.\u516D\u7EF4, `${path}.\u516D\u7EF4`);
   if (value.\u5F53\u524D\u751F\u547D\u503C !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u5F53\u524D\u751F\u547D\u503C, `${path}.\u5F53\u524D\u751F\u547D\u503C`);
   if (value.\u5F53\u524D\u4F53\u529B\u503C !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u5F53\u524D\u4F53\u529B\u503C, `${path}.\u5F53\u524D\u4F53\u529B\u503C`);
+  if (value.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210, `${path}.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210`);
+  if (value.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210, `${path}.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210`);
   if (value.\u88C5\u5907 !== void 0) \u6821\u9A8C\u88C5\u5907\u680F(value.\u88C5\u5907, `${path}.\u88C5\u5907`);
   if (value.\u6B66\u6280 !== void 0) \u6821\u9A8C\u6B66\u6280\u6620\u5C04(value.\u6B66\u6280, `${path}.\u6B66\u6280`);
   if (value.\u4E13\u957F !== void 0) \u6821\u9A8C\u4E13\u957F\u6620\u5C04(value.\u4E13\u957F, `${path}.\u4E13\u957F`);
@@ -818,6 +822,8 @@ function \u6821\u9A8C\u4E3B\u89D2\u66F4\u65B0(value, path) {
   if (value.\u516D\u7EF4 !== void 0) \u6821\u9A8C\u516D\u7EF4(value.\u516D\u7EF4, `${path}.\u516D\u7EF4`);
   if (value.\u5F53\u524D\u751F\u547D\u503C !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u5F53\u524D\u751F\u547D\u503C, `${path}.\u5F53\u524D\u751F\u547D\u503C`);
   if (value.\u5F53\u524D\u4F53\u529B\u503C !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u5F53\u524D\u4F53\u529B\u503C, `${path}.\u5F53\u524D\u4F53\u529B\u503C`);
+  if (value.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210, `${path}.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210`);
+  if (value.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210, `${path}.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210`);
   if (value.\u88C5\u5907 !== void 0) \u6821\u9A8C\u88C5\u5907\u680F(value.\u88C5\u5907, `${path}.\u88C5\u5907`);
   if (value.\u6B66\u6280 !== void 0) \u6821\u9A8C\u6B66\u6280\u6620\u5C04(value.\u6B66\u6280, `${path}.\u6B66\u6280`);
   if (value.\u4E13\u957F !== void 0) \u6821\u9A8C\u4E13\u957F\u6620\u5C04(value.\u4E13\u957F, `${path}.\u4E13\u957F`);
@@ -1089,6 +1095,7 @@ __export(storage_exports, {
   \u4FDD\u5B58\u72B6\u6001: () => \u4FDD\u5B58\u72B6\u6001,
   \u521D\u59CB\u5316\u72B6\u6001: () => \u521D\u59CB\u5316\u72B6\u6001,
   \u52A0\u8F7D\u72B6\u6001: () => \u52A0\u8F7D\u72B6\u6001,
+  \u66F4\u65B0\u6D88\u606F\u6B63\u6587: () => \u66F4\u65B0\u6D88\u606F\u6B63\u6587,
   \u66F4\u65B0\u72B6\u6001: () => \u66F4\u65B0\u72B6\u6001,
   \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F: () => \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F,
   \u8BFB\u53D6\u539F\u59CB\u72B6\u6001: () => \u8BFB\u53D6\u539F\u59CB\u72B6\u6001,
@@ -1110,12 +1117,16 @@ function recompute\u516D\u7EF4(stats) {
 function recompute\u89D2\u8272\u6218\u6597\u6570\u636E(data) {
   const next = _.cloneDeep(data);
   next.\u516D\u7EF4 = recompute\u516D\u7EF4(next.\u516D\u7EF4);
-  const \u751F\u547D\u4E0A\u9650 = (next.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0) * 5;
-  const \u4F53\u529B\u4E0A\u9650 = (next.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0) * 8;
+  const \u57FA\u7840\u751F\u547D\u4E0A\u9650 = (next.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0) * 5;
+  const \u57FA\u7840\u4F53\u529B\u4E0A\u9650 = (next.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0) * 8;
+  const \u751F\u547D\u4E0A\u9650 = Math.max(0, \u57FA\u7840\u751F\u547D\u4E0A\u9650 + \u6570\u503C(next.\u751F\u547D\u503C\u4E0A\u9650\u52A0\u6210));
+  const \u4F53\u529B\u4E0A\u9650 = Math.max(0, \u57FA\u7840\u4F53\u529B\u4E0A\u9650 + \u6570\u503C(next.\u4F53\u529B\u503C\u4E0A\u9650\u52A0\u6210));
   next.\u5F53\u524D\u751F\u547D\u503C = _.clamp(\u6570\u503C(next.\u5F53\u524D\u751F\u547D\u503C), 0, \u751F\u547D\u4E0A\u9650);
   next.\u5F53\u524D\u4F53\u529B\u503C = _.clamp(\u6570\u503C(next.\u5F53\u524D\u4F53\u529B\u503C), 0, \u4F53\u529B\u4E0A\u9650);
-  next._\u751F\u547D\u4E0A\u9650 = \u751F\u547D\u4E0A\u9650;
-  next._\u4F53\u529B\u4E0A\u9650 = \u4F53\u529B\u4E0A\u9650;
+  next._\u57FA\u7840\u751F\u547D\u503C\u4E0A\u9650 = \u57FA\u7840\u751F\u547D\u4E0A\u9650;
+  next._\u57FA\u7840\u4F53\u529B\u503C\u4E0A\u9650 = \u57FA\u7840\u4F53\u529B\u4E0A\u9650;
+  next._\u751F\u547D\u503C\u4E0A\u9650 = \u751F\u547D\u4E0A\u9650;
+  next._\u4F53\u529B\u503C\u4E0A\u9650 = \u4F53\u529B\u4E0A\u9650;
   const \u4F24\u52BF = \u8BA1\u7B97\u4F24\u52BF(next.\u5F53\u524D\u751F\u547D\u503C, \u751F\u547D\u4E0A\u9650);
   next._\u4F24\u52BF = \u4F24\u52BF._\u4F24\u52BF;
   next._\u6218\u6597\u51CF\u503C = \u4F24\u52BF._\u6218\u6597\u51CF\u503C;
@@ -1321,6 +1332,19 @@ async function \u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167() {
   debugLog("storage", "\u8FC7\u671F\u72B6\u6001\u5FEB\u7167\u6E05\u7406\u5B8C\u6210", {
     removedMessageIds: patches.map((item) => item.message_id)
   });
+}
+async function \u66F4\u65B0\u6D88\u606F\u6B63\u6587(messageId, message) {
+  const currentMessage = \u8BFB\u53D6\u6D88\u606F(messageId);
+  if (!currentMessage) {
+    throw new Error(`\u672A\u627E\u5230\u8981\u66F4\u65B0\u6B63\u6587\u7684\u6D88\u606F: ${messageId}`);
+  }
+  debugLog("storage", "\u51C6\u5907\u5199\u5165\u697C\u5C42\u6B63\u6587", {
+    messageId,
+    before: summarizeValue(currentMessage.message),
+    after: summarizeValue(message)
+  });
+  await \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().setChatMessages([{ message_id: messageId, message }], { refresh: "affected" });
+  debugLog("storage", "\u697C\u5C42\u6B63\u6587\u5199\u5165\u5B8C\u6210", { messageId });
 }
 async function \u4FDD\u5B58\u72B6\u6001(state, messageId) {
   const next = recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(state));
@@ -1756,9 +1780,11 @@ function \u89E3\u6790\u547D\u4EE4\u5757(replyText) {
 // src/bridge.ts
 var bridge_exports = {};
 __export(bridge_exports, {
+  appendStatusBarToReply: () => appendStatusBarToReply,
   buildContextMacroText: () => buildContextMacroText,
   buildInjectedContext: () => buildInjectedContext,
   buildInjectedView: () => buildInjectedView,
+  buildStatusBarHtml: () => buildStatusBarHtml,
   extractAndApplyCommands: () => extractAndApplyCommands,
   extractApplyAndSaveCommands: () => extractApplyAndSaveCommands,
   extractCommands: () => extractCommands,
@@ -1766,6 +1792,234 @@ __export(bridge_exports, {
   refreshContextMacro: () => refreshContextMacro,
   refreshContextMacroFromStorage: () => refreshContextMacroFromStorage
 });
+
+// src/status-panel.ts
+var status_panel_exports = {};
+__export(status_panel_exports, {
+  STATUS_BAR_END: () => STATUS_BAR_END,
+  STATUS_BAR_START: () => STATUS_BAR_START,
+  appendStatusBar: () => appendStatusBar,
+  buildStatusBar: () => buildStatusBar,
+  stripStatusBar: () => stripStatusBar
+});
+var STATUS_BAR_START = "<StatusBar>";
+var STATUS_BAR_END = "</StatusBar>";
+function \u8F6C\u4E49HTML(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function \u6570\u503C\u6761(label, current, max, tone = "hp") {
+  const currentNumber = Number(current ?? 0);
+  const maxNumber = Number(max ?? Math.max(currentNumber, 100));
+  const safeMax = maxNumber > 0 ? maxNumber : 100;
+  const percent = Math.max(0, Math.min(100, Math.round(currentNumber / safeMax * 100)));
+  return `<div class="tk-panel-bar-row"><div class="tk-panel-bar-label">${\u8F6C\u4E49HTML(label)}</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-${tone}" style="width:${percent}%"></span></div><div class="tk-panel-bar-value">${\u8F6C\u4E49HTML(currentNumber)}${max !== void 0 ? ` / ${\u8F6C\u4E49HTML(maxNumber)}` : ""}</div></div>`;
+}
+function \u6807\u7B7E(label, value, accent = false) {
+  return `<div class="tk-panel-kv${accent ? " is-accent" : ""}"><span class="tk-panel-k">${\u8F6C\u4E49HTML(label)}</span><span class="tk-panel-v">${\u8F6C\u4E49HTML(value || "\u65E0")}</span></div>`;
+}
+function \u5217\u8868\u9879(title, meta, desc) {
+  return `<div class="tk-panel-list-item"><div class="tk-panel-list-title">${\u8F6C\u4E49HTML(title)}</div><div class="tk-panel-list-meta">${\u8F6C\u4E49HTML(meta)}</div>${desc ? `<div class="tk-panel-list-desc">${\u8F6C\u4E49HTML(desc)}</div>` : ""}</div>`;
+}
+function \u6E32\u67D3\u4E3B\u89D2\u9875(state) {
+  const player = state.\u4E3B\u89D2;
+  const \u8D44\u6E90\u6807\u7B7E = [
+    \u6807\u7B7E("\u5B98\u804C", player.\u5B98\u804C || "\u65E0", true),
+    \u6807\u7B7E("\u7235\u4F4D", player.\u7235\u4F4D || "\u65E0", true),
+    \u6807\u7B7E("\u58F0\u671B\u79F0\u53F7", player._\u58F0\u671B\u79F0\u53F7 || "\u65E0"),
+    \u6807\u7B7E("\u548C\u8C10\u7B49\u7EA7", player._\u548C\u8C10\u7B49\u7EA7 || "\u65E0"),
+    \u6807\u7B7E("\u91D1\u94B1", player.\u91D1\u94B1),
+    \u6807\u7B7E("\u79EF\u5206", player.\u79EF\u5206),
+    \u6807\u7B7E("\u58F0\u671B", player.\u58F0\u671B)
+  ].join("");
+  const \u516D\u7EF4 = [
+    \u6807\u7B7E("\u6B66\u529B", `${player.\u516D\u7EF4.\u6B66\u529B} / ${player.\u516D\u7EF4._\u6B66\u529B\u52A0\u503C ?? 0}`),
+    \u6807\u7B7E("\u667A\u529B", `${player.\u516D\u7EF4.\u667A\u529B} / ${player.\u516D\u7EF4._\u667A\u529B\u52A0\u503C ?? 0}`),
+    \u6807\u7B7E("\u7EDF\u7387", `${player.\u516D\u7EF4.\u7EDF\u7387} / ${player.\u516D\u7EF4._\u7EDF\u7387\u52A0\u503C ?? 0}`),
+    \u6807\u7B7E("\u653F\u6CBB", `${player.\u516D\u7EF4.\u653F\u6CBB} / ${player.\u516D\u7EF4._\u653F\u6CBB\u52A0\u503C ?? 0}`),
+    \u6807\u7B7E("\u9B45\u529B", `${player.\u516D\u7EF4.\u9B45\u529B} / ${player.\u516D\u7EF4._\u9B45\u529B\u52A0\u503C ?? 0}`),
+    \u6807\u7B7E("\u4F53\u8D28", `${player.\u516D\u7EF4.\u4F53\u8D28} / ${player.\u516D\u7EF4._\u4F53\u8D28\u52A0\u503C ?? 0}`)
+  ].join("");
+  const \u88C5\u5907\u5217\u8868 = Object.entries(player.\u88C5\u5907 || {}).map(([slot, item]) => {
+    if (!item || item === "\u65E0") {
+      return \u5217\u8868\u9879(slot, "\u672A\u88C5\u5907");
+    }
+    return \u5217\u8868\u9879(`${slot} \xB7 ${item.\u540D\u79F0}`, `${item.\u54C1\u8D28} / ${item.\u7C7B\u578B}`, item.\u63CF\u8FF0 || item.\u5176\u4ED6\u6548\u679C || "\u65E0");
+  }).join("");
+  return `
+    <div class="tk-panel-page-grid cols-2">
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u4E3B\u89D2\u9762\u677F</div>
+        ${\u6570\u503C\u6761("\u751F\u547D", player.\u5F53\u524D\u751F\u547D\u503C, player._\u751F\u547D\u503C\u4E0A\u9650, "hp")}
+        ${\u6570\u503C\u6761("\u4F53\u529B", player.\u5F53\u524D\u4F53\u529B\u503C, player._\u4F53\u529B\u503C\u4E0A\u9650, "sp")}
+        <div class="tk-panel-inline-note">\u4F24\u52BF\uFF1A${\u8F6C\u4E49HTML(player._\u4F24\u52BF || "\u5B8C\u597D")}\u3000\u51CF\u503C\uFF1A${\u8F6C\u4E49HTML(player._\u6218\u6597\u51CF\u503C ?? 0)}</div>
+        <div class="tk-panel-kv-grid">${\u8D44\u6E90\u6807\u7B7E}</div>
+      </section>
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u516D\u7EF4\u4E0E\u6218\u6597</div>
+        <div class="tk-panel-kv-grid">${\u516D\u7EF4}</div>
+        <div class="tk-panel-kv-grid compact">
+          ${\u6807\u7B7E("\u5148\u653B", player._\u5148\u653B\u503C ?? 0)}
+          ${\u6807\u7B7E("\u653B\u51FB", player._\u653B\u51FB\u57FA\u7840\u503C ?? 0)}
+          ${\u6807\u7B7E("\u4F24\u5BB3", player._\u4F24\u5BB3\u57FA\u7840\u503C ?? 0)}
+          ${\u6807\u7B7E("\u9632\u5FA1DC", player._\u9632\u5FA1DC ?? 0)}
+          ${\u6807\u7B7E("\u4F24\u5BB3\u51CF\u514D", player._\u4F24\u5BB3\u51CF\u514D ?? 0)}
+        </div>
+      </section>
+      <section class="tk-panel-card cols-span-2">
+        <div class="tk-panel-card-title">\u88C5\u5907\u680F</div>
+        <div class="tk-panel-list">${\u88C5\u5907\u5217\u8868 || '<div class="tk-panel-empty">\u6682\u65E0\u88C5\u5907</div>'}</div>
+      </section>
+    </div>`;
+}
+function \u6E32\u67D3NPC\u8BE6\u60C5(id, npc) {
+  const details = [
+    \u6807\u7B7E("\u9635\u8425", npc.\u9635\u8425 || "\u65E0"),
+    \u6807\u7B7E("\u5B9A\u4F4D", npc.\u5B9A\u4F4D || "\u65E0"),
+    \u6807\u7B7E("\u5173\u7CFB", npc._\u5FE0\u8BDA\u7B49\u7EA7 || npc._\u597D\u611F\u7B49\u7EA7 || npc._\u4EA4\u60C5\u7B49\u7EA7 || npc.\u597D\u611F)
+  ].join("");
+  return `
+    <details class="tk-panel-detail">
+      <summary><span>${\u8F6C\u4E49HTML(npc.\u540D\u79F0 || id)}</span><span>${\u8F6C\u4E49HTML(npc.\u54C1\u8D28)} / ${\u8F6C\u4E49HTML(npc.\u5B9A\u4F4D || "\u672A\u77E5")}</span></summary>
+      <div class="tk-panel-detail-body">
+        <div class="tk-panel-kv-grid compact">${details}</div>
+        <div class="tk-panel-inline-note">${\u8F6C\u4E49HTML(npc.\u7B80\u8FF0 || "\u6682\u65E0\u63CF\u8FF0")}</div>
+      </div>
+    </details>`;
+}
+function \u6E32\u67D3NPC\u9875(state) {
+  const entries = Object.entries(state.NPC || {});
+  const list = entries.length > 0 ? entries.map(([id, npc]) => \u6E32\u67D3NPC\u8BE6\u60C5(id, npc)).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u5730\u70B9\u6682\u65E0\u5173\u952E NPC</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5F53\u524D\u5730\u70B9 NPC</div><div class="tk-panel-detail-list">${list}</div></section>`;
+}
+function \u6E32\u67D3\u4EFB\u52A1\u9875(state) {
+  const tasks = Object.entries(state.\u4EFB\u52A1 || {});
+  const content = tasks.length ? tasks.map(([id, task]) => {
+    const targets = Object.values(task.\u76EE\u6807 || {}).map((target) => `${target.\u7C7B\u578B}:${target.\u72B6\u6001}`).join(" / ") || "\u65E0\u76EE\u6807";
+    return \u5217\u8868\u9879(task.\u540D\u79F0 || id, `${task.\u7C7B\u578B} / ${task.\u72B6\u6001}`, `${task.\u65F6\u9650 || "\u65E0\u65F6\u9650"} \xB7 ${targets}`);
+  }).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u6D3B\u8DC3\u4EFB\u52A1</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u4EFB\u52A1\u5217\u8868</div><div class="tk-panel-list">${content}</div></section>`;
+}
+function \u6E32\u67D3\u5546\u57CE\u9875(state) {
+  const items = Object.entries(state.\u5546\u57CE || {});
+  const content = items.length ? items.map(([id, item]) => \u5217\u8868\u9879(item.\u540D\u79F0 || id, `${item.\u5206\u7C7B} / ${item.\u4EF7\u683C} \u79EF\u5206`, item.\u63CF\u8FF0 || "")).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u53EF\u89C1\u5546\u54C1</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u5546\u57CE</div><div class="tk-panel-list">${content}</div></section>`;
+}
+function \u6E32\u67D3\u519B\u961F\u9875(state) {
+  const armies = Object.entries(state.\u52BF\u529B?.\u519B\u961F || {});
+  const content = armies.length ? armies.map(([id, army]) => `
+      <details class="tk-panel-detail">
+        <summary><span>${\u8F6C\u4E49HTML(id)}</span><span>${\u8F6C\u4E49HTML(army.\u5175\u79CD)} / ${\u8F6C\u4E49HTML(army.\u7B49\u7EA7)}</span></summary>
+        <div class="tk-panel-detail-body">
+          ${\u6570\u503C\u6761("\u58EB\u6C14", army.\u58EB\u6C14, 100, "morale")}
+          ${\u6570\u503C\u6761("\u75B2\u60EB", army.\u75B2\u60EB, 100, "fatigue")}
+          <div class="tk-panel-kv-grid compact">
+            ${\u6807\u7B7E("\u5175\u529B", army.\u5175\u529B)}
+            ${\u6807\u7B7E("\u5C06\u9886", army.\u7EDF\u5C5E\u5C06\u9886 || "\u65E0")}
+            ${\u6807\u7B7E("\u9A7B\u624E\u5730", army.\u9A7B\u624E\u5730 || "\u65E0")}
+            ${\u6807\u7B7E("\u6218\u529B", army._\u7EFC\u5408\u6218\u529B ?? 0)}
+            ${\u6807\u7B7E("\u653B\u51FB\u6218\u529B", army._\u653B\u51FB\u6218\u529B ?? 0)}
+            ${\u6807\u7B7E("\u9632\u5FA1\u6218\u529B", army._\u9632\u5FA1\u6218\u529B ?? 0)}
+          </div>
+        </div>
+      </details>`).join("") : '<div class="tk-panel-empty">\u5F53\u524D\u6CA1\u6709\u519B\u961F\u6570\u636E</div>';
+  return `<section class="tk-panel-card"><div class="tk-panel-card-title">\u519B\u961F</div><div class="tk-panel-detail-list">${content}</div></section>`;
+}
+function \u6E32\u67D3\u52BF\u529B\u9875(state) {
+  const faction = state.\u52BF\u529B;
+  const diplomacy = Object.entries(faction.\u5916\u4EA4 || {}).slice(0, 8).map(([name, value]) => \u6807\u7B7E(name, `${value} / ${faction._\u5916\u4EA4\u7B49\u7EA7?.[name] || "\u672A\u77E5"}`)).join("");
+  const cities = Object.entries(faction.\u57CE\u6C60 || {}).slice(0, 8).map(([name, city]) => \u5217\u8868\u9879(name, `${city.\u7B49\u7EA7} / \u592A\u5B88:${city.\u592A\u5B88 || "\u65E0"}`, `\u7A0E\u6536:${city._\u6708\u7A0E\u6536 ?? 0} \xB7 \u4EA7\u7CAE:${city._\u6708\u4EA7\u7CAE ?? 0}`)).join("");
+  return `
+    <div class="tk-panel-page-grid cols-2">
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u52BF\u529B\u603B\u89C8</div>
+        <div class="tk-panel-kv-grid">
+          ${\u6807\u7B7E("\u540D\u79F0", faction.\u540D\u79F0 || "\u65E0", true)}
+          ${\u6807\u7B7E("\u89C4\u6A21", faction.\u89C4\u6A21 || "\u65E0", true)}
+          ${\u6807\u7B7E("\u6B63\u7EDF\u6027", faction.\u6B63\u7EDF\u6027)}
+          ${\u6807\u7B7E("\u60C5\u62A5\u7F51", faction.\u60C5\u62A5\u7F51)}
+          ${\u6807\u7B7E("\u91D1\u94B1", faction.\u91D1\u94B1)}
+          ${\u6807\u7B7E("\u7CAE\u8349", faction.\u7CAE\u8349)}
+          ${\u6807\u7B7E("\u603B\u5175\u529B", faction._\u603B\u5175\u529B ?? 0)}
+          ${\u6807\u7B7E("\u603B\u6218\u529B", faction._\u603B\u6218\u529B ?? 0)}
+          ${\u6807\u7B7E("\u6708\u7A0E\u6536", faction._\u6708\u603B\u7A0E\u6536 ?? 0)}
+          ${\u6807\u7B7E("\u6708\u4EA7\u7CAE", faction._\u6708\u603B\u4EA7\u7CAE ?? 0)}
+          ${\u6807\u7B7E("\u6708\u519B\u9977", faction._\u6708\u519B\u9977\u4F30\u7B97 ?? 0)}
+          ${\u6807\u7B7E("\u6708\u8017\u7CAE", faction._\u6708\u7CAE\u8349\u6D88\u8017\u4F30\u7B97 ?? 0)}
+        </div>
+      </section>
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">\u5916\u4EA4\u6001\u52BF</div>
+        <div class="tk-panel-kv-grid compact">${diplomacy || '<div class="tk-panel-empty">\u6682\u65E0\u5916\u4EA4\u6570\u636E</div>'}</div>
+      </section>
+      <section class="tk-panel-card cols-span-2">
+        <div class="tk-panel-card-title">\u57CE\u6C60\u6458\u8981</div>
+        <div class="tk-panel-list">${cities || '<div class="tk-panel-empty">\u6682\u65E0\u57CE\u6C60\u6570\u636E</div>'}</div>
+      </section>
+    </div>`;
+}
+function \u6837\u5F0F(ids) {
+  return `<style>
+.tk-statusbar{margin-top:14px;border:1px solid rgba(196,154,92,.45);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(37,24,17,.96),rgba(15,12,10,.96));box-shadow:0 12px 32px rgba(0,0,0,.35);color:#f3e3c3;font-family:"Microsoft YaHei",serif}
+.tk-statusbar *{box-sizing:border-box}
+.tk-statusbar .tk-panel-shell{position:relative}
+.tk-statusbar .tk-panel-head{padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.28);background:linear-gradient(180deg,rgba(122,63,30,.35),rgba(54,30,18,.15))}
+.tk-statusbar .tk-panel-title{font-size:18px;font-weight:700;letter-spacing:2px;color:#f6d9a2}
+.tk-statusbar .tk-panel-subtitle{margin-top:6px;font-size:12px;color:#d8bf93;display:flex;flex-wrap:wrap;gap:10px}
+.tk-statusbar .tk-panel-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.02)}
+.tk-statusbar .tk-panel-tab-input{display:none}
+.tk-statusbar .tk-panel-tab-label{padding:8px 14px;border:1px solid rgba(196,154,92,.28);border-radius:999px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;transition:.2s;font-size:12px}
+.tk-statusbar .tk-panel-tab-label:hover{background:rgba(196,154,92,.12);color:#fff1d0}
+.tk-statusbar .tk-panel-pages{padding:14px}
+.tk-statusbar .tk-panel-page{display:none}
+.tk-statusbar #${ids.hero}:checked~.tk-panel-tabs label[for="${ids.hero}"],.tk-statusbar #${ids.npc}:checked~.tk-panel-tabs label[for="${ids.npc}"],.tk-statusbar #${ids.quest}:checked~.tk-panel-tabs label[for="${ids.quest}"],.tk-statusbar #${ids.shop}:checked~.tk-panel-tabs label[for="${ids.shop}"],.tk-statusbar #${ids.army}:checked~.tk-panel-tabs label[for="${ids.army}"],.tk-statusbar #${ids.faction}:checked~.tk-panel-tabs label[for="${ids.faction}"]{background:linear-gradient(180deg,#a76b2e,#7a4a1f);color:#fff5e6;border-color:rgba(255,216,158,.8);box-shadow:0 0 0 1px rgba(255,240,212,.12) inset}
+.tk-statusbar #${ids.hero}:checked~.tk-panel-pages .is-hero,.tk-statusbar #${ids.npc}:checked~.tk-panel-pages .is-npc,.tk-statusbar #${ids.quest}:checked~.tk-panel-pages .is-quest,.tk-statusbar #${ids.shop}:checked~.tk-panel-pages .is-shop,.tk-statusbar #${ids.army}:checked~.tk-panel-pages .is-army,.tk-statusbar #${ids.faction}:checked~.tk-panel-pages .is-faction{display:block}
+.tk-statusbar .tk-panel-page-grid{display:grid;gap:12px}.tk-statusbar .tk-panel-page-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tk-statusbar .cols-span-2{grid-column:span 2}
+.tk-statusbar .tk-panel-card{padding:14px;border:1px solid rgba(196,154,92,.22);border-radius:12px;background:rgba(255,248,232,.03)}
+.tk-statusbar .tk-panel-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
+.tk-statusbar .tk-panel-kv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tk-statusbar .tk-panel-kv{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.tk-statusbar .tk-panel-kv.is-accent{background:rgba(167,107,46,.18);border-color:rgba(240,201,131,.26)}
+.tk-statusbar .tk-panel-k{display:block;font-size:11px;color:#cba977}.tk-statusbar .tk-panel-v{display:block;margin-top:4px;font-size:13px;color:#fff1d0}
+.tk-statusbar .tk-panel-inline-note{margin-top:10px;font-size:12px;color:#d6c4a4}
+.tk-statusbar .tk-panel-list,.tk-statusbar .tk-panel-detail-list{display:flex;flex-direction:column;gap:8px}
+.tk-statusbar .tk-panel-list-item{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.tk-statusbar .tk-panel-list-title{font-size:13px;font-weight:700;color:#f6dfb5}.tk-statusbar .tk-panel-list-meta{margin-top:4px;font-size:11px;color:#d6bb91}.tk-statusbar .tk-panel-list-desc{margin-top:6px;font-size:12px;color:#f2eadc;opacity:.88}
+.tk-statusbar .tk-panel-detail{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
+.tk-statusbar .tk-panel-detail summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:10px 12px;color:#f6dfb5;font-size:13px}.tk-statusbar .tk-panel-detail summary::-webkit-details-marker{display:none}
+.tk-statusbar .tk-panel-detail-body{padding:0 12px 12px}
+.tk-statusbar .tk-panel-empty{padding:18px 12px;text-align:center;color:#bda681;font-size:12px}
+.tk-statusbar .tk-panel-bar-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
+.tk-statusbar .tk-panel-bar-label,.tk-statusbar .tk-panel-bar-value{font-size:11px;color:#d8bf93}.tk-statusbar .tk-panel-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.tk-statusbar .tk-panel-bar-fill{display:block;height:100%}.tk-statusbar .tk-panel-bar-fill.is-hp{background:linear-gradient(90deg,#7f1d1d,#dc2626)}.tk-statusbar .tk-panel-bar-fill.is-sp{background:linear-gradient(90deg,#0f3d73,#3b82f6)}.tk-statusbar .tk-panel-bar-fill.is-morale{background:linear-gradient(90deg,#7c5c12,#f59e0b)}.tk-statusbar .tk-panel-bar-fill.is-fatigue{background:linear-gradient(90deg,#3f3f46,#a1a1aa)}.tk-statusbar .tk-panel-bar-fill.is-gold{background:linear-gradient(90deg,#8b5e00,#facc15)}
+@media (max-width:720px){.tk-statusbar .tk-panel-page-grid.cols-2,.tk-statusbar .tk-panel-kv-grid,.tk-statusbar .tk-panel-kv-grid.compact{grid-template-columns:1fr}.tk-statusbar .cols-span-2{grid-column:span 1}}
+</style>`;
+}
+function stripStatusBar(content) {
+  return String(content || "").replace(/\s*<StatusBar>[\s\S]*?<\/StatusBar>\s*$/i, "").trim();
+}
+function buildStatusBar(state, messageId) {
+  const header = `${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u65F6\u95F4 || "\u672A\u77E5\u65F6\u523B")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5730\u70B9 || "\u672A\u77E5\u5730\u70B9")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5929\u6C14 || "\u672A\u77E5\u5929\u6C14")} \xB7 ${\u8F6C\u4E49HTML(state.\u4E16\u754C.\u5F53\u524D\u5267\u672C || "\u672A\u77E5\u5267\u672C")}`;
+  const suffix = String(messageId ?? "latest");
+  const group = `tk-panel-tab-${suffix}`;
+  const ids = {
+    hero: `tk-tab-hero-${suffix}`,
+    npc: `tk-tab-npc-${suffix}`,
+    quest: `tk-tab-quest-${suffix}`,
+    shop: `tk-tab-shop-${suffix}`,
+    army: `tk-tab-army-${suffix}`,
+    faction: `tk-tab-faction-${suffix}`
+  };
+  return `${STATUS_BAR_START}<div class="tk-statusbar"><div class="tk-panel-shell">${\u6837\u5F0F(ids)}<input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.hero}" checked><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.npc}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.quest}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.shop}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.army}"><input class="tk-panel-tab-input" type="radio" name="${group}" id="${ids.faction}"><div class="tk-panel-head"><div class="tk-panel-title">\u4E09\u56FD\u9738\u4E3B \xB7 \u7CFB\u7EDF\u9762\u677F</div><div class="tk-panel-subtitle"><span>${header}</span></div></div><div class="tk-panel-tabs"><label class="tk-panel-tab-label" for="${ids.hero}">\u4E3B\u89D2</label><label class="tk-panel-tab-label" for="${ids.npc}">\u5F53\u524D\u5730\u70B9NPC</label><label class="tk-panel-tab-label" for="${ids.quest}">\u4EFB\u52A1</label><label class="tk-panel-tab-label" for="${ids.shop}">\u5546\u57CE</label><label class="tk-panel-tab-label" for="${ids.army}">\u519B\u961F</label><label class="tk-panel-tab-label" for="${ids.faction}">\u52BF\u529B</label></div><div class="tk-panel-pages"><div class="tk-panel-page is-hero">${\u6E32\u67D3\u4E3B\u89D2\u9875(state)}</div><div class="tk-panel-page is-npc">${\u6E32\u67D3NPC\u9875(state)}</div><div class="tk-panel-page is-quest">${\u6E32\u67D3\u4EFB\u52A1\u9875(state)}</div><div class="tk-panel-page is-shop">${\u6E32\u67D3\u5546\u57CE\u9875(state)}</div><div class="tk-panel-page is-army">${\u6E32\u67D3\u519B\u961F\u9875(state)}</div><div class="tk-panel-page is-faction">${\u6E32\u67D3\u52BF\u529B\u9875(state)}</div></div></div></div>${STATUS_BAR_END}`;
+}
+function appendStatusBar(content, state, messageId) {
+  const cleaned = stripStatusBar(content);
+  return `${cleaned}
+
+${buildStatusBar(state, messageId)}`.trim();
+}
+
+// src/bridge.ts
 function buildInjectedContext(state) {
   return \u6784\u5EFA\u6CE8\u5165\u6587\u672C(state);
 }
@@ -1774,6 +2028,12 @@ function buildInjectedView(state) {
 }
 function buildContextMacroText(state) {
   return \u6784\u5EFA\u5B8F\u6CE8\u5165\u6587\u672C(state);
+}
+function buildStatusBarHtml(state, messageId) {
+  return buildStatusBar(state, messageId);
+}
+function appendStatusBarToReply(replyText, state, messageId) {
+  return appendStatusBar(stripStatusBar(replyText), state, messageId);
 }
 function refreshContextMacro(state, macroKey = CONTEXT_MACRO_KEY) {
   debugLog("bridge", "\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", {
@@ -1847,6 +2107,7 @@ async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey
       macroKey,
       refreshMacroOnNoCommands
     });
+    await \u66F4\u65B0\u6D88\u606F\u6B63\u6587(messageId, appendStatusBarToReply(extracted.cleanedReplyText, state, messageId));
     if (refreshMacroOnNoCommands) {
       refreshContextMacro(state, macroKey);
     }
@@ -1858,6 +2119,7 @@ async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey
     };
   }
   const result = await \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, messageId);
+  await \u66F4\u65B0\u6D88\u606F\u6B63\u6587(messageId, appendStatusBarToReply(extracted.cleanedReplyText, result.state, messageId));
   refreshContextMacro(result.state, macroKey);
   debugInfo("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
     messageId,
@@ -2217,6 +2479,7 @@ var ThreeKingdomsStateKit = {
   \u534F\u8BAE: protocol_exports,
   \u6865\u63A5: bridge_exports,
   \u5B8F: macro_exports,
+  \u72B6\u6001\u680F: status_panel_exports,
   \u8FD0\u884C\u65F6: runtime_exports,
   \u8C03\u8BD5: debug_exports,
   handleAssistantReply,
@@ -2263,12 +2526,18 @@ export {
   MAX_SAVED_STATE_MESSAGES,
   SGBZ_CONTEXT_MACRO_REGEX,
   STATE_ROOT_KEY,
+  STATUS_BAR_END,
+  STATUS_BAR_START,
   ThreeKingdomsStateKit,
   UPDATE_VARIABLE_END,
   UPDATE_VARIABLE_START,
+  appendStatusBar,
+  appendStatusBarToReply,
   buildContextMacroText,
   buildInjectedContext,
   buildInjectedView,
+  buildStatusBar,
+  buildStatusBarHtml,
   createNPC,
   create\u4E13\u957F\u6761\u76EE,
   create\u4E16\u754C,
@@ -2316,6 +2585,7 @@ export {
   setupAssistantReplyHook,
   setupDebugLogToggleButtonHook,
   setupDebugParseButtonHook,
+  stripStatusBar,
   summarizeState,
   summarizeValue,
   teardownAssistantReplyHook,
@@ -2346,6 +2616,7 @@ export {
   \u654F\u611F\u7B49\u7EA7,
   \u6570\u503C,
   \u65AD\u8A00\u65E0\u4E0B\u5212\u7EBF\u5B57\u6BB5,
+  \u66F4\u65B0\u6D88\u606F\u6B63\u6587,
   \u66F4\u65B0\u72B6\u6001,
   \u6784\u5EFA\u5B8F\u6CE8\u5165\u6587\u672C,
   \u6784\u5EFA\u6CE8\u5165\u6587\u672C,

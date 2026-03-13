@@ -84,12 +84,16 @@ export type 角色战斗数据 = {
   六维: 六维;
   当前生命值: number;
   当前体力值: number;
+  生命值上限加成: number;
+  体力值上限加成: number;
   装备: 装备栏;
   武技: Record<string, 武技条目>;
   专长: Record<string, 专长条目>;
   状态: 状态记录;
-  _生命上限?: number;
-  _体力上限?: number;
+  _基础生命值上限?: number;
+  _基础体力值上限?: number;
+  _生命值上限?: number;
+  _体力值上限?: number;
   _伤势?: string;
   _战斗减值?: number;
   _先攻值?: number;
@@ -337,6 +341,8 @@ export function create角色战斗数据(data: Partial<角色战斗数据> = {},
     六维: create六维(data.六维),
     当前生命值: 数值(data.当前生命值),
     当前体力值: 数值(data.当前体力值),
+    生命值上限加成: 数值(data.生命值上限加成),
+    体力值上限加成: 数值(data.体力值上限加成),
     装备: create装备栏(data.装备),
     武技: _.mapValues(data.武技 || {}, item => create武技条目(item, { 完整 })),
     专长: _.mapValues(data.专长 || {}, item => create专长条目(item)),

@@ -53,12 +53,16 @@ export function recompute角色战斗数据(data: 角色战斗数据): 角色战
   const next = _.cloneDeep(data);
   next.六维 = recompute六维(next.六维);
 
-  const 生命上限 = (next.六维._体质加值 ?? 0) * 5;
-  const 体力上限 = (next.六维._体质加值 ?? 0) * 8;
+  const 基础生命上限 = (next.六维._体质加值 ?? 0) * 5;
+  const 基础体力上限 = (next.六维._体质加值 ?? 0) * 8;
+  const 生命上限 = Math.max(0, 基础生命上限 + 数值(next.生命值上限加成));
+  const 体力上限 = Math.max(0, 基础体力上限 + 数值(next.体力值上限加成));
   next.当前生命值 = _.clamp(数值(next.当前生命值), 0, 生命上限);
   next.当前体力值 = _.clamp(数值(next.当前体力值), 0, 体力上限);
-  next._生命上限 = 生命上限;
-  next._体力上限 = 体力上限;
+  next._基础生命值上限 = 基础生命上限;
+  next._基础体力值上限 = 基础体力上限;
+  next._生命值上限 = 生命上限;
+  next._体力值上限 = 体力上限;
 
   const 伤势 = 计算伤势(next.当前生命值, 生命上限);
   next._伤势 = 伤势._伤势;

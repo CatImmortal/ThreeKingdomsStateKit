@@ -18,6 +18,7 @@ import * as context from './context';
 import * as protocol from './protocol';
 import * as bridge from './bridge';
 import * as macro from './macro';
+import * as statusPanel from './status-panel';
 import './runtime-auto';
 import * as runtime from './runtime';
 import * as debug from './debug';
@@ -33,6 +34,7 @@ export * from './context';
 export * from './protocol';
 export * from './bridge';
 export * from './macro';
+export * from './status-panel';
 export * from './runtime';
 export * from './debug';
 
@@ -57,6 +59,7 @@ export const ThreeKingdomsStateKit = {
   协议: protocol,
   桥接: bridge,
   宏: macro,
+  状态栏: statusPanel,
   运行时: runtime,
   调试: debug,
   handleAssistantReply: bridge.handleAssistantReply,
