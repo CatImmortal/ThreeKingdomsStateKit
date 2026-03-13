@@ -13,7 +13,7 @@ import {
   type 任务,
 } from './state';
 import { MAX_RECENT_EVENTS, 数值 } from './rules';
-import { 保存状态, STATE_ROOT_KEY } from './storage';
+import { 保存状态 } from './storage';
 
 export type 执行结果 = {
   state: 状态总表;
@@ -101,7 +101,7 @@ function 应用任务状态(state: 状态总表, command: Extract<状态命令, 
   if (command.目标) {
     for (const [targetId, patch] of Object.entries(command.目标)) {
       next.目标[targetId] = {
-        ...(next.目标[targetId] ?? { 类型: '主要', 状态: '未完成', 积分: 0, 其他奖励: '' }),
+        ...(next.目标[targetId] ?? { 类型: '主要', 状态: '未完成', 描述: '', 积分: 0, 其他奖励: '' }),
         ...patch,
       };
     }
@@ -193,16 +193,16 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
   }
 }
 
-export function 执行并保存命令(
+export async function 执行并保存命令(
   state: 状态总表,
   commandInput: string | 状态命令 | 状态命令[],
-  rootKey: string = STATE_ROOT_KEY,
-): 执行结果 {
-  debugLog('executor', '开始执行并保存命令', { rootKey });
+  messageId: number,
+): Promise<执行结果> {
+  debugLog('executor', '开始执行并保存命令', { messageId });
   const result = 执行命令(state, commandInput);
-  const savedState = 保存状态(result.state, rootKey);
+  const savedState = await 保存状态(result.state, messageId);
   debugLog('executor', '执行并保存命令完成', {
-    rootKey,
+    messageId,
     applied: result.applied.length,
     state: summarizeState(savedState),
   });

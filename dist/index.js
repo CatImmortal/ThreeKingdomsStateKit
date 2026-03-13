@@ -184,6 +184,7 @@ function create\u72B6\u6001\u8BB0\u5F55(data = {}) {
 }
 function create\u6B66\u6280\u6761\u76EE(data = {}, { \u5B8C\u6574 = true } = {}) {
   return {
+    \u540D\u79F0: String(data.\u540D\u79F0 || ""),
     \u7B49\u7EA7: \u679A\u4E3E.\u6B66\u6280\u7B49\u7EA7.includes(data.\u7B49\u7EA7) ? data.\u7B49\u7EA7 : "\u5165\u95E8",
     \u7C7B\u578B: \u679A\u4E3E.\u6B66\u6280\u7C7B\u578B.includes(data.\u7C7B\u578B) ? data.\u7C7B\u578B : "\u653B\u51FB",
     \u6548\u679C: String(data.\u6548\u679C || ""),
@@ -192,6 +193,7 @@ function create\u6B66\u6280\u6761\u76EE(data = {}, { \u5B8C\u6574 = true } = {})
 }
 function create\u4E13\u957F\u6761\u76EE(data = {}) {
   return {
+    \u540D\u79F0: String(data.\u540D\u79F0 || ""),
     \u7B49\u7EA7: String(data.\u7B49\u7EA7 || ""),
     \u6548\u679C: String(data.\u6548\u679C || "")
   };
@@ -246,12 +248,14 @@ function create\u4EFB\u52A1\u76EE\u6807(data = {}) {
   return {
     \u7C7B\u578B: \u679A\u4E3E.\u4EFB\u52A1\u76EE\u6807\u7C7B\u578B.includes(data.\u7C7B\u578B) ? data.\u7C7B\u578B : "\u4E3B\u8981",
     \u72B6\u6001: \u679A\u4E3E.\u4EFB\u52A1\u76EE\u6807\u72B6\u6001.includes(data.\u72B6\u6001) ? data.\u72B6\u6001 : "\u672A\u5B8C\u6210",
+    \u63CF\u8FF0: String(data.\u63CF\u8FF0 || ""),
     \u79EF\u5206: \u6570\u503C(data.\u79EF\u5206),
     \u5176\u4ED6\u5956\u52B1: String(data.\u5176\u4ED6\u5956\u52B1 || "")
   };
 }
 function create\u4EFB\u52A1(data = {}) {
   return {
+    \u540D\u79F0: String(data.\u540D\u79F0 || ""),
     \u7C7B\u578B: \u679A\u4E3E.\u4EFB\u52A1\u7C7B\u578B.includes(data.\u7C7B\u578B) ? data.\u7C7B\u578B : "\u652F\u7EBF",
     \u72B6\u6001: \u679A\u4E3E.\u4EFB\u52A1\u72B6\u6001.includes(data.\u72B6\u6001) ? data.\u72B6\u6001 : "\u53EF\u63A5\u53D6",
     \u65F6\u9650: String(data.\u65F6\u9650 || "\u65E0"),
@@ -415,15 +419,15 @@ var \u4E3B\u89D2\u8D44\u6E90\u5B57\u6BB5 = ["\u5F53\u524D\u751F\u547D\u503C", "\
 var \u516D\u7EF4\u5B57\u6BB5 = ["\u6B66\u529B", "\u667A\u529B", "\u7EDF\u7387", "\u653F\u6CBB", "\u9B45\u529B", "\u4F53\u8D28"];
 var \u88C5\u5907\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u7C7B\u578B", "\u5148\u653B\u52A0\u503C", "\u653B\u51FB\u52A0\u503C", "\u9632\u5FA1DC\u52A0\u503C", "\u4F24\u5BB3\u51CF\u514D", "\u6548\u679C"];
 var \u88C5\u5907\u680F\u5B57\u6BB5 = ["\u4E3B\u6B66\u5668", "\u526F\u6B66\u5668", "\u62A4\u7532", "\u5750\u9A91", "\u9970\u54C11", "\u9970\u54C12", "\u9970\u54C13"];
-var \u6B66\u6280\u6761\u76EE\u5B57\u6BB5 = ["\u7B49\u7EA7", "\u7C7B\u578B", "\u6548\u679C", "\u719F\u7EC3\u5EA6", "\u4F53\u529B\u6D88\u8017"];
-var \u4E13\u957F\u6761\u76EE\u5B57\u6BB5 = ["\u7B49\u7EA7", "\u6548\u679C"];
+var \u6B66\u6280\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u7C7B\u578B", "\u6548\u679C", "\u719F\u7EC3\u5EA6", "\u4F53\u529B\u6D88\u8017"];
+var \u4E13\u957F\u6761\u76EE\u5B57\u6BB5 = ["\u540D\u79F0", "\u7B49\u7EA7", "\u6548\u679C"];
 var \u4E3B\u89D2\u5B57\u6BB5 = ["\u516D\u7EF4", "\u5F53\u524D\u751F\u547D\u503C", "\u5F53\u524D\u4F53\u529B\u503C", "\u88C5\u5907", "\u6B66\u6280", "\u4E13\u957F", "\u72B6\u6001", "\u7269\u54C1\u680F", "\u58F0\u671B", "\u91D1\u94B1", "\u79EF\u5206", "\u5B98\u804C", "\u7235\u4F4D", "\u540E\u5BAB\u548C\u8C10\u5EA6"];
 var \u7269\u54C1\u680F\u5B57\u6BB5 = ["\u54C1\u8D28", "\u63CF\u8FF0", "\u6570\u91CF"];
 var NPC\u5B57\u6BB5 = ["\u540D\u79F0", "\u54C1\u8D28", "\u9635\u8425", "\u5B9A\u4F4D", "\u597D\u611F", "\u7B80\u8FF0", "\u7F81\u7ECA", "\u89D2\u8272\u6570\u636E", "\u6B66\u5C06\u4FE1\u606F", "\u7F8E\u4EBA\u5C5E\u6027"];
 var \u6B66\u5C06\u4FE1\u606F\u5B57\u6BB5 = ["\u91CE\u5FC3\u503C", "\u6027\u683C", "\u5B98\u804C", "\u5F53\u524D\u72B6\u6001", "\u72B6\u6001\u63CF\u8FF0", "\u9A7B\u624E\u5730", "\u7279\u6280"];
 var \u7F8E\u4EBA\u5C5E\u6027\u5B57\u6BB5 = ["\u4F9D\u8D56\u5EA6", "\u654F\u611F\u5EA6", "\u8D1E\u6D01\u5EA6", "\u4F4D\u4EFD", "\u6027\u683C", "\u5F53\u524D\u72B6\u6001"];
-var \u4EFB\u52A1\u5B57\u6BB5 = ["\u7C7B\u578B", "\u72B6\u6001", "\u65F6\u9650", "\u76EE\u6807"];
-var \u4EFB\u52A1\u76EE\u6807\u5B57\u6BB5 = ["\u7C7B\u578B", "\u72B6\u6001", "\u79EF\u5206", "\u5176\u4ED6\u5956\u52B1"];
+var \u4EFB\u52A1\u5B57\u6BB5 = ["\u540D\u79F0", "\u7C7B\u578B", "\u72B6\u6001", "\u65F6\u9650", "\u76EE\u6807"];
+var \u4EFB\u52A1\u76EE\u6807\u5B57\u6BB5 = ["\u7C7B\u578B", "\u72B6\u6001", "\u63CF\u8FF0", "\u79EF\u5206", "\u5176\u4ED6\u5956\u52B1"];
 var \u5546\u54C1\u5B57\u6BB5 = ["\u540D\u79F0", "\u5206\u7C7B", "\u4EF7\u683C", "\u63CF\u8FF0"];
 function isPlainObject(value) {
   return _.isPlainObject(value);
@@ -520,6 +524,7 @@ function \u6821\u9A8C\u88C5\u5907\u680F(value, path) {
 function \u6821\u9A8C\u6B66\u6280\u6761\u76EE(value, path) {
   \u65AD\u8A00\u5BF9\u8C61(value, path);
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u6B66\u6280\u6761\u76EE\u5B57\u6BB5, path);
+  if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
   if (value.\u7B49\u7EA7 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7B49\u7EA7, \u679A\u4E3E.\u6B66\u6280\u7B49\u7EA7, `${path}.\u7B49\u7EA7`);
   if (value.\u7C7B\u578B !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7C7B\u578B, \u679A\u4E3E.\u6B66\u6280\u7C7B\u578B, `${path}.\u7C7B\u578B`);
   if (value.\u6548\u679C !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u6548\u679C, `${path}.\u6548\u679C`);
@@ -529,6 +534,7 @@ function \u6821\u9A8C\u6B66\u6280\u6761\u76EE(value, path) {
 function \u6821\u9A8C\u4E13\u957F\u6761\u76EE(value, path) {
   \u65AD\u8A00\u5BF9\u8C61(value, path);
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u4E13\u957F\u6761\u76EE\u5B57\u6BB5, path);
+  if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
   if (value.\u7B49\u7EA7 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u7B49\u7EA7, `${path}.\u7B49\u7EA7`);
   if (value.\u6548\u679C !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u6548\u679C, `${path}.\u6548\u679C`);
 }
@@ -606,6 +612,7 @@ function \u6821\u9A8C\u4EFB\u52A1\u76EE\u6807\u66F4\u65B0(value, path) {
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u4EFB\u52A1\u76EE\u6807\u5B57\u6BB5, path);
   if (value.\u7C7B\u578B !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7C7B\u578B, \u679A\u4E3E.\u4EFB\u52A1\u76EE\u6807\u7C7B\u578B, `${path}.\u7C7B\u578B`);
   if (value.\u72B6\u6001 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u72B6\u6001, \u679A\u4E3E.\u4EFB\u52A1\u76EE\u6807\u72B6\u6001, `${path}.\u72B6\u6001`);
+  if (value.\u63CF\u8FF0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u63CF\u8FF0, `${path}.\u63CF\u8FF0`);
   if (value.\u79EF\u5206 !== void 0) \u65AD\u8A00\u6570\u5B57(value.\u79EF\u5206, `${path}.\u79EF\u5206`);
   if (value.\u5176\u4ED6\u5956\u52B1 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u5176\u4ED6\u5956\u52B1, `${path}.\u5176\u4ED6\u5956\u52B1`);
 }
@@ -671,6 +678,7 @@ function \u6821\u9A8CNPC\u66F4\u65B0(value, path) {
 function \u6821\u9A8C\u4EFB\u52A1\u66F4\u65B0(value, path) {
   \u65AD\u8A00\u975E\u7A7A\u5BF9\u8C61(value, path);
   \u65AD\u8A00\u5B57\u6BB5\u767D\u540D\u5355(value, \u4EFB\u52A1\u5B57\u6BB5, path);
+  if (value.\u540D\u79F0 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u540D\u79F0, `${path}.\u540D\u79F0`);
   if (value.\u7C7B\u578B !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u7C7B\u578B, \u679A\u4E3E.\u4EFB\u52A1\u7C7B\u578B, `${path}.\u7C7B\u578B`);
   if (value.\u72B6\u6001 !== void 0) \u65AD\u8A00\u679A\u4E3E\u503C(value.\u72B6\u6001, \u679A\u4E3E.\u4EFB\u52A1\u72B6\u6001, `${path}.\u72B6\u6001`);
   if (value.\u65F6\u9650 !== void 0) \u65AD\u8A00\u5B57\u7B26\u4E32(value.\u65F6\u9650, `${path}.\u65F6\u9650`);
@@ -809,6 +817,7 @@ function \u521B\u5EFA\u547D\u4EE4\u6267\u884C\u5FEB\u7167(state) {
 var storage_exports = {};
 __export(storage_exports, {
   CONTEXT_MACRO_KEY: () => CONTEXT_MACRO_KEY,
+  MAX_SAVED_STATE_MESSAGES: () => MAX_SAVED_STATE_MESSAGES,
   STATE_ROOT_KEY: () => STATE_ROOT_KEY,
   \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F: () => \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F,
   \u4FDD\u5B58\u72B6\u6001: () => \u4FDD\u5B58\u72B6\u6001,
@@ -817,7 +826,8 @@ __export(storage_exports, {
   \u66F4\u65B0\u72B6\u6001: () => \u66F4\u65B0\u72B6\u6001,
   \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F: () => \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F,
   \u8BFB\u53D6\u539F\u59CB\u72B6\u6001: () => \u8BFB\u53D6\u539F\u59CB\u72B6\u6001,
-  \u8BFB\u53D6\u804A\u5929\u53D8\u91CF: () => \u8BFB\u53D6\u804A\u5929\u53D8\u91CF
+  \u8BFB\u53D6\u6240\u6709\u6D88\u606F: () => \u8BFB\u53D6\u6240\u6709\u6D88\u606F,
+  \u8BFB\u53D6\u6D88\u606F: () => \u8BFB\u53D6\u6D88\u606F
 });
 
 // src/recompute.ts
@@ -899,100 +909,146 @@ function recompute\u5168\u5C40(state) {
 // src/storage.ts
 var STATE_ROOT_KEY = "sgbz_state";
 var CONTEXT_MACRO_KEY = "sgbz_context";
-function \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3() {
-  const helper = window.TavernHelper;
-  debugLog("storage", "\u68C0\u67E5 TavernHelper \u53D8\u91CF\u63A5\u53E3", {
-    hasGetVariables: Boolean(helper?.getVariables),
-    hasReplaceVariables: Boolean(helper?.replaceVariables)
+var MAX_SAVED_STATE_MESSAGES = 10;
+function \u83B7\u53D6\u6D88\u606F\u63A5\u53E3() {
+  const globalApi = globalThis;
+  const windowApi = typeof window !== "undefined" ? window : void 0;
+  const getChatMessages = globalApi.getChatMessages ?? windowApi?.getChatMessages ?? globalApi.TavernHelper?.getChatMessages ?? windowApi?.TavernHelper?.getChatMessages;
+  const setChatMessages = globalApi.setChatMessages ?? windowApi?.setChatMessages ?? globalApi.TavernHelper?.setChatMessages ?? windowApi?.TavernHelper?.setChatMessages;
+  debugLog("storage", "\u68C0\u67E5\u804A\u5929\u6D88\u606F\u63A5\u53E3", {
+    hasGetChatMessages: typeof getChatMessages === "function",
+    hasSetChatMessages: typeof setChatMessages === "function"
   });
-  if (!helper?.getVariables || !helper?.replaceVariables) {
-    const error = new Error("\u672A\u627E\u5230 TavernHelper.getVariables / replaceVariables\uFF0C\u65E0\u6CD5\u8BFB\u5199\u804A\u5929\u5B58\u6863");
-    debugError("storage", "\u83B7\u53D6\u53D8\u91CF\u63A5\u53E3\u5931\u8D25", error);
+  if (!getChatMessages || !setChatMessages) {
+    const error = new Error("\u672A\u627E\u5230 getChatMessages / setChatMessages\uFF0C\u65E0\u6CD5\u8BFB\u5199\u697C\u5C42\u72B6\u6001");
+    debugError("storage", "\u83B7\u53D6\u804A\u5929\u6D88\u606F\u63A5\u53E3\u5931\u8D25", error);
     throw error;
   }
-  return {
-    getVariables: helper.getVariables,
-    replaceVariables: helper.replaceVariables
-  };
+  return { getChatMessages, setChatMessages };
 }
-function \u8BFB\u53D6\u804A\u5929\u53D8\u91CF() {
-  const variables = \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().getVariables({ type: "chat" }) ?? {};
-  debugLog("storage", "\u8BFB\u53D6\u804A\u5929\u53D8\u91CF\u5B8C\u6210", summarizeValue(variables));
-  return variables;
-}
-function \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(rootKey = STATE_ROOT_KEY) {
-  const raw = _.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey);
-  debugLog("storage", "\u8BFB\u53D6\u539F\u59CB\u72B6\u6001", {
-    rootKey,
-    summary: summarizeValue(raw)
+function \u8BFB\u53D6\u6D88\u606F(messageId) {
+  const messages = \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().getChatMessages(messageId, { include_swipes: false }) ?? [];
+  const message = Array.isArray(messages) ? messages[0] ?? null : null;
+  debugLog("storage", "\u8BFB\u53D6\u5355\u6761\u6D88\u606F\u5B8C\u6210", {
+    messageId,
+    summary: summarizeValue(message)
   });
-  return raw;
+  return message;
+}
+function \u8BFB\u53D6\u6240\u6709\u6D88\u606F(\u622A\u6B62\u6D88\u606FID) {
+  if (typeof \u622A\u6B62\u6D88\u606FID === "number" && \u622A\u6B62\u6D88\u606FID < 0) {
+    debugLog("storage", "\u8BFB\u53D6\u6D88\u606F\u5217\u8868\u5B8C\u6210", {
+      range: "empty",
+      count: 0
+    });
+    return [];
+  }
+  const range = typeof \u622A\u6B62\u6D88\u606FID === "number" ? `0-${\u622A\u6B62\u6D88\u606FID}` : "0-{{lastMessageId}}";
+  const messages = \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().getChatMessages(range, { include_swipes: false }) ?? [];
+  debugLog("storage", "\u8BFB\u53D6\u6D88\u606F\u5217\u8868\u5B8C\u6210", {
+    range,
+    count: messages.length
+  });
+  return messages;
+}
+function \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(messageId) {
+  const messages = \u8BFB\u53D6\u6240\u6709\u6D88\u606F(messageId);
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const raw = _.get(messages[index], ["data", STATE_ROOT_KEY]);
+    if (!raw) continue;
+    debugLog("storage", "\u8BFB\u53D6\u539F\u59CB\u72B6\u6001\u5FEB\u7167", {
+      sourceMessageId: messages[index].message_id,
+      summary: summarizeValue(raw)
+    });
+    return raw;
+  }
+  debugLog("storage", "\u672A\u627E\u5230\u72B6\u6001\u5FEB\u7167", { upToMessageId: messageId ?? null });
+  return void 0;
 }
 function \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F(rootKey = CONTEXT_MACRO_KEY) {
-  const content = String(_.get(\u8BFB\u53D6\u804A\u5929\u53D8\u91CF(), rootKey, ""));
-  debugLog("storage", "\u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F", {
-    rootKey,
-    summary: summarizeValue(content)
-  });
-  return content;
+  debugLog("storage", "\u697C\u5C42\u7EA7\u65B9\u6848\u4E0B\u4E0D\u518D\u6301\u4E45\u5316\u4E0A\u4E0B\u6587\u5B8F", { rootKey });
+  return "";
 }
-function \u52A0\u8F7D\u72B6\u6001(rootKey = STATE_ROOT_KEY) {
-  const raw = \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(rootKey);
+function \u52A0\u8F7D\u72B6\u6001(\u622A\u6B62\u6D88\u606FID) {
+  const raw = \u8BFB\u53D6\u539F\u59CB\u72B6\u6001(\u622A\u6B62\u6D88\u606FID);
   const state = recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(raw));
   debugLog("storage", "\u52A0\u8F7D\u72B6\u6001\u5B8C\u6210", {
-    rootKey,
+    upToMessageId: \u622A\u6B62\u6D88\u606FID ?? null,
     raw: summarizeValue(raw),
     state: summarizeState(state)
   });
   return state;
 }
-function \u4FDD\u5B58\u72B6\u6001(state, rootKey = STATE_ROOT_KEY) {
+async function \u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167() {
+  const messages = \u8BFB\u53D6\u6240\u6709\u6D88\u606F();
+  const snapshots = messages.filter((message) => _.has(message.data, STATE_ROOT_KEY));
+  if (snapshots.length <= MAX_SAVED_STATE_MESSAGES) {
+    debugLog("storage", "\u65E0\u9700\u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167", {
+      snapshots: snapshots.length,
+      limit: MAX_SAVED_STATE_MESSAGES
+    });
+    return;
+  }
+  const expired = snapshots.slice(0, snapshots.length - MAX_SAVED_STATE_MESSAGES);
+  const patches = expired.map((message) => {
+    const nextData = { ...message.data || {} };
+    delete nextData[STATE_ROOT_KEY];
+    return {
+      message_id: message.message_id,
+      data: nextData
+    };
+  });
+  debugLog("storage", "\u51C6\u5907\u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167", {
+    keep: MAX_SAVED_STATE_MESSAGES,
+    removeCount: patches.length,
+    removedMessageIds: patches.map((item) => item.message_id)
+  });
+  await \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().setChatMessages(patches, { refresh: "none" });
+  debugLog("storage", "\u8FC7\u671F\u72B6\u6001\u5FEB\u7167\u6E05\u7406\u5B8C\u6210", {
+    removedMessageIds: patches.map((item) => item.message_id)
+  });
+}
+async function \u4FDD\u5B58\u72B6\u6001(state, messageId) {
   const next = recompute\u5168\u5C40(create\u521D\u59CB\u72B6\u6001(state));
-  const variables = \u8BFB\u53D6\u804A\u5929\u53D8\u91CF();
-  debugLog("storage", "\u51C6\u5907\u4FDD\u5B58\u72B6\u6001", {
-    rootKey,
-    before: summarizeValue(_.get(variables, rootKey)),
+  const currentMessage = \u8BFB\u53D6\u6D88\u606F(messageId);
+  if (!currentMessage) {
+    throw new Error(`\u672A\u627E\u5230\u8981\u5199\u5165\u72B6\u6001\u7684\u6D88\u606F: ${messageId}`);
+  }
+  const nextData = {
+    ...currentMessage.data || {},
+    [STATE_ROOT_KEY]: next
+  };
+  debugLog("storage", "\u51C6\u5907\u5199\u5165\u697C\u5C42\u72B6\u6001", {
+    messageId,
+    before: summarizeValue(currentMessage.data?.[STATE_ROOT_KEY]),
     next: summarizeState(next)
   });
-  _.set(variables, rootKey, next);
   try {
-    \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
-    debugLog("storage", "replaceVariables \u8C03\u7528\u5B8C\u6210", {
-      rootKey,
-      after: summarizeValue(_.get(variables, rootKey))
+    await \u83B7\u53D6\u6D88\u606F\u63A5\u53E3().setChatMessages([{ message_id: messageId, data: nextData }], { refresh: "none" });
+    debugLog("storage", "\u697C\u5C42\u72B6\u6001\u5199\u5165\u5B8C\u6210", {
+      messageId,
+      after: summarizeValue(nextData[STATE_ROOT_KEY])
     });
+    await \u6E05\u7406\u8FC7\u671F\u72B6\u6001\u5FEB\u7167();
   } catch (error) {
-    debugError("storage", "\u4FDD\u5B58\u72B6\u6001\u5931\u8D25", error);
+    debugError("storage", "\u697C\u5C42\u72B6\u6001\u5199\u5165\u5931\u8D25", error);
     throw error;
   }
   return next;
 }
 function \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F(content, rootKey = CONTEXT_MACRO_KEY) {
-  const variables = \u8BFB\u53D6\u804A\u5929\u53D8\u91CF();
-  debugLog("storage", "\u51C6\u5907\u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F", {
+  debugLog("storage", "\u697C\u5C42\u7EA7\u65B9\u6848\u4E0B\u8DF3\u8FC7\u4E0A\u4E0B\u6587\u5B8F\u6301\u4E45\u5316", {
     rootKey,
-    before: summarizeValue(_.get(variables, rootKey, "")),
-    next: summarizeValue(content)
+    summary: summarizeValue(content)
   });
-  _.set(variables, rootKey, String(content || ""));
-  try {
-    \u83B7\u53D6\u53D8\u91CF\u63A5\u53E3().replaceVariables(variables, { type: "chat" });
-    debugLog("storage", "\u4E0A\u4E0B\u6587\u5B8F\u4FDD\u5B58\u5B8C\u6210", {
-      rootKey,
-      after: summarizeValue(_.get(variables, rootKey, ""))
-    });
-  } catch (error) {
-    debugError("storage", "\u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F\u5931\u8D25", error);
-    throw error;
-  }
-  return String(_.get(variables, rootKey, ""));
+  return String(content || "");
 }
-function \u521D\u59CB\u5316\u72B6\u6001(seed = {}, rootKey = STATE_ROOT_KEY) {
-  return \u4FDD\u5B58\u72B6\u6001(create\u521D\u59CB\u72B6\u6001(seed), rootKey);
+async function \u521D\u59CB\u5316\u72B6\u6001(seed = {}, messageId) {
+  return \u4FDD\u5B58\u72B6\u6001(create\u521D\u59CB\u72B6\u6001(seed), messageId);
 }
-function \u66F4\u65B0\u72B6\u6001(updater, rootKey = STATE_ROOT_KEY) {
-  const current = \u52A0\u8F7D\u72B6\u6001(rootKey);
-  return \u4FDD\u5B58\u72B6\u6001(updater(current), rootKey);
+async function \u66F4\u65B0\u72B6\u6001(updater, messageId) {
+  const current = \u52A0\u8F7D\u72B6\u6001(messageId - 1);
+  return \u4FDD\u5B58\u72B6\u6001(updater(current), messageId);
 }
 
 // src/executor.ts
@@ -1072,7 +1128,7 @@ function \u5E94\u7528\u4EFB\u52A1\u72B6\u6001(state, command) {
   if (command.\u76EE\u6807) {
     for (const [targetId, patch] of Object.entries(command.\u76EE\u6807)) {
       next.\u76EE\u6807[targetId] = {
-        ...next.\u76EE\u6807[targetId] ?? { \u7C7B\u578B: "\u4E3B\u8981", \u72B6\u6001: "\u672A\u5B8C\u6210", \u79EF\u5206: 0, \u5176\u4ED6\u5956\u52B1: "" },
+        ...next.\u76EE\u6807[targetId] ?? { \u7C7B\u578B: "\u4E3B\u8981", \u72B6\u6001: "\u672A\u5B8C\u6210", \u63CF\u8FF0: "", \u79EF\u5206: 0, \u5176\u4ED6\u5956\u52B1: "" },
         ...patch
       };
     }
@@ -1159,12 +1215,12 @@ function \u6267\u884C\u547D\u4EE4(state, commandInput) {
     throw error;
   }
 }
-function \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, commandInput, rootKey = STATE_ROOT_KEY) {
-  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4", { rootKey });
+async function \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, commandInput, messageId) {
+  debugLog("executor", "\u5F00\u59CB\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4", { messageId });
   const result = \u6267\u884C\u547D\u4EE4(state, commandInput);
-  const savedState = \u4FDD\u5B58\u72B6\u6001(result.state, rootKey);
+  const savedState = await \u4FDD\u5B58\u72B6\u6001(result.state, messageId);
   debugLog("executor", "\u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
-    rootKey,
+    messageId,
     applied: result.applied.length,
     state: summarizeState(savedState)
   });
@@ -1362,9 +1418,9 @@ function refreshContextMacro(state, macroKey = CONTEXT_MACRO_KEY) {
   });
   return \u4FDD\u5B58\u4E0A\u4E0B\u6587\u5B8F(buildContextMacroText(state), macroKey);
 }
-function refreshContextMacroFromStorage(rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY) {
-  debugLog("bridge", "\u4ECE\u5B58\u6863\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", { rootKey, macroKey });
-  return refreshContextMacro(\u52A0\u8F7D\u72B6\u6001(rootKey), macroKey);
+function refreshContextMacroFromStorage(messageId, macroKey = CONTEXT_MACRO_KEY) {
+  debugLog("bridge", "\u4ECE\u6700\u65B0\u697C\u5C42\u5FEB\u7167\u5237\u65B0\u4E0A\u4E0B\u6587\u5B8F", { messageId: messageId ?? null, macroKey });
+  return refreshContextMacro(\u52A0\u8F7D\u72B6\u6001(messageId), macroKey);
 }
 function extractCommands(replyText) {
   debugLog("bridge", "\u5F00\u59CB\u4ECE\u56DE\u590D\u63D0\u53D6\u547D\u4EE4", summarizeValue(replyText));
@@ -1409,15 +1465,15 @@ function extractAndApplyCommands(replyText, state) {
     cleanedReplyText: extracted.cleanedReplyText
   };
 }
-function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = true) {
+async function extractApplyAndSaveCommands(replyText, state, messageId, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = true) {
   debugLog("bridge", "\u5F00\u59CB\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4", {
-    rootKey,
+    messageId,
     macroKey,
     state: summarizeState(state)
   });
   const extracted = extractCommands(replyText);
   debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u63D0\u53D6\u7ED3\u679C", {
-    rootKey,
+    messageId,
     macroKey,
     hasCommandsText: Boolean(extracted.commandsText),
     commandsCount: extracted.commands.length
@@ -1437,10 +1493,10 @@ function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY,
       cleanedReplyText: extracted.cleanedReplyText
     };
   }
-  const result = \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, rootKey);
+  const result = await \u6267\u884C\u5E76\u4FDD\u5B58\u547D\u4EE4(state, extracted.commands, messageId);
   refreshContextMacro(result.state, macroKey);
   debugLog("bridge", "\u63D0\u53D6\u3001\u5E94\u7528\u5E76\u4FDD\u5B58\u547D\u4EE4\u5B8C\u6210", {
-    rootKey,
+    messageId,
     macroKey,
     applied: result.applied.length,
     state: summarizeState(result.state)
@@ -1451,19 +1507,22 @@ function extractApplyAndSaveCommands(replyText, state, rootKey = STATE_ROOT_KEY,
     cleanedReplyText: extracted.cleanedReplyText
   };
 }
-function handleAssistantReply(replyText, options = {}) {
-  const { rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
+async function handleAssistantReply(replyText, options = {}) {
+  const { messageId, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
   debugLog("bridge", "\u5F00\u59CB\u5904\u7406 AI \u56DE\u590D", {
-    rootKey,
+    messageId: messageId ?? null,
     macroKey,
     refreshMacroOnNoCommands,
     reply: summarizeValue(replyText)
   });
   try {
-    const state = \u52A0\u8F7D\u72B6\u6001(rootKey);
-    const result = extractApplyAndSaveCommands(replyText, state, rootKey, macroKey, refreshMacroOnNoCommands);
+    if (typeof messageId !== "number") {
+      throw new Error("\u5904\u7406 AI \u56DE\u590D\u65F6\u5FC5\u987B\u63D0\u4F9B\u76EE\u6807 messageId");
+    }
+    const state = \u52A0\u8F7D\u72B6\u6001(messageId - 1);
+    const result = await extractApplyAndSaveCommands(replyText, state, messageId, macroKey, refreshMacroOnNoCommands);
     debugLog("bridge", "AI \u56DE\u590D\u5904\u7406\u5B8C\u6210", {
-      rootKey,
+      messageId,
       macroKey,
       applied: result.applied.length,
       hasCommandsText: Boolean(result.commandsText),
@@ -1502,8 +1561,8 @@ function \u83B7\u53D6\u5B8F\u63A5\u53E3() {
     unregisterMacroLike: api.unregisterMacroLike
   };
 }
-function renderSgbzContextMacro(rootKey = STATE_ROOT_KEY) {
-  return buildInjectedContext(\u52A0\u8F7D\u72B6\u6001(rootKey));
+function renderSgbzContextMacro(messageId) {
+  return buildInjectedContext(\u52A0\u8F7D\u72B6\u6001(messageId));
 }
 function unregisterSgbzMacros() {
   const api = \u83B7\u53D6\u5B8F\u63A5\u53E3();
@@ -1513,10 +1572,10 @@ function unregisterSgbzMacros() {
   }
   \u5DF2\u6CE8\u518C\u5B8F = [];
 }
-function registerSgbzMacros(rootKey = STATE_ROOT_KEY) {
+function registerSgbzMacros() {
   unregisterSgbzMacros();
   const api = \u83B7\u53D6\u5B8F\u63A5\u53E3();
-  const entry = api.registerMacroLike(SGBZ_CONTEXT_MACRO_REGEX, () => renderSgbzContextMacro(rootKey));
+  const entry = api.registerMacroLike(SGBZ_CONTEXT_MACRO_REGEX, (context) => renderSgbzContextMacro(context.message_id));
   \u5DF2\u6CE8\u518C\u5B8F.push({ regex: SGBZ_CONTEXT_MACRO_REGEX, unregister: entry.unregister });
 }
 
@@ -1547,7 +1606,7 @@ function \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570() {
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
   return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
 }
-function \u8BFB\u53D6\u6D88\u606F(messageId) {
+function \u8BFB\u53D6\u6D88\u606F2(messageId) {
   const getChatMessages = \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570();
   if (typeof getChatMessages !== "function") {
     debugLog("runtime", "\u672A\u627E\u5230 getChatMessages\uFF0C\u65E0\u6CD5\u8BFB\u53D6\u6307\u5B9A\u6D88\u606F", { messageId });
@@ -1598,28 +1657,29 @@ function setupDebugParseButtonHook(buttonName = "\u89E3\u6790\u547D\u4EE4", opti
     });
     return false;
   }
-  const listener = () => {
+  const listener = async () => {
     debugLog("runtime", "\u6536\u5230\u89E3\u6790\u547D\u4EE4\u6309\u94AE\u70B9\u51FB\u4E8B\u4EF6", { buttonName, eventName });
     try {
-      const message = \u8BFB\u53D6\u6D88\u606F(-1);
+      const message = \u8BFB\u53D6\u6D88\u606F2(-1);
       if (!message) {
         debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
         return;
       }
-      if (message.role !== "assistant") {
-        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u8BFB\u53D6\u5230\u7684\u6700\u65B0\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+      if (message.role !== "assistant" || typeof message.message_id !== "number") {
+        debugLog("runtime", "\u6309\u94AE\u8C03\u8BD5\u8BFB\u53D6\u5230\u7684\u6700\u65B0\u6D88\u606F\u4E0D\u662F\u53EF\u5904\u7406 assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
           role: message.role ?? null,
           messageId: message.message_id ?? null
         });
         return;
       }
-      const result = handleAssistantReply(String(message.message || ""), {
+      const result = await handleAssistantReply(String(message.message || ""), {
         ...options,
+        messageId: message.message_id,
         refreshMacroOnNoCommands: false
       });
       debugLog("runtime", "\u6309\u94AE\u89E6\u53D1\u7684 assistant \u6D88\u606F\u5904\u7406\u5B8C\u6210", {
         buttonName,
-        messageId: message.message_id ?? null,
+        messageId: message.message_id,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText)
       });
@@ -1657,14 +1717,14 @@ function setupAssistantReplyHook(options = {}) {
     });
     return false;
   }
-  const listener = (messageId, type) => {
+  const listener = async (messageId, type) => {
     debugLog("runtime", "\u6536\u5230 MESSAGE_RECEIVED \u4E8B\u4EF6", {
       eventName,
       messageId,
       type: type ?? null
     });
     try {
-      const message = \u8BFB\u53D6\u6D88\u606F(messageId);
+      const message = \u8BFB\u53D6\u6D88\u606F2(messageId);
       if (!message) {
         debugLog("runtime", "\u672A\u8BFB\u53D6\u5230\u76EE\u6807\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", { messageId });
         return;
@@ -1682,8 +1742,9 @@ function setupAssistantReplyHook(options = {}) {
         });
         return;
       }
-      const result = handleAssistantReply(String(message.message || ""), {
+      const result = await handleAssistantReply(String(message.message || ""), {
         ...options,
+        messageId,
         refreshMacroOnNoCommands: false
       });
       \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message);
@@ -1770,6 +1831,7 @@ export {
   MAX_CONTEXT_QUESTS,
   MAX_CONTEXT_SHOP_ITEMS,
   MAX_RECENT_EVENTS,
+  MAX_SAVED_STATE_MESSAGES,
   SGBZ_CONTEXT_MACRO_REGEX,
   STATE_ROOT_KEY,
   ThreeKingdomsStateKit,
@@ -1852,7 +1914,8 @@ export {
   \u8BA1\u7B97\u52A0\u503C,
   \u8BFB\u53D6\u4E0A\u4E0B\u6587\u5B8F,
   \u8BFB\u53D6\u539F\u59CB\u72B6\u6001,
-  \u8BFB\u53D6\u804A\u5929\u53D8\u91CF,
+  \u8BFB\u53D6\u6240\u6709\u6D88\u606F,
+  \u8BFB\u53D6\u6D88\u606F,
   \u8D1E\u6D01\u7B49\u7EA7,
   \u9009\u62E9\u5546\u57CE\u6761\u76EE,
   \u9009\u62E9\u5F53\u524D\u5730\u70B9\u76F8\u5173NPC,

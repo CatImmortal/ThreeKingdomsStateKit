@@ -1,5 +1,5 @@
 import { buildInjectedContext } from './bridge';
-import { 加载状态, STATE_ROOT_KEY } from './storage';
+import { 加载状态 } from './storage';
 
 type MacroLikeContext = {
   message_id?: number;
@@ -41,8 +41,8 @@ function 获取宏接口(): MacroRegistry {
   };
 }
 
-export function renderSgbzContextMacro(rootKey = STATE_ROOT_KEY): string {
-  return buildInjectedContext(加载状态(rootKey));
+export function renderSgbzContextMacro(messageId?: number): string {
+  return buildInjectedContext(加载状态(messageId));
 }
 
 export function unregisterSgbzMacros(): void {
@@ -54,9 +54,9 @@ export function unregisterSgbzMacros(): void {
   已注册宏 = [];
 }
 
-export function registerSgbzMacros(rootKey = STATE_ROOT_KEY): void {
+export function registerSgbzMacros(): void {
   unregisterSgbzMacros();
   const api = 获取宏接口();
-  const entry = api.registerMacroLike(SGBZ_CONTEXT_MACRO_REGEX, () => renderSgbzContextMacro(rootKey));
+  const entry = api.registerMacroLike(SGBZ_CONTEXT_MACRO_REGEX, context => renderSgbzContextMacro(context.message_id));
   已注册宏.push({ regex: SGBZ_CONTEXT_MACRO_REGEX, unregister: entry.unregister });
 }

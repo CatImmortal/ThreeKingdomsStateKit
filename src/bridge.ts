@@ -3,7 +3,7 @@ import { 构建宏注入文本, 构建注入文本, 构建注入视图, type 注
 import { 解析命令输入, type 状态命令 } from './commands';
 import { debugError, debugLog, summarizeState, summarizeValue } from './debug';
 import { 解析命令块 } from './protocol';
-import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态, STATE_ROOT_KEY } from './storage';
+import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态 } from './storage';
 import { type 状态总表 } from './state';
 
 export type 命令应用结果 = 执行结果 & {
@@ -12,7 +12,7 @@ export type 命令应用结果 = 执行结果 & {
 };
 
 export type 处理回复选项 = {
-  rootKey?: string;
+  messageId?: number;
   macroKey?: string;
   refreshMacroOnNoCommands?: boolean;
 };
@@ -37,9 +37,9 @@ export function refreshContextMacro(state: 状态总表, macroKey = CONTEXT_MACR
   return 保存上下文宏(buildContextMacroText(state), macroKey);
 }
 
-export function refreshContextMacroFromStorage(rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY): string {
-  debugLog('bridge', '从存档刷新上下文宏', { rootKey, macroKey });
-  return refreshContextMacro(加载状态(rootKey), macroKey);
+export function refreshContextMacroFromStorage(messageId?: number, macroKey = CONTEXT_MACRO_KEY): string {
+  debugLog('bridge', '从最新楼层快照刷新上下文宏', { messageId: messageId ?? null, macroKey });
+  return refreshContextMacro(加载状态(messageId), macroKey);
 }
 
 export function extractCommands(replyText: string): { commandsText: string | null; commands: 状态命令[]; cleanedReplyText: string } {
@@ -87,21 +87,21 @@ export function extractAndApplyCommands(replyText: string, state: 状态总表):
   };
 }
 
-export function extractApplyAndSaveCommands(
+export async function extractApplyAndSaveCommands(
   replyText: string,
   state: 状态总表,
-  rootKey = STATE_ROOT_KEY,
+  messageId: number,
   macroKey = CONTEXT_MACRO_KEY,
   refreshMacroOnNoCommands = true,
-): 命令应用结果 {
+): Promise<命令应用结果> {
   debugLog('bridge', '开始提取、应用并保存命令', {
-    rootKey,
+    messageId,
     macroKey,
     state: summarizeState(state),
   });
   const extracted = extractCommands(replyText);
   debugLog('bridge', '提取、应用并保存命令提取结果', {
-    rootKey,
+    messageId,
     macroKey,
     hasCommandsText: Boolean(extracted.commandsText),
     commandsCount: extracted.commands.length,
@@ -121,10 +121,10 @@ export function extractApplyAndSaveCommands(
       cleanedReplyText: extracted.cleanedReplyText,
     };
   }
-  const result = 执行并保存命令(state, extracted.commands, rootKey);
+  const result = await 执行并保存命令(state, extracted.commands, messageId);
   refreshContextMacro(result.state, macroKey);
   debugLog('bridge', '提取、应用并保存命令完成', {
-    rootKey,
+    messageId,
     macroKey,
     applied: result.applied.length,
     state: summarizeState(result.state),
@@ -136,19 +136,22 @@ export function extractApplyAndSaveCommands(
   };
 }
 
-export function handleAssistantReply(replyText: string, options: 处理回复选项 = {}): 命令应用结果 {
-  const { rootKey = STATE_ROOT_KEY, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
+export async function handleAssistantReply(replyText: string, options: 处理回复选项 = {}): Promise<命令应用结果> {
+  const { messageId, macroKey = CONTEXT_MACRO_KEY, refreshMacroOnNoCommands = false } = options;
   debugLog('bridge', '开始处理 AI 回复', {
-    rootKey,
+    messageId: messageId ?? null,
     macroKey,
     refreshMacroOnNoCommands,
     reply: summarizeValue(replyText),
   });
   try {
-    const state = 加载状态(rootKey);
-    const result = extractApplyAndSaveCommands(replyText, state, rootKey, macroKey, refreshMacroOnNoCommands);
+    if (typeof messageId !== 'number') {
+      throw new Error('处理 AI 回复时必须提供目标 messageId');
+    }
+    const state = 加载状态(messageId - 1);
+    const result = await extractApplyAndSaveCommands(replyText, state, messageId, macroKey, refreshMacroOnNoCommands);
     debugLog('bridge', 'AI 回复处理完成', {
-      rootKey,
+      messageId,
       macroKey,
       applied: result.applied.length,
       hasCommandsText: Boolean(result.commandsText),

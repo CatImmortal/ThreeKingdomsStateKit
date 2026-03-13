@@ -107,7 +107,7 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
     return false;
   }
 
-  const listener = () => {
+  const listener = async () => {
     debugLog('runtime', '收到解析命令按钮点击事件', { buttonName, eventName });
     try {
       const message = 读取消息(-1);
@@ -115,20 +115,21 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
         debugLog('runtime', '按钮调试未读取到最新消息，跳过处理');
         return;
       }
-      if (message.role !== 'assistant') {
-        debugLog('runtime', '按钮调试读取到的最新消息不是 assistant，跳过处理', {
+      if (message.role !== 'assistant' || typeof message.message_id !== 'number') {
+        debugLog('runtime', '按钮调试读取到的最新消息不是可处理 assistant 消息，跳过处理', {
           role: message.role ?? null,
           messageId: message.message_id ?? null,
         });
         return;
       }
-      const result = handleAssistantReply(String(message.message || ''), {
+      const result = await handleAssistantReply(String(message.message || ''), {
         ...options,
+        messageId: message.message_id,
         refreshMacroOnNoCommands: false,
       });
       debugLog('runtime', '按钮触发的 assistant 消息处理完成', {
         buttonName,
-        messageId: message.message_id ?? null,
+        messageId: message.message_id,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText),
       });
@@ -170,7 +171,7 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
     return false;
   }
 
-  const listener = (messageId: number, type?: string) => {
+  const listener = async (messageId: number, type?: string) => {
     debugLog('runtime', '收到 MESSAGE_RECEIVED 事件', {
       eventName,
       messageId,
@@ -195,8 +196,9 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
         });
         return;
       }
-      const result = handleAssistantReply(String(message.message || ''), {
+      const result = await handleAssistantReply(String(message.message || ''), {
         ...options,
+        messageId,
         refreshMacroOnNoCommands: false,
       });
       记录最近消息(message);

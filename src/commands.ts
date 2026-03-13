@@ -107,15 +107,15 @@ const 主角资源字段 = ['当前生命值', '当前体力值', '声望', '金
 const 六维字段 = ['武力', '智力', '统率', '政治', '魅力', '体质'] as const;
 const 装备条目字段 = ['名称', '品质', '类型', '先攻加值', '攻击加值', '防御DC加值', '伤害减免', '效果'] as const;
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
-const 武技条目字段 = ['等级', '类型', '效果', '熟练度', '体力消耗'] as const;
-const 专长条目字段 = ['等级', '效果'] as const;
+const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度', '体力消耗'] as const;
+const 专长条目字段 = ['名称', '等级', '效果'] as const;
 const 主角字段 = ['六维', '当前生命值', '当前体力值', '装备', '武技', '专长', '状态', '物品栏', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['品质', '描述', '数量'] as const;
 const NPC字段 = ['名称', '品质', '阵营', '定位', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
 const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '驻扎地', '特技'] as const;
 const 美人属性字段 = ['依赖度', '敏感度', '贞洁度', '位份', '性格', '当前状态'] as const;
-const 任务字段 = ['类型', '状态', '时限', '目标'] as const;
-const 任务目标字段 = ['类型', '状态', '积分', '其他奖励'] as const;
+const 任务字段 = ['名称', '类型', '状态', '时限', '目标'] as const;
+const 任务目标字段 = ['类型', '状态', '描述', '积分', '其他奖励'] as const;
 const 商品字段 = ['名称', '分类', '价格', '描述'] as const;
 
 function isPlainObject(value: unknown): value is PlainObject {
@@ -229,6 +229,7 @@ function 校验装备栏(value: unknown, path: string): void {
 function 校验武技条目(value: unknown, path: string): void {
   断言对象(value, path);
   断言字段白名单(value, 武技条目字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.武技等级, `${path}.等级`);
   if (value.类型 !== undefined) 断言枚举值(value.类型, 枚举.武技类型, `${path}.类型`);
   if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
@@ -239,6 +240,7 @@ function 校验武技条目(value: unknown, path: string): void {
 function 校验专长条目(value: unknown, path: string): void {
   断言对象(value, path);
   断言字段白名单(value, 专长条目字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.等级 !== undefined) 断言字符串(value.等级, `${path}.等级`);
   if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
 }
@@ -324,6 +326,7 @@ function 校验任务目标更新(value: unknown, path: string): void {
   断言字段白名单(value, 任务目标字段, path);
   if (value.类型 !== undefined) 断言枚举值(value.类型, 枚举.任务目标类型, `${path}.类型`);
   if (value.状态 !== undefined) 断言枚举值(value.状态, 枚举.任务目标状态, `${path}.状态`);
+  if (value.描述 !== undefined) 断言字符串(value.描述, `${path}.描述`);
   if (value.积分 !== undefined) 断言数字(value.积分, `${path}.积分`);
   if (value.其他奖励 !== undefined) 断言字符串(value.其他奖励, `${path}.其他奖励`);
 }
@@ -395,6 +398,7 @@ function 校验NPC更新(value: unknown, path: string): void {
 function 校验任务更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 任务字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.类型 !== undefined) 断言枚举值(value.类型, 枚举.任务类型, `${path}.类型`);
   if (value.状态 !== undefined) 断言枚举值(value.状态, 枚举.任务状态, `${path}.状态`);
   if (value.时限 !== undefined) 断言字符串(value.时限, `${path}.时限`);
