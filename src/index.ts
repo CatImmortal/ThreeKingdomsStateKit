@@ -14,6 +14,7 @@ import * as context from './context';
 import * as protocol from './protocol';
 import * as bridge from './bridge';
 import * as macro from './macro';
+import './runtime-auto';
 import * as runtime from './runtime';
 import * as debug from './debug';
 import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据 } from './recompute';
@@ -75,12 +76,6 @@ try {
   macro.registerSgbzMacros();
 } catch (error) {
   console.warn('[ThreeKingdomsStateKit] 注册宏失败，脚本主体仍可使用。', error);
-}
-
-try {
-  runtime.setupAssistantReplyHook();
-} catch (error) {
-  console.warn('[ThreeKingdomsStateKit] 注册 AI 回复完成钩子失败，脚本主体仍可使用。', error);
 }
 
 export default ThreeKingdomsStateKit;

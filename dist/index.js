@@ -1623,6 +1623,13 @@ function setupAssistantReplyHook(options = {}) {
   return true;
 }
 
+// src/runtime-auto.ts
+try {
+  setupAssistantReplyHook();
+} catch (error) {
+  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
+}
+
 // src/index.ts
 var ThreeKingdomsStateKit = {
   \u7ED3\u6784: {
@@ -1665,11 +1672,6 @@ try {
   registerSgbzMacros();
 } catch (error) {
   console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C\u5B8F\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
-}
-try {
-  setupAssistantReplyHook();
-} catch (error) {
-  console.warn("[ThreeKingdomsStateKit] \u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50\u5931\u8D25\uFF0C\u811A\u672C\u4E3B\u4F53\u4ECD\u53EF\u4F7F\u7528\u3002", error);
 }
 var index_default = ThreeKingdomsStateKit;
 export {
