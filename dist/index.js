@@ -1036,29 +1036,58 @@ function \u6784\u5EFA\u5B8F\u6CE8\u5165\u6587\u672C(state, space = 2) {
 // src/protocol.ts
 var protocol_exports = {};
 __export(protocol_exports, {
+  ANALYSIS_END: () => ANALYSIS_END,
+  ANALYSIS_START: () => ANALYSIS_START,
   COMMAND_BLOCK_END: () => COMMAND_BLOCK_END,
   COMMAND_BLOCK_START: () => COMMAND_BLOCK_START,
+  UPDATE_VARIABLE_END: () => UPDATE_VARIABLE_END,
+  UPDATE_VARIABLE_START: () => UPDATE_VARIABLE_START,
   \u5305\u88C5\u547D\u4EE4\u5757: () => \u5305\u88C5\u547D\u4EE4\u5757,
   \u63D0\u53D6\u547D\u4EE4\u5757: () => \u63D0\u53D6\u547D\u4EE4\u5757,
   \u79FB\u9664\u547D\u4EE4\u5757: () => \u79FB\u9664\u547D\u4EE4\u5757,
   \u89E3\u6790\u547D\u4EE4\u5757: () => \u89E3\u6790\u547D\u4EE4\u5757
 });
-var COMMAND_BLOCK_START = "<SgCommandsStart>";
-var COMMAND_BLOCK_END = "<SgCommandsEnd>";
-function \u5305\u88C5\u547D\u4EE4\u5757(commands, space = 2) {
+var UPDATE_VARIABLE_START = "<UpdateVariable>";
+var UPDATE_VARIABLE_END = "</UpdateVariable>";
+var ANALYSIS_START = "<Analysis>";
+var ANALYSIS_END = "</Analysis>";
+var COMMAND_BLOCK_START = "<Commands>";
+var COMMAND_BLOCK_END = "</Commands>";
+function \u5305\u88C5\u547D\u4EE4\u5757(commands, analysis = "", space = 2) {
   const list = Array.isArray(commands) ? commands : [commands];
-  return [COMMAND_BLOCK_START, JSON.stringify(list, null, space), COMMAND_BLOCK_END].join("\n");
+  return [
+    UPDATE_VARIABLE_START,
+    ANALYSIS_START,
+    analysis,
+    ANALYSIS_END,
+    COMMAND_BLOCK_START,
+    JSON.stringify(list, null, space),
+    COMMAND_BLOCK_END,
+    UPDATE_VARIABLE_END
+  ].join("\n");
 }
-function \u63D0\u53D6\u547D\u4EE4\u5757(replyText) {
-  const start = replyText.indexOf(COMMAND_BLOCK_START);
-  const end = replyText.indexOf(COMMAND_BLOCK_END);
+function \u63D0\u53D6\u66F4\u65B0\u5757(replyText) {
+  const start = replyText.indexOf(UPDATE_VARIABLE_START);
+  const end = replyText.indexOf(UPDATE_VARIABLE_END);
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  return replyText.slice(start + COMMAND_BLOCK_START.length, end).trim();
+  return replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
+}
+function \u63D0\u53D6\u547D\u4EE4\u5757(replyText) {
+  const block = \u63D0\u53D6\u66F4\u65B0\u5757(replyText);
+  if (!block) {
+    return null;
+  }
+  const start = block.indexOf(COMMAND_BLOCK_START);
+  const end = block.indexOf(COMMAND_BLOCK_END);
+  if (start < 0 || end < 0 || end < start) {
+    return null;
+  }
+  return block.slice(start + COMMAND_BLOCK_START.length, end).trim();
 }
 function \u79FB\u9664\u547D\u4EE4\u5757(replyText) {
-  const pattern = new RegExp(`${_.escapeRegExp(COMMAND_BLOCK_START)}[\\s\\S]*?${_.escapeRegExp(COMMAND_BLOCK_END)}`, "g");
+  const pattern = new RegExp(`${_.escapeRegExp(UPDATE_VARIABLE_START)}[\\s\\S]*?${_.escapeRegExp(UPDATE_VARIABLE_END)}`, "g");
   return replyText.replace(pattern, "").trim();
 }
 function \u89E3\u6790\u547D\u4EE4\u5757(replyText) {
@@ -1232,6 +1261,8 @@ try {
 }
 var index_default = ThreeKingdomsStateKit;
 export {
+  ANALYSIS_END,
+  ANALYSIS_START,
   COMMAND_BLOCK_END,
   COMMAND_BLOCK_START,
   CONTEXT_MACRO_KEY,
@@ -1242,6 +1273,8 @@ export {
   SGBZ_CONTEXT_MACRO_REGEX,
   STATE_ROOT_KEY,
   ThreeKingdomsStateKit,
+  UPDATE_VARIABLE_END,
+  UPDATE_VARIABLE_START,
   buildContextMacroText,
   buildInjectedContext,
   buildInjectedView,
