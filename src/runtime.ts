@@ -20,7 +20,7 @@ type RuntimeApi = {
   eventOn?: (eventName: string, listener: (...args: any[]) => void) => EventBinding | void;
   eventRemoveListener?: (eventName: string, listener: (...args: any[]) => void) => void;
   tavern_events?: {
-    GENERATION_ENDED?: string;
+    MESSAGE_RECEIVED?: string;
   };
   getChatMessages?: (range: string | number, option?: { include_swipes?: false }) => ChatMessageLike[];
   TavernHelper?: {
@@ -35,16 +35,23 @@ function 获取运行时接口(): RuntimeApi {
   return globalThis as typeof globalThis & RuntimeApi;
 }
 
-function 获取最新助手消息(): ChatMessageLike | null {
+function 获取消息读取函数() {
   const runtime = 获取运行时接口();
-  const getChatMessages = runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+  return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+}
+
+function 读取消息(messageId: number): ChatMessageLike | null {
+  const getChatMessages = 获取消息读取函数();
   if (typeof getChatMessages !== 'function') {
-    debugLog('runtime', '未找到 getChatMessages，无法读取最新消息');
+    debugLog('runtime', '未找到 getChatMessages，无法读取指定消息', { messageId });
     return null;
   }
-  const messages = getChatMessages(-1, { include_swipes: false }) ?? [];
+  const messages = getChatMessages(messageId, { include_swipes: false }) ?? [];
   const message = Array.isArray(messages) ? messages[0] ?? null : null;
-  debugLog('runtime', '读取最新消息完成', summarizeValue(message));
+  debugLog('runtime', '读取指定消息完成', {
+    messageId,
+    message: summarizeValue(message),
+  });
   return message;
 }
 
@@ -79,36 +86,37 @@ export function teardownAssistantReplyHook(): void {
 export function setupAssistantReplyHook(options: 自动接线选项 = {}): boolean {
   teardownAssistantReplyHook();
   const runtime = 获取运行时接口();
-  const eventName = runtime.tavern_events?.GENERATION_ENDED;
+  const eventName = runtime.tavern_events?.MESSAGE_RECEIVED;
   if (!eventName || typeof runtime.eventOn !== 'function') {
-    debugLog('runtime', '未找到 tavern_events.GENERATION_ENDED 或 eventOn，无法自动接入', {
+    debugLog('runtime', '未找到 tavern_events.MESSAGE_RECEIVED 或 eventOn，无法自动接入', {
       hasEventOn: typeof runtime.eventOn === 'function',
       eventName,
     });
     return false;
   }
 
-  const listener = (...args: any[]) => {
-    debugLog('runtime', '收到 GENERATION_ENDED 事件', {
+  const listener = (messageId: number, type?: string) => {
+    debugLog('runtime', '收到 MESSAGE_RECEIVED 事件', {
       eventName,
-      args: summarizeValue(args),
+      messageId,
+      type: type ?? null,
     });
     try {
-      const message = 获取最新助手消息();
+      const message = 读取消息(messageId);
       if (!message) {
-        debugLog('runtime', '未读取到最新消息，跳过处理');
+        debugLog('runtime', '未读取到目标消息，跳过处理', { messageId });
         return;
       }
       if (message.role !== 'assistant') {
-        debugLog('runtime', '最新消息不是 assistant，跳过处理', {
+        debugLog('runtime', '目标消息不是 assistant，跳过处理', {
           role: message.role ?? null,
-          messageId: message.message_id ?? null,
+          messageId: message.message_id ?? messageId,
         });
         return;
       }
       if (是否重复消息(message)) {
         debugLog('runtime', '检测到重复 assistant 消息，跳过处理', {
-          messageId: message.message_id ?? null,
+          messageId: message.message_id ?? messageId,
         });
         return;
       }
@@ -118,7 +126,7 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
       });
       记录最近消息(message);
       debugLog('runtime', 'assistant 消息自动处理完成', {
-        messageId: message.message_id ?? null,
+        messageId: message.message_id ?? messageId,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText),
       });
@@ -129,6 +137,6 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
 
   const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
   已注册回复钩子 = { eventName, listener, binding: binding ?? undefined };
-  debugLog('runtime', '已注册 AI 回复完成钩子', { eventName });
+  debugLog('runtime', '已注册 assistant 消息接收钩子', { eventName });
   return true;
 }

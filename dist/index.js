@@ -1531,16 +1531,22 @@ var \u6700\u8FD1\u5904\u7406\u8BB0\u5F55 = { messageId: null, message: "" };
 function \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3() {
   return globalThis;
 }
-function \u83B7\u53D6\u6700\u65B0\u52A9\u624B\u6D88\u606F() {
+function \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570() {
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
-  const getChatMessages = runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+  return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+}
+function \u8BFB\u53D6\u6D88\u606F(messageId) {
+  const getChatMessages = \u83B7\u53D6\u6D88\u606F\u8BFB\u53D6\u51FD\u6570();
   if (typeof getChatMessages !== "function") {
-    debugLog("runtime", "\u672A\u627E\u5230 getChatMessages\uFF0C\u65E0\u6CD5\u8BFB\u53D6\u6700\u65B0\u6D88\u606F");
+    debugLog("runtime", "\u672A\u627E\u5230 getChatMessages\uFF0C\u65E0\u6CD5\u8BFB\u53D6\u6307\u5B9A\u6D88\u606F", { messageId });
     return null;
   }
-  const messages = getChatMessages(-1, { include_swipes: false }) ?? [];
+  const messages = getChatMessages(messageId, { include_swipes: false }) ?? [];
   const message = Array.isArray(messages) ? messages[0] ?? null : null;
-  debugLog("runtime", "\u8BFB\u53D6\u6700\u65B0\u6D88\u606F\u5B8C\u6210", summarizeValue(message));
+  debugLog("runtime", "\u8BFB\u53D6\u6307\u5B9A\u6D88\u606F\u5B8C\u6210", {
+    messageId,
+    message: summarizeValue(message)
+  });
   return message;
 }
 function \u662F\u5426\u91CD\u590D\u6D88\u606F(message) {
@@ -1571,35 +1577,36 @@ function teardownAssistantReplyHook() {
 function setupAssistantReplyHook(options = {}) {
   teardownAssistantReplyHook();
   const runtime = \u83B7\u53D6\u8FD0\u884C\u65F6\u63A5\u53E3();
-  const eventName = runtime.tavern_events?.GENERATION_ENDED;
+  const eventName = runtime.tavern_events?.MESSAGE_RECEIVED;
   if (!eventName || typeof runtime.eventOn !== "function") {
-    debugLog("runtime", "\u672A\u627E\u5230 tavern_events.GENERATION_ENDED \u6216 eventOn\uFF0C\u65E0\u6CD5\u81EA\u52A8\u63A5\u5165", {
+    debugLog("runtime", "\u672A\u627E\u5230 tavern_events.MESSAGE_RECEIVED \u6216 eventOn\uFF0C\u65E0\u6CD5\u81EA\u52A8\u63A5\u5165", {
       hasEventOn: typeof runtime.eventOn === "function",
       eventName
     });
     return false;
   }
-  const listener = (...args) => {
-    debugLog("runtime", "\u6536\u5230 GENERATION_ENDED \u4E8B\u4EF6", {
+  const listener = (messageId, type) => {
+    debugLog("runtime", "\u6536\u5230 MESSAGE_RECEIVED \u4E8B\u4EF6", {
       eventName,
-      args: summarizeValue(args)
+      messageId,
+      type: type ?? null
     });
     try {
-      const message = \u83B7\u53D6\u6700\u65B0\u52A9\u624B\u6D88\u606F();
+      const message = \u8BFB\u53D6\u6D88\u606F(messageId);
       if (!message) {
-        debugLog("runtime", "\u672A\u8BFB\u53D6\u5230\u6700\u65B0\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406");
+        debugLog("runtime", "\u672A\u8BFB\u53D6\u5230\u76EE\u6807\u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", { messageId });
         return;
       }
       if (message.role !== "assistant") {
-        debugLog("runtime", "\u6700\u65B0\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
+        debugLog("runtime", "\u76EE\u6807\u6D88\u606F\u4E0D\u662F assistant\uFF0C\u8DF3\u8FC7\u5904\u7406", {
           role: message.role ?? null,
-          messageId: message.message_id ?? null
+          messageId: message.message_id ?? messageId
         });
         return;
       }
       if (\u662F\u5426\u91CD\u590D\u6D88\u606F(message)) {
         debugLog("runtime", "\u68C0\u6D4B\u5230\u91CD\u590D assistant \u6D88\u606F\uFF0C\u8DF3\u8FC7\u5904\u7406", {
-          messageId: message.message_id ?? null
+          messageId: message.message_id ?? messageId
         });
         return;
       }
@@ -1609,7 +1616,7 @@ function setupAssistantReplyHook(options = {}) {
       });
       \u8BB0\u5F55\u6700\u8FD1\u6D88\u606F(message);
       debugLog("runtime", "assistant \u6D88\u606F\u81EA\u52A8\u5904\u7406\u5B8C\u6210", {
-        messageId: message.message_id ?? null,
+        messageId: message.message_id ?? messageId,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText)
       });
@@ -1619,7 +1626,7 @@ function setupAssistantReplyHook(options = {}) {
   };
   const binding = runtime.eventOn(eventName, listener);
   \u5DF2\u6CE8\u518C\u56DE\u590D\u94A9\u5B50 = { eventName, listener, binding: binding ?? void 0 };
-  debugLog("runtime", "\u5DF2\u6CE8\u518C AI \u56DE\u590D\u5B8C\u6210\u94A9\u5B50", { eventName });
+  debugLog("runtime", "\u5DF2\u6CE8\u518C assistant \u6D88\u606F\u63A5\u6536\u94A9\u5B50", { eventName });
   return true;
 }
 
