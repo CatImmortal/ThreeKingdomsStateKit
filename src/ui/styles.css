@@ -1,6 +1,6 @@
 #tk-vue-root{position:fixed;inset:0;z-index:2147483200;font-family:"Microsoft YaHei",serif;pointer-events:none}
 #tk-vue-root *{box-sizing:border-box}
-#tk-vue-root .tk-vue-panel-shell{position:fixed;width:min(1080px,calc(100vw - 24px));border:1px solid rgba(196,154,92,.36);border-radius:18px;background:linear-gradient(180deg,rgba(41,25,17,.96),rgba(12,10,10,.98));box-shadow:0 16px 36px rgba(0,0,0,.35);overflow:hidden;color:#f3e3c3;pointer-events:auto}
+#tk-vue-root .tk-vue-panel-shell{position:fixed;display:flex;flex-direction:column;width:min(1080px,calc(100vw - 24px));border:1px solid rgba(196,154,92,.36);border-radius:18px;background:linear-gradient(180deg,rgba(41,25,17,.96),rgba(12,10,10,.98));box-shadow:0 16px 36px rgba(0,0,0,.35);overflow:hidden;color:#f3e3c3;pointer-events:auto}
 #tk-vue-root .tk-vue-floating-options{position:fixed;width:min(420px,calc(100vw - 24px));border:1px solid rgba(196,154,92,.36);border-radius:18px;background:linear-gradient(180deg,rgba(41,25,17,.96),rgba(12,10,10,.98));box-shadow:0 16px 36px rgba(0,0,0,.35);overflow:hidden;color:#f3e3c3;pointer-events:auto}
 #tk-vue-root .tk-vue-panel-shell.is-hidden,#tk-vue-root .tk-vue-floating-options.is-hidden{display:none}
 #tk-vue-root .tk-vue-panel-head,#tk-vue-root .tk-vue-floating-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.03);cursor:move}
@@ -9,7 +9,7 @@
 #tk-vue-root .tk-vue-head-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 #tk-vue-root .tk-vue-head-btn{appearance:none;border:1px solid rgba(220,181,119,.28);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;font-size:12px}
 #tk-vue-root .tk-vue-panel-content{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:14px}
-#tk-vue-root .tk-vue-panel-content.is-system-panel{grid-template-columns:minmax(0,1fr)}
+#tk-vue-root .tk-vue-panel-content.is-system-panel{flex:1;min-height:0;grid-template-columns:minmax(0,1fr);overflow-y:auto;overscroll-behavior:contain}
 #tk-vue-root .tk-vue-card{border:1px solid rgba(196,154,92,.22);border-radius:14px;background:rgba(255,248,232,.03);padding:14px}
 #tk-vue-root .tk-vue-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
 #tk-vue-root .tk-vue-options-list{display:flex;flex-direction:column;gap:10px}

@@ -28,7 +28,7 @@ import { resetSystemPanelPosition, setSystemPanelPosition, setSystemPanelVisible
 
 const panelRef = ref<HTMLElement | null>(null);
 const visible = computed(() => unifiedPanelState.systemPanel.visible);
-const measuredSize = ref({ width: 960, height: 640 });
+const measuredSize = ref({ width: 960, height: 760 });
 const worldSummary = computed(() => {
   const state = unifiedPanelState.systemPanel.state;
   if (!state) {
@@ -49,6 +49,7 @@ const panelStyle = computed<CSSProperties>(() => {
       left: `${centered.left}px`,
       top: `${centered.top}px`,
       width: 'min(1080px,calc(100vw - 24px))',
+      height: 'min(760px,calc(100vh - 32px))',
     };
   }
   return {
@@ -56,6 +57,7 @@ const panelStyle = computed<CSSProperties>(() => {
     left: `${position.left}px`,
     top: `${position.top}px`,
     width: 'min(1080px,calc(100vw - 24px))',
+    height: 'min(760px,calc(100vh - 32px))',
   };
 });
 

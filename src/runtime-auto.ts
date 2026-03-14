@@ -1,5 +1,5 @@
 import { debugLog, debugWarn } from './debug';
-import { restoreRuntimeStateFromCurrentChat, setupAssistantReplyHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupMessageDeletedHook, setupMessageSentHook, setupVuePanelToggleButtonHook, teardownRuntimeHooks } from './runtime';
+import { scheduleRestoreRuntimeStateFromCurrentChat, setupAssistantReplyHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupMessageDeletedHook, setupMessageSentHook, setupVuePanelToggleButtonHook, teardownRuntimeHooks } from './runtime';
 
 let 已注册PageHide监听 = false;
 
@@ -70,7 +70,7 @@ try {
 }
 
 try {
-  restoreRuntimeStateFromCurrentChat('runtime-init');
+  scheduleRestoreRuntimeStateFromCurrentChat('runtime-init');
 } catch (error) {
-  debugWarn('runtime-auto', '初始化恢复当前聊天状态失败，脚本主体仍可使用。', error);
+  debugWarn('runtime-auto', '初始化调度恢复当前聊天状态失败，脚本主体仍可使用。', error);
 }

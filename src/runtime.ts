@@ -61,6 +61,10 @@ let 已注册日志按钮钩子: { eventName: string; listener: (...args: any[])
 let 已注册Vue面板按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 最近处理记录: { chatId: string | null; messageId: number | null; message: string } = { chatId: null, messageId: null, message: '' };
 let Vue面板已启用 = false;
+let 恢复状态定时器: ReturnType<typeof setTimeout> | null = null;
+let 恢复状态令牌 = 0;
+
+const 恢复状态补偿延迟毫秒 = 120;
 
 function 获取运行时接口(): RuntimeApi {
   const globalApi = globalThis as typeof globalThis & RuntimeApi;
@@ -409,6 +413,78 @@ function 重置运行时消息记录(): void {
   最近处理记录 = { chatId: null, messageId: null, message: '' };
 }
 
+function 取消待执行的聊天恢复(reason: string): void {
+  if (恢复状态定时器) {
+    clearTimeout(恢复状态定时器);
+    恢复状态定时器 = null;
+    debugLog('runtime', '已取消待执行的聊天恢复调度', { reason });
+  }
+}
+
+function 执行调度恢复(reason: string, token: number, expectedChatId: string | null, attempt: 1 | 2): void {
+  恢复状态定时器 = null;
+  const currentChatId = 获取当前聊天ID();
+  if (token !== 恢复状态令牌) {
+    debugLog('runtime', '聊天恢复调度令牌已过期，跳过执行', {
+      reason,
+      attempt,
+      token,
+      latestToken: 恢复状态令牌,
+      expectedChatId,
+      currentChatId,
+    });
+    return;
+  }
+  if (currentChatId !== expectedChatId) {
+    debugInfo('runtime', '聊天已切换，取消本次恢复执行', {
+      reason,
+      attempt,
+      token,
+      expectedChatId,
+      currentChatId,
+    });
+    return;
+  }
+  const restored = restoreRuntimeStateFromCurrentChat(`${reason}${attempt > 1 ? `-retry-${attempt}` : ''}`);
+  if (restored) {
+    return;
+  }
+  if (attempt >= 2) {
+    debugInfo('runtime', '聊天恢复调度未命中有效状态，已结束补偿重试', {
+      reason,
+      attempt,
+      token,
+      chatId: currentChatId,
+    });
+    return;
+  }
+  debugInfo('runtime', '首次聊天恢复未命中有效状态，准备短延迟补偿重试', {
+    reason,
+    attempt,
+    token,
+    chatId: currentChatId,
+    delayMs: 恢复状态补偿延迟毫秒,
+  });
+  恢复状态定时器 = setTimeout(() => {
+    执行调度恢复(reason, token, expectedChatId, 2);
+  }, 恢复状态补偿延迟毫秒);
+}
+
+export function scheduleRestoreRuntimeStateFromCurrentChat(reason = 'runtime-restore-scheduled'): void {
+  恢复状态令牌 += 1;
+  const token = 恢复状态令牌;
+  const chatId = 获取当前聊天ID();
+  取消待执行的聊天恢复(`${reason}-reschedule`);
+  debugInfo('runtime', '已计划聊天恢复调度', {
+    reason,
+    token,
+    chatId,
+  });
+  恢复状态定时器 = setTimeout(() => {
+    执行调度恢复(reason, token, chatId, 1);
+  }, 0);
+}
+
 function 销毁全部Vue界面(reason: string): void {
   clearUnifiedPanelState();
   unmountUnifiedPanelApp();
@@ -418,6 +494,8 @@ function 销毁全部Vue界面(reason: string): void {
 
 export function teardownRuntimeHooks(reason = 'runtime-teardown'): void {
   debugLog('runtime', '开始统一销毁运行时钩子与 Vue 界面', { reason });
+  取消待执行的聊天恢复(`${reason}-teardown`);
+  恢复状态令牌 += 1;
   teardownAssistantReplyHook();
   teardownChatChangedHook();
   teardownMessageSentHook();
@@ -467,7 +545,9 @@ function 同步Vue面板(messageId: number, state: 状态总表): boolean {
 }
 
 export function restoreRuntimeStateFromCurrentChat(reason = 'runtime-restore'): boolean {
+  const chatId = 获取当前聊天ID();
   if (!确保Vue面板已挂载()) {
+    debugWarn('runtime', '恢复当前聊天状态时 Vue 面板挂载失败', { reason, chatId });
     return false;
   }
   try {
@@ -482,23 +562,30 @@ export function restoreRuntimeStateFromCurrentChat(reason = 'runtime-restore'): 
         options: [],
       });
       setPlayerOptionsPanelVisible(false);
-      debugLog('runtime', '当前聊天无 assistant 楼层，已恢复为空状态', { reason });
+      debugInfo('runtime', '当前聊天无 assistant 楼层，已恢复为空状态', { reason, chatId });
       return false;
     }
+    debugLog('runtime', '开始从最新 assistant 楼层加载状态', {
+      reason,
+      chatId,
+      messageId: latestAssistant.message_id,
+    });
     const state = 加载状态(latestAssistant.message_id);
     updateSystemPanelState({
       messageId: latestAssistant.message_id,
       state,
     });
-    刷新玩家选项界面状态(reason);
-    debugLog('runtime', '已按当前聊天恢复系统面板与玩家选项', {
+    const hasPlayerOptions = 刷新玩家选项界面状态(reason);
+    debugInfo('runtime', '已按当前聊天恢复系统面板与玩家选项', {
       reason,
+      chatId,
       messageId: latestAssistant.message_id,
       playerOptionsCount: unifiedPanelState.playerOptionsPanel.options.length,
+      hasPlayerOptions,
     });
     return true;
   } catch (error) {
-    debugWarn('runtime', '按当前聊天恢复系统面板与玩家选项失败', { reason, error });
+    debugWarn('runtime', '按当前聊天恢复系统面板与玩家选项失败', { reason, chatId, error });
     return false;
   }
 }
@@ -714,13 +801,14 @@ export function setupChatChangedHook(): boolean {
     return false;
   }
   const listener = (chatFileName?: string) => {
-    debugInfo('runtime', '收到 CHAT_CHANGED 事件，准备清理并恢复当前聊天状态', {
+    debugInfo('runtime', '收到 CHAT_CHANGED 事件，准备清理并调度恢复当前聊天状态', {
       chatFileName: chatFileName ?? null,
       currentCharacterId: 获取当前角色卡ID(),
+      chatId: 获取当前聊天ID(),
     });
     销毁全部Vue界面('chat-changed');
     重置运行时消息记录();
-    restoreRuntimeStateFromCurrentChat('chat-changed');
+    scheduleRestoreRuntimeStateFromCurrentChat('chat-changed');
   };
   const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
   已注册聊天切换钩子 = { eventName, listener, binding: binding ?? undefined };
