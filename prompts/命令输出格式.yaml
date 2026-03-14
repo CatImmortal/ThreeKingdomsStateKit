@@ -107,6 +107,7 @@
       专长: Record<string, 专长条目>
       状态: 状态记录
     物品栏条目:
+      名称: string
       品质: 装备品质
       描述: string
       数量: number
@@ -230,6 +231,7 @@
         后宫和谐度: number
       关键约束:
         - `changes` 至少包含一个字段
+        - `物品栏` 中每个条目都必须显式提供 `名称`，不能只依赖 key 表示名称
         - 小幅资源增减优先用 `AdjustPlayerResource`
       示例: |-
         {

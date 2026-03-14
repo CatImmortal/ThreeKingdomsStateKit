@@ -105,7 +105,7 @@ export type 角色战斗数据 = {
 };
 
 export type 主角 = 角色战斗数据 & {
-  物品栏: Record<string, { 品质: 装备品质 | '无'; 描述: string; 数量: number }>;
+  物品栏: Record<string, { 名称: string; 品质: 装备品质 | '无'; 描述: string; 数量: number }>;
   声望: number;
   金钱: number;
   积分: number;
@@ -512,7 +512,8 @@ export function create世界(data: Partial<世界> = {}): 世界 {
 export function create主角(data: Partial<主角> = {}): 主角 {
   return {
     ...create角色战斗数据(data, { 完整: true }),
-    物品栏: _.mapValues(data.物品栏 || {}, item => ({
+    物品栏: _.mapValues(data.物品栏 || {}, (item, id) => ({
+      名称: String(item?.名称 || id || ''),
       品质: (枚举.装备品质.includes(item?.品质 as 装备品质) ? (item?.品质 as 装备品质) : '无') as 装备品质 | '无',
       描述: String(item?.描述 || ''),
       数量: Math.max(0, 数值(item?.数量, 1)),
