@@ -559,6 +559,10 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
         });
         return;
       }
+      debugInfo('runtime', '按钮开始处理 assistant 消息', {
+        buttonName,
+        messageId: message.message_id,
+      });
       const result = await handleAssistantReply(String(message.message || ''), {
         ...options,
         messageId: message.message_id,

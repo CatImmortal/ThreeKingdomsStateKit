@@ -33,10 +33,6 @@ function 获取消息接口(): 消息接口 {
   const windowApi = typeof window !== 'undefined' ? (window as typeof window & RuntimeApi) : undefined;
   const getChatMessages = globalApi.getChatMessages ?? windowApi?.getChatMessages ?? globalApi.TavernHelper?.getChatMessages ?? windowApi?.TavernHelper?.getChatMessages;
   const setChatMessages = globalApi.setChatMessages ?? windowApi?.setChatMessages ?? globalApi.TavernHelper?.setChatMessages ?? windowApi?.TavernHelper?.setChatMessages;
-  debugLog('storage', '检查聊天消息接口', {
-    hasGetChatMessages: typeof getChatMessages === 'function',
-    hasSetChatMessages: typeof setChatMessages === 'function',
-  });
   if (!getChatMessages || !setChatMessages) {
     const error = new Error('未找到 getChatMessages / setChatMessages，无法读写楼层状态');
     debugError('storage', '获取聊天消息接口失败', error);

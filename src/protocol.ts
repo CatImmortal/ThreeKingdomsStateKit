@@ -1,5 +1,5 @@
 import type { 状态命令 } from './commands';
-import { debugError, debugLog, summarizeValue } from './debug';
+import { debugError, debugLog } from './debug';
 
 export const UPDATE_VARIABLE_START = '<UpdateVariable>';
 export const UPDATE_VARIABLE_END = '</UpdateVariable>';
@@ -37,54 +37,32 @@ export function 包装命令块(commands: 状态命令[] | 状态命令, analysi
 function 提取更新块(replyText: string): string | null {
   const start = replyText.indexOf(UPDATE_VARIABLE_START);
   const end = replyText.indexOf(UPDATE_VARIABLE_END);
-  debugLog('protocol', '扫描 UpdateVariable 包装', {
-    hasStart: start >= 0,
-    hasEnd: end >= 0,
-    reply: summarizeValue(replyText),
-  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  const block = replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
-  debugLog('protocol', '提取到 UpdateVariable 内容', summarizeValue(block));
-  return block;
+  return replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
 }
 
 export function 提取玩家选项块(replyText: string): string | null {
   const start = replyText.indexOf(PLAYER_OPTIONS_START);
   const end = replyText.indexOf(PLAYER_OPTIONS_END);
-  debugLog('protocol', '扫描 PlayerOptions 包装', {
-    hasStart: start >= 0,
-    hasEnd: end >= 0,
-    reply: summarizeValue(replyText),
-  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  const block = replyText.slice(start + PLAYER_OPTIONS_START.length, end).trim();
-  debugLog('protocol', '提取到 PlayerOptions 内容', summarizeValue(block));
-  return block;
+  return replyText.slice(start + PLAYER_OPTIONS_START.length, end).trim();
 }
 
 export function 提取命令块(replyText: string): string | null {
   const block = 提取更新块(replyText);
   if (!block) {
-    debugLog('protocol', '未提取到 UpdateVariable 内容');
     return null;
   }
   const start = block.indexOf(COMMAND_BLOCK_START);
   const end = block.indexOf(COMMAND_BLOCK_END);
-  debugLog('protocol', '扫描 Commands 包装', {
-    hasStart: start >= 0,
-    hasEnd: end >= 0,
-    block: summarizeValue(block),
-  });
   if (start < 0 || end < 0 || end < start) {
     return null;
   }
-  const commandsText = block.slice(start + COMMAND_BLOCK_START.length, end).trim();
-  debugLog('protocol', '提取到 Commands 内容', summarizeValue(commandsText));
-  return commandsText;
+  return block.slice(start + COMMAND_BLOCK_START.length, end).trim();
 }
 
 export function 解析命令块(replyText: string): 命令块提取结果 {

@@ -2,7 +2,7 @@ import { 执行命令, 执行并保存命令, type 执行结果 } from './execut
 import { 构建宏注入文本, 构建注入文本, 构建注入视图, type 注入视图 } from './context';
 import { 解析命令输入, type 状态命令 } from './commands';
 import { debugError, debugInfo, debugLog, summarizeState, summarizeValue } from './debug';
-import { 解析命令块, 解析玩家选项块, 移除命令协议块, type 玩家选项 } from './protocol';
+import { 解析命令块, 解析玩家选项块, type 玩家选项 } from './protocol';
 import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态, 更新消息正文 } from './storage';
 import { type 状态总表 } from './state';
 
@@ -34,7 +34,7 @@ export function appendReplyDecorators(replyText: string, state: 状态总表, pl
   void state;
   void playerOptions;
   void messageId;
-  return 移除命令协议块(String(replyText || ''));
+  return String(replyText || '');
 }
 
 export function refreshContextMacro(state: 状态总表, macroKey = CONTEXT_MACRO_KEY): string {
@@ -51,17 +51,16 @@ export function refreshContextMacroFromStorage(messageId?: number, macroKey = CO
 }
 
 export function extractCommands(replyText: string): { commandsText: string | null; commands: 状态命令[]; playerOptions: 玩家选项[]; cleanedReplyText: string } {
-  debugLog('bridge', '开始从回复提取命令与选项', summarizeValue(replyText));
   try {
     const parsed = 解析命令块(replyText);
     const commands = parsed.commandsText ? 解析命令输入(parsed.commands) : [];
     const playerOptions = 解析玩家选项块(parsed.replyText);
     const cleanedReplyText = parsed.replyText;
     debugInfo('bridge', '命令与选项提取完成', {
+      reply: summarizeValue(replyText),
       hasCommandsText: Boolean(parsed.commandsText),
       commandsCount: commands.length,
       playerOptionsCount: playerOptions.length,
-      cleanedReply: summarizeValue(cleanedReplyText),
     });
     return {
       commandsText: parsed.commandsText,
@@ -122,9 +121,11 @@ export async function extractApplyAndSaveCommands(
     playerOptionsCount: extracted.playerOptions.length,
   });
   if (extracted.commands.length === 0) {
-    debugInfo('bridge', refreshMacroOnNoCommands ? '未提取到命令，仅刷新上下文宏' : '未提取到命令，仅记录日志', {
+    debugInfo('bridge', '未提取到命令', {
+      messageId,
       macroKey,
       refreshMacroOnNoCommands,
+      playerOptionsCount: extracted.playerOptions.length,
     });
     await 更新消息正文(messageId, appendReplyDecorators(extracted.cleanedReplyText, state, extracted.playerOptions, messageId));
     if (refreshMacroOnNoCommands) {
