@@ -2,13 +2,13 @@ import { 执行命令, 执行并保存命令, type 执行结果 } from './execut
 import { 构建宏注入文本, 构建注入文本, 构建注入视图, type 注入视图 } from './context';
 import { 解析命令输入, type 状态命令 } from './commands';
 import { debugError, debugInfo, debugLog, summarizeState, summarizeValue } from './debug';
-import { 解析命令块 } from './protocol';
-import { appendStatusBar, buildStatusBar, stripStatusBar } from './status-panel';
+import { 解析命令块, 解析玩家选项块, 移除玩家选项块, type 玩家选项 } from './protocol';
 import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态, 更新消息正文 } from './storage';
 import { type 状态总表 } from './state';
 
 export type 命令应用结果 = 执行结果 & {
   commandsText: string | null;
+  playerOptions: 玩家选项[];
   cleanedReplyText: string;
 };
 
@@ -30,12 +30,11 @@ export function buildContextMacroText(state: 状态总表): string {
   return 构建宏注入文本(state);
 }
 
-export function buildStatusBarHtml(state: 状态总表, messageId?: number): string {
-  return buildStatusBar(state, messageId);
-}
-
-export function appendStatusBarToReply(replyText: string, state: 状态总表, messageId?: number): string {
-  return appendStatusBar(stripStatusBar(replyText), state, messageId);
+export function appendReplyDecorators(replyText: string, state: 状态总表, playerOptions: 玩家选项[] = [], messageId?: number): string {
+  void state;
+  void playerOptions;
+  void messageId;
+  return String(replyText || '').trim();
 }
 
 export function refreshContextMacro(state: 状态总表, macroKey = CONTEXT_MACRO_KEY): string {
@@ -51,20 +50,24 @@ export function refreshContextMacroFromStorage(messageId?: number, macroKey = CO
   return refreshContextMacro(加载状态(messageId), macroKey);
 }
 
-export function extractCommands(replyText: string): { commandsText: string | null; commands: 状态命令[]; cleanedReplyText: string } {
-  debugLog('bridge', '开始从回复提取命令', summarizeValue(replyText));
+export function extractCommands(replyText: string): { commandsText: string | null; commands: 状态命令[]; playerOptions: 玩家选项[]; cleanedReplyText: string } {
+  debugLog('bridge', '开始从回复提取命令与选项', summarizeValue(replyText));
   try {
     const parsed = 解析命令块(replyText);
     const commands = parsed.commandsText ? 解析命令输入(parsed.commands) : [];
-    debugInfo('bridge', '命令提取完成', {
+    const playerOptions = 解析玩家选项块(parsed.replyText);
+    const cleanedReplyText = 移除玩家选项块(parsed.replyText);
+    debugInfo('bridge', '命令与选项提取完成', {
       hasCommandsText: Boolean(parsed.commandsText),
       commandsCount: commands.length,
-      cleanedReply: summarizeValue(parsed.replyText),
+      playerOptionsCount: playerOptions.length,
+      cleanedReply: summarizeValue(cleanedReplyText),
     });
     return {
       commandsText: parsed.commandsText,
       commands,
-      cleanedReplyText: parsed.replyText,
+      playerOptions,
+      cleanedReplyText,
     };
   } catch (error) {
     debugError('bridge', '提取命令失败', error);
@@ -81,6 +84,7 @@ export function extractAndApplyCommands(replyText: string, state: 状态总表):
       state: _.cloneDeep(state),
       applied: [],
       commandsText: null,
+      playerOptions: extracted.playerOptions,
       cleanedReplyText: extracted.cleanedReplyText,
     };
   }
@@ -92,6 +96,7 @@ export function extractAndApplyCommands(replyText: string, state: 状态总表):
   return {
     ...result,
     commandsText: extracted.commandsText,
+    playerOptions: extracted.playerOptions,
     cleanedReplyText: extracted.cleanedReplyText,
   };
 }
@@ -114,13 +119,14 @@ export async function extractApplyAndSaveCommands(
     macroKey,
     hasCommandsText: Boolean(extracted.commandsText),
     commandsCount: extracted.commands.length,
+    playerOptionsCount: extracted.playerOptions.length,
   });
   if (extracted.commands.length === 0) {
     debugInfo('bridge', refreshMacroOnNoCommands ? '未提取到命令，仅刷新上下文宏' : '未提取到命令，仅记录日志', {
       macroKey,
       refreshMacroOnNoCommands,
     });
-    await 更新消息正文(messageId, appendStatusBarToReply(extracted.cleanedReplyText, state, messageId));
+    await 更新消息正文(messageId, appendReplyDecorators(extracted.cleanedReplyText, state, extracted.playerOptions, messageId));
     if (refreshMacroOnNoCommands) {
       refreshContextMacro(state, macroKey);
     }
@@ -128,21 +134,24 @@ export async function extractApplyAndSaveCommands(
       state: _.cloneDeep(state),
       applied: [],
       commandsText: null,
+      playerOptions: extracted.playerOptions,
       cleanedReplyText: extracted.cleanedReplyText,
     };
   }
   const result = await 执行并保存命令(state, extracted.commands, messageId);
-  await 更新消息正文(messageId, appendStatusBarToReply(extracted.cleanedReplyText, result.state, messageId));
+  await 更新消息正文(messageId, appendReplyDecorators(extracted.cleanedReplyText, result.state, extracted.playerOptions, messageId));
   refreshContextMacro(result.state, macroKey);
   debugInfo('bridge', '提取、应用并保存命令完成', {
     messageId,
     macroKey,
     applied: result.applied.length,
+    playerOptionsCount: extracted.playerOptions.length,
     state: summarizeState(result.state),
   });
   return {
     ...result,
     commandsText: extracted.commandsText,
+    playerOptions: extracted.playerOptions,
     cleanedReplyText: extracted.cleanedReplyText,
   };
 }

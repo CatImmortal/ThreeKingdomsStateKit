@@ -13,5 +13,5 @@
     "sourceMap": false,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "*.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "*.d.ts"]
 }

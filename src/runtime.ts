@@ -1,5 +1,9 @@
 import { handleAssistantReply, type 处理回复选项 } from './bridge';
-import { debugError, debugInfo, debugLog, getDebugEnabled, setDebugEnabled, summarizeValue } from './debug';
+import { debugError, debugInfo, debugLog, debugWarn, getDebugEnabled, setDebugEnabled, summarizeValue } from './debug';
+import { getHostDocument } from './dom-host';
+import { mountUnifiedPanelApp, unmountUnifiedPanelApp } from './ui/app';
+import { clearUnifiedPanelState, setPlayerOptionsPanelVisible, setSystemPanelVisible, updatePlayerOptionsPanelState, updateSystemPanelState, unifiedPanelState } from './ui/store';
+import type { 状态总表 } from './state';
 
 export type 自动接线选项 = 处理回复选项;
 
@@ -22,21 +26,30 @@ type RuntimeApi = {
   getButtonEvent?: (buttonName: string) => string;
   tavern_events?: {
     MESSAGE_RECEIVED?: string;
+    CHAT_CHANGED?: string;
   };
   getChatMessages?: (range: string | number, option?: { include_swipes?: false }) => ChatMessageLike[];
+  executeSlashCommandsWithOptions?: (text: string, options?: any) => Promise<{ isError?: boolean; errorMessage?: string }>;
+  triggerSlash?: (command: string) => Promise<string>;
   TavernHelper?: {
     getChatMessages?: (range: string | number, option?: { include_swipes?: false }) => ChatMessageLike[];
+    executeSlashCommandsWithOptions?: (text: string, options?: any) => Promise<{ isError?: boolean; errorMessage?: string }>;
+    triggerSlash?: (command: string) => Promise<string>;
   };
 };
 
 type ToastrLike = {
   success?: (message: string) => void;
+  warning?: (message: string) => void;
 };
 
 let 已注册回复钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
+let 已注册聊天切换钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册日志按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
+let 已注册Vue面板按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 最近处理记录: { messageId: number | null; message: string } = { messageId: null, message: '' };
+let Vue面板已启用 = false;
 
 function 获取运行时接口(): RuntimeApi {
   const globalApi = globalThis as typeof globalThis & RuntimeApi;
@@ -47,6 +60,8 @@ function 获取运行时接口(): RuntimeApi {
     getButtonEvent: globalApi.getButtonEvent ?? windowApi?.getButtonEvent,
     tavern_events: globalApi.tavern_events ?? windowApi?.tavern_events,
     getChatMessages: globalApi.getChatMessages ?? windowApi?.getChatMessages,
+    executeSlashCommandsWithOptions: globalApi.executeSlashCommandsWithOptions ?? windowApi?.executeSlashCommandsWithOptions,
+    triggerSlash: globalApi.triggerSlash ?? windowApi?.triggerSlash,
     TavernHelper: globalApi.TavernHelper ?? windowApi?.TavernHelper,
   };
 }
@@ -54,6 +69,23 @@ function 获取运行时接口(): RuntimeApi {
 function 获取消息读取函数() {
   const runtime = 获取运行时接口();
   return runtime.getChatMessages ?? runtime.TavernHelper?.getChatMessages;
+}
+
+function 获取Slash执行器() {
+  const runtime = 获取运行时接口();
+  const triggerSlash = runtime.triggerSlash ?? runtime.TavernHelper?.triggerSlash;
+  const executeSlashCommandsWithOptions = runtime.executeSlashCommandsWithOptions ?? runtime.TavernHelper?.executeSlashCommandsWithOptions;
+  debugLog('runtime', '检查 slash 执行器', {
+    hasDirectTriggerSlash: typeof runtime.triggerSlash === 'function',
+    hasTavernHelperTriggerSlash: typeof runtime.TavernHelper?.triggerSlash === 'function',
+    hasDirectExecutor: typeof runtime.executeSlashCommandsWithOptions === 'function',
+    hasTavernHelperExecutor: typeof runtime.TavernHelper?.executeSlashCommandsWithOptions === 'function',
+    preferred: typeof triggerSlash === 'function' ? 'triggerSlash' : typeof executeSlashCommandsWithOptions === 'function' ? 'executeSlashCommandsWithOptions' : 'none',
+  });
+  return {
+    triggerSlash,
+    executeSlashCommandsWithOptions,
+  };
 }
 
 function 获取Toastr接口(): ToastrLike | undefined {
@@ -72,6 +104,19 @@ function 提示日志开关状态(enabled: boolean): void {
   console.log('[ThreeKingdomsStateKit][debug]', message);
 }
 
+function 提示玩家选项消息(message: string, tone: 'success' | 'warning' = 'success'): void {
+  const toastr = 获取Toastr接口();
+  if (tone === 'warning' && typeof toastr?.warning === 'function') {
+    toastr.warning(message);
+    return;
+  }
+  if (tone === 'success' && typeof toastr?.success === 'function') {
+    toastr.success(message);
+    return;
+  }
+  console.log('[ThreeKingdomsStateKit][player-options]', message);
+}
+
 function 读取消息(messageId: number): ChatMessageLike | null {
   const getChatMessages = 获取消息读取函数();
   if (typeof getChatMessages !== 'function') {
@@ -87,6 +132,150 @@ function 读取消息(messageId: number): ChatMessageLike | null {
   return message;
 }
 
+function 读取最新assistant消息(): ChatMessageLike | null {
+  const getChatMessages = 获取消息读取函数();
+  if (typeof getChatMessages !== 'function') {
+    debugLog('runtime', '未找到 getChatMessages，无法读取最新 assistant 消息');
+    return null;
+  }
+  const messages = getChatMessages('0-{{lastMessageId}}', { include_swipes: false }) ?? [];
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role === 'assistant') {
+      debugLog('runtime', '读取最新 assistant 消息完成', {
+        messageId: message.message_id ?? null,
+      });
+      return message;
+    }
+  }
+  debugLog('runtime', '未找到最新 assistant 消息');
+  return null;
+}
+
+function 是否最新assistant楼层(messageId: number): boolean {
+  const latest = 读取最新assistant消息();
+  const isLatest = typeof latest?.message_id === 'number' && latest.message_id === messageId;
+  debugLog('runtime', '校验玩家选项楼层是否最新', {
+    messageId,
+    latestAssistantMessageId: latest?.message_id ?? null,
+    isLatest,
+  });
+  return isLatest;
+}
+
+function 格式化玩家选项文本(text: string): string {
+  const normalized = String(text || '').trim().replace(/^（|）$/g, '');
+  return normalized ? `（${normalized}）` : '';
+}
+
+function 查找输入框(): HTMLTextAreaElement | HTMLInputElement | HTMLElement | null {
+  let hostDocument: Document;
+  try {
+    hostDocument = getHostDocument();
+  } catch {
+    return null;
+  }
+  const selectors = [
+    '#send_textarea',
+    '#send_textarea textarea',
+    'textarea[name="send_textarea"]',
+    'textarea[id="send_textarea"]',
+    'textarea[data-testid="send_textarea"]',
+    '[contenteditable="true"]',
+    '[contenteditable="plaintext-only"]',
+    '.ProseMirror',
+    'form textarea',
+    'textarea',
+    'input[type="text"]',
+  ];
+  for (const selector of selectors) {
+    const element = hostDocument.querySelector(selector);
+    if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
+      return element;
+    }
+    if (element instanceof HTMLElement && element.isContentEditable) {
+      return element;
+    }
+  }
+  const active = hostDocument.activeElement;
+  if (active instanceof HTMLTextAreaElement || active instanceof HTMLInputElement) {
+    return active;
+  }
+  if (active instanceof HTMLElement && active.isContentEditable) {
+    return active;
+  }
+  return null;
+}
+
+function 设置原生输入值(input: HTMLTextAreaElement | HTMLInputElement, text: string): void {
+  const prototype = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+  const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+  if (descriptor?.set) {
+    descriptor.set.call(input, text);
+    return;
+  }
+  input.value = text;
+}
+
+function 设置可编辑区域文本(input: HTMLElement, text: string): void {
+  input.textContent = text;
+  const selection = typeof window !== 'undefined' ? window.getSelection?.() : null;
+  let range: Range | null = null;
+  try {
+    range = getHostDocument().createRange();
+  } catch {
+    range = null;
+  }
+  if (!selection || !range) {
+    return;
+  }
+  range.selectNodeContents(input);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+async function 通过Slash填充输入框(text: string): Promise<boolean> {
+  const command = `/setinput ${JSON.stringify(text)}`;
+  if (await 执行Slash(command)) {
+    debugInfo('runtime', '已通过 slash /setinput 填充输入框', { text: summarizeValue(text) });
+    return true;
+  }
+  return false;
+}
+
+function 通过DOM填充输入框(text: string): boolean {
+  const input = 查找输入框();
+  if (!input) {
+    debugWarn('runtime', '未找到可填充的输入框');
+    return false;
+  }
+  input.focus();
+  if (input instanceof HTMLTextAreaElement || input instanceof HTMLInputElement) {
+    设置原生输入值(input, text);
+  } else if (input instanceof HTMLElement && input.isContentEditable) {
+    设置可编辑区域文本(input, text);
+  } else {
+    debugWarn('runtime', '找到的输入目标不支持填充', { tagName: (input as HTMLElement).tagName ?? null });
+    return false;
+  }
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+  debugInfo('runtime', '已通过 DOM 填充用户输入框', {
+    tagName: (input as HTMLElement).tagName,
+    isContentEditable: input instanceof HTMLElement ? input.isContentEditable : false,
+    text: summarizeValue(text),
+  });
+  return true;
+}
+
+async function 填充输入框(text: string): Promise<boolean> {
+  if (await 通过Slash填充输入框(text)) {
+    return true;
+  }
+  return 通过DOM填充输入框(text);
+}
+
 function 是否重复消息(message: ChatMessageLike): boolean {
   const messageId = typeof message.message_id === 'number' ? message.message_id : null;
   const text = String(message.message || '');
@@ -98,6 +287,142 @@ function 记录最近消息(message: ChatMessageLike): void {
     messageId: typeof message.message_id === 'number' ? message.message_id : null,
     message: String(message.message || ''),
   };
+}
+
+function 转义Slash参数(value: string): string {
+  return JSON.stringify(String(value || ''));
+}
+
+async function 执行Slash(command: string): Promise<boolean> {
+  const { triggerSlash, executeSlashCommandsWithOptions } = 获取Slash执行器();
+  if (typeof triggerSlash === 'function') {
+    try {
+      await triggerSlash(command);
+      debugLog('runtime', '通过 triggerSlash 执行 slash 命令成功', { command });
+      return true;
+    } catch (error) {
+      debugWarn('runtime', '通过 triggerSlash 执行 slash 命令异常', { command, error });
+      return false;
+    }
+  }
+  if (typeof executeSlashCommandsWithOptions === 'function') {
+    try {
+      const result = await executeSlashCommandsWithOptions(command, { handleExecutionErrors: true });
+      if (result?.isError) {
+        debugWarn('runtime', '通过 executeSlashCommandsWithOptions 执行 slash 命令失败', {
+          command,
+          errorMessage: result.errorMessage || null,
+        });
+        return false;
+      }
+      debugLog('runtime', '通过 executeSlashCommandsWithOptions 执行 slash 命令成功', { command });
+      return true;
+    } catch (error) {
+      debugWarn('runtime', '通过 executeSlashCommandsWithOptions 执行 slash 命令异常', { command, error });
+      return false;
+    }
+  }
+  debugWarn('runtime', '未找到可用的 slash 执行器，无法执行命令', { command });
+  return false;
+}
+
+function 确保Vue面板已挂载(): boolean {
+  try {
+    const mounted = mountUnifiedPanelApp();
+    if (!mounted) {
+      debugWarn('runtime', 'Vue 面板挂载失败，继续使用正文状态栏兜底');
+      return false;
+    }
+    Vue面板已启用 = true;
+    return true;
+  } catch (error) {
+    debugWarn('runtime', 'Vue 面板挂载异常，继续使用正文状态栏兜底', error);
+    return false;
+  }
+}
+
+function 同步Vue面板(messageId: number, state: 状态总表, options: Array<{ text: string }>): boolean {
+  if (!确保Vue面板已挂载()) {
+    return false;
+  }
+  try {
+    updateSystemPanelState({
+      messageId,
+      state,
+    });
+    updatePlayerOptionsPanelState({
+      messageId,
+      options,
+    });
+    debugLog('runtime', '已同步 Vue 双悬浮窗状态', {
+      messageId,
+      playerOptionsCount: options.length,
+    });
+    return true;
+  } catch (error) {
+    debugWarn('runtime', '同步 Vue 面板状态失败，继续使用正文状态栏兜底', error);
+    return false;
+  }
+}
+
+export async function syncPlayerOptionsQuickReplies(messageId: number, options: Array<{ text: string }>): Promise<boolean> {
+  void messageId;
+  void options;
+  debugLog('runtime', '已停用 Quick Reply 同步逻辑，当前由 Vue 状态面板承载');
+  return false;
+}
+
+export async function clearPlayerOptionsQuickReplies(): Promise<void> {
+  debugLog('runtime', '已停用 Quick Reply 清理逻辑，当前由 Vue 状态面板承载');
+}
+
+export async function rehydratePlayerOptionsQuickRepliesFromLatestMessage(): Promise<boolean> {
+  if (!unifiedPanelState.systemPanel.state || unifiedPanelState.systemPanel.latestMessageId == null) {
+    debugLog('runtime', '当前没有可恢复的 Vue 面板状态');
+    return false;
+  }
+  return 同步Vue面板(unifiedPanelState.systemPanel.latestMessageId, unifiedPanelState.systemPanel.state, unifiedPanelState.playerOptionsPanel.options);
+}
+
+export function updatePlayerOptionsView(messageId: number, options: Array<{ text: string }>): boolean {
+  if (!unifiedPanelState.systemPanel.state) {
+    debugLog('runtime', '当前没有可用状态，跳过独立更新 Vue 选项视图', { messageId, playerOptionsCount: options.length });
+    return false;
+  }
+  updatePlayerOptionsPanelState({ messageId, options });
+  return true;
+}
+
+export function clearPlayerOptionsView(): void {
+  setPlayerOptionsPanelVisible(false);
+  updatePlayerOptionsPanelState({ messageId: unifiedPanelState.playerOptionsPanel.latestMessageId ?? -1, options: [] });
+  debugLog('runtime', '已清理玩家选项悬浮窗状态');
+}
+
+export async function handlePlayerOptionClick(messageId: number, optionText: string): Promise<boolean> {
+  debugLog('runtime', '收到玩家选项点击请求', {
+    messageId,
+    optionText,
+  });
+  if (!Number.isFinite(messageId) || !optionText) {
+    debugWarn('runtime', '玩家选项点击参数无效，已忽略', { messageId, optionText });
+    return false;
+  }
+  if (!是否最新assistant楼层(messageId)) {
+    提示玩家选项消息('仅最新一条 AI 回复的选项可填入输入栏', 'warning');
+    return false;
+  }
+  const formatted = 格式化玩家选项文本(optionText);
+  if (!formatted) {
+    debugWarn('runtime', '玩家选项文本为空，已忽略', { messageId });
+    return false;
+  }
+  if (!(await 填充输入框(formatted))) {
+    提示玩家选项消息('未找到输入栏，无法填充选项', 'warning');
+    return false;
+  }
+  提示玩家选项消息('已将选项填入输入栏，可修改后手动发送');
+  return true;
 }
 
 function 卸载事件绑定(bindingState: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null): void {
@@ -156,6 +481,7 @@ export function setupDebugParseButtonHook(buttonName = '解析命令', options: 
         messageId: message.message_id,
         refreshMacroOnNoCommands: false,
       });
+      同步Vue面板(message.message_id, result.state, result.playerOptions);
       debugInfo('runtime', '按钮触发的 assistant 消息处理完成', {
         buttonName,
         messageId: message.message_id,
@@ -183,6 +509,39 @@ export function teardownAssistantReplyHook(): void {
   debugLog('runtime', '已卸载 AI 回复完成钩子', { eventName });
 }
 
+export function teardownChatChangedHook(): void {
+  if (!已注册聊天切换钩子) {
+    return;
+  }
+  const { eventName } = 已注册聊天切换钩子;
+  卸载事件绑定(已注册聊天切换钩子);
+  已注册聊天切换钩子 = null;
+  debugLog('runtime', '已卸载聊天切换钩子', { eventName });
+}
+
+export function setupChatChangedHook(): boolean {
+  teardownChatChangedHook();
+  const runtime = 获取运行时接口();
+  const eventName = runtime.tavern_events?.CHAT_CHANGED;
+  if (!eventName || typeof runtime.eventOn !== 'function') {
+    debugLog('runtime', '未找到 tavern_events.CHAT_CHANGED 或 eventOn，无法注册聊天切换钩子', {
+      hasEventOn: typeof runtime.eventOn === 'function',
+      eventName,
+    });
+    return false;
+  }
+  const listener = (chatFileName?: string) => {
+    debugInfo('runtime', '收到 CHAT_CHANGED 事件，准备清理悬浮窗', { chatFileName: chatFileName ?? null });
+    clearUnifiedPanelState();
+    unmountUnifiedPanelApp();
+    Vue面板已启用 = false;
+  };
+  const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
+  已注册聊天切换钩子 = { eventName, listener, binding: binding ?? undefined };
+  debugLog('runtime', '已注册聊天切换钩子', { eventName });
+  return true;
+}
+
 export function teardownDebugLogToggleButtonHook(): void {
   if (!已注册日志按钮钩子) {
     return;
@@ -191,6 +550,60 @@ export function teardownDebugLogToggleButtonHook(): void {
   卸载事件绑定(已注册日志按钮钩子);
   已注册日志按钮钩子 = null;
   debugLog('runtime', '已卸载日志开关按钮钩子', { eventName });
+}
+
+export function teardownVuePanelToggleButtonHook(): void {
+  if (已注册Vue面板按钮钩子) {
+    const { eventName } = 已注册Vue面板按钮钩子;
+    卸载事件绑定(已注册Vue面板按钮钩子);
+    已注册Vue面板按钮钩子 = null;
+    debugLog('runtime', '已卸载 Vue 面板开关按钮钩子', { eventName });
+  }
+  clearUnifiedPanelState();
+  unmountUnifiedPanelApp();
+  Vue面板已启用 = false;
+  debugLog('runtime', '已卸载 Vue 面板');
+}
+
+export function toggleVuePanel(): boolean {
+  const mounted = 确保Vue面板已挂载();
+  if (!mounted) {
+    return false;
+  }
+  const nextVisible = !unifiedPanelState.systemPanel.visible;
+  setSystemPanelVisible(nextVisible);
+  debugLog('runtime', nextVisible ? '已显示系统界面' : '已隐藏系统界面');
+  return nextVisible;
+}
+
+export function toggleSystemPanel(): boolean {
+  return toggleVuePanel();
+}
+
+export function setupVuePanelToggleButtonHook(buttonName = '系统界面开关'): boolean {
+  teardownVuePanelToggleButtonHook();
+  const runtime = 获取运行时接口();
+  const eventName = runtime.getButtonEvent?.(buttonName);
+  if (!eventName || typeof runtime.eventOn !== 'function') {
+    debugLog('runtime', '未找到按钮事件或 eventOn，无法注册 Vue 面板开关按钮', {
+      buttonName,
+      hasEventOn: typeof runtime.eventOn === 'function',
+      eventName,
+    });
+    return false;
+  }
+  const listener = () => {
+    const visible = toggleVuePanel();
+    debugLog('runtime', '收到系统界面开关按钮点击事件', { buttonName, eventName, visible });
+  };
+  const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
+  已注册Vue面板按钮钩子 = { eventName, listener, binding: binding ?? undefined };
+  debugLog('runtime', '已注册系统界面开关按钮钩子', { buttonName, eventName, hasBinding: Boolean(binding) });
+  return true;
+}
+
+export function setupSystemPanelToggleButtonHook(buttonName = '系统界面开关'): boolean {
+  return setupVuePanelToggleButtonHook(buttonName);
 }
 
 export function setupDebugLogToggleButtonHook(buttonName = '日志开关'): boolean {
@@ -262,10 +675,12 @@ export function setupAssistantReplyHook(options: 自动接线选项 = {}): boole
         refreshMacroOnNoCommands: false,
       });
       记录最近消息(message);
+      同步Vue面板(message.message_id ?? messageId, result.state, result.playerOptions);
       debugInfo('runtime', 'assistant 消息自动处理完成', {
         messageId: message.message_id ?? messageId,
         applied: result.applied.length,
         hasCommandsText: Boolean(result.commandsText),
+        playerOptionsCount: result.playerOptions.length,
       });
     } catch (error) {
       debugError('runtime', 'assistant 消息自动处理失败', error);

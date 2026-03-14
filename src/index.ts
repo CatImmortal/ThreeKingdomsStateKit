@@ -19,10 +19,10 @@ import * as context from './context';
 import * as protocol from './protocol';
 import * as bridge from './bridge';
 import * as macro from './macro';
-import * as statusPanel from './status-panel';
 import './runtime-auto';
 import * as runtime from './runtime';
 import * as debug from './debug';
+import * as domHost from './dom-host';
 import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据, recompute城池, recompute军队, recompute势力, recompute势力集合 } from './recompute';
 
 export * from './state';
@@ -35,9 +35,9 @@ export * from './context';
 export * from './protocol';
 export * from './bridge';
 export * from './macro';
-export * from './status-panel';
 export * from './runtime';
 export * from './debug';
+export * from './dom-host';
 
 export const ThreeKingdomsStateKit = {
   结构: {
@@ -61,16 +61,29 @@ export const ThreeKingdomsStateKit = {
   协议: protocol,
   桥接: bridge,
   宏: macro,
-  状态栏: statusPanel,
   运行时: runtime,
   调试: debug,
+  宿主DOM: domHost,
   handleAssistantReply: bridge.handleAssistantReply,
   setupAssistantReplyHook: runtime.setupAssistantReplyHook,
   teardownAssistantReplyHook: runtime.teardownAssistantReplyHook,
+  setupChatChangedHook: runtime.setupChatChangedHook,
+  teardownChatChangedHook: runtime.teardownChatChangedHook,
   setupDebugParseButtonHook: runtime.setupDebugParseButtonHook,
   teardownDebugParseButtonHook: runtime.teardownDebugParseButtonHook,
   setupDebugLogToggleButtonHook: runtime.setupDebugLogToggleButtonHook,
   teardownDebugLogToggleButtonHook: runtime.teardownDebugLogToggleButtonHook,
+  setupVuePanelToggleButtonHook: runtime.setupVuePanelToggleButtonHook,
+  setupSystemPanelToggleButtonHook: runtime.setupSystemPanelToggleButtonHook,
+  teardownVuePanelToggleButtonHook: runtime.teardownVuePanelToggleButtonHook,
+  toggleVuePanel: runtime.toggleVuePanel,
+  toggleSystemPanel: runtime.toggleSystemPanel,
+  handlePlayerOptionClick: runtime.handlePlayerOptionClick,
+  syncPlayerOptionsQuickReplies: runtime.syncPlayerOptionsQuickReplies,
+  clearPlayerOptionsQuickReplies: runtime.clearPlayerOptionsQuickReplies,
+  rehydratePlayerOptionsQuickRepliesFromLatestMessage: runtime.rehydratePlayerOptionsQuickRepliesFromLatestMessage,
+  updatePlayerOptionsView: runtime.updatePlayerOptionsView,
+  clearPlayerOptionsView: runtime.clearPlayerOptionsView,
   setDebug: debug.setDebugEnabled,
   getDebug: debug.getDebugEnabled,
   重算: {

@@ -1,0 +1,141 @@
+{
+  "generatedAt": "2026-03-14T11:33:02+08:00",
+  "schemaVersion": "1.0",
+  "projectName": "ThreeKingdomsStateKit",
+  "projectRoot": ".",
+  "truncated": false,
+  "coverage": {
+    "estimatedTotalFiles": 28,
+    "scannedFiles": 28,
+    "coveragePercent": 100,
+    "ignoredDirs": ["node_modules", ".git", ".idea", "dist"],
+    "ignoredReasons": {
+      "node_modules": ".gitignore 规则",
+      ".git": ".gitignore 规则（默认）",
+      ".idea": ".gitignore 规则",
+      "dist/*.map": ".gitignore 规则（仅排除 source map，dist/index.js 为构建产物）"
+    }
+  },
+  "modules": [
+    {
+      "id": "src",
+      "path": "src",
+      "language": "TypeScript",
+      "entryFile": "src/index.ts",
+      "claudeMd": "src/CLAUDE.md",
+      "description": "所有业务逻辑源码，包含状态定义、命令系统、运行时接线、UI 渲染等",
+      "hasTesting": false,
+      "hasConfig": true,
+      "configFiles": ["tsconfig.json", "tsup.config.ts"],
+      "interfaces": [
+        "window.ThreeKingdomsStateKit（全局命名空间对象）",
+        "handleAssistantReply(replyText, options) - 主流程 API",
+        "setupAssistantReplyHook(options) - 事件钩子",
+        "toggleVuePanel() - Vue 面板控制"
+      ],
+      "keyFiles": [
+        "src/index.ts",
+        "src/state.ts",
+        "src/rules.ts",
+        "src/commands.ts",
+        "src/executor.ts",
+        "src/recompute.ts",
+        "src/protocol.ts",
+        "src/bridge.ts",
+        "src/storage.ts",
+        "src/context.ts",
+        "src/runtime.ts",
+        "src/runtime-auto.ts",
+        "src/macro.ts",
+        "src/status-panel.ts",
+        "src/player-options.ts",
+        "src/player-options-panel.ts",
+        "src/debug.ts"
+      ],
+      "gaps": []
+    },
+    {
+      "id": "src/ui",
+      "path": "src/ui",
+      "language": "TypeScript + Vue 3 SFC",
+      "entryFile": "src/ui/app.ts",
+      "claudeMd": "src/ui/CLAUDE.md",
+      "description": "Vue 3 浮动交互面板，含 store、router、视图组件",
+      "hasTesting": false,
+      "hasConfig": false,
+      "interfaces": [
+        "mountUnifiedPanelApp() - 挂载面板",
+        "unmountUnifiedPanelApp() - 卸载面板",
+        "updateUnifiedPanelState(payload) - 推送状态",
+        "clearUnifiedPanelState() - 清空状态"
+      ],
+      "keyFiles": [
+        "src/ui/app.ts",
+        "src/ui/router.ts",
+        "src/ui/store.ts",
+        "src/ui/App.vue",
+        "src/ui/views/UnifiedPanel.vue",
+        "src/ui/components/PlayerOptionsPanel.vue",
+        "src/ui/components/StatusBarPanel.vue"
+      ],
+      "gaps": [
+        "PlayerOptionsPanel.vue 当前仅展示数量，缺乏点击交互（预留扩展）"
+      ]
+    },
+    {
+      "id": "reference",
+      "path": "reference",
+      "language": "TypeScript 类型声明 + YAML + 文本",
+      "entryFile": null,
+      "claudeMd": null,
+      "description": "SillyTavern 宿主 API 类型参考文档与角色卡示例，不参与构建",
+      "hasTesting": false,
+      "hasConfig": false,
+      "interfaces": [],
+      "keyFiles": [
+        "reference/@types.txt",
+        "reference/@types/function/",
+        "reference/@types/iframe/",
+        "reference/SillyTavern_Macros.txt",
+        "reference/slash_command.txt",
+        "reference/示例/"
+      ],
+      "gaps": [
+        "无 CLAUDE.md 文档（参考目录，不构建，低优先级）"
+      ]
+    }
+  ],
+  "globalGaps": [
+    "无自动化测试（无 Vitest / Jest 配置）",
+    "reference/ 目录无 CLAUDE.md 说明文档"
+  ],
+  "nextScanRecommendations": [],
+  "buildInfo": {
+    "tool": "tsup",
+    "configFile": "tsup.config.ts",
+    "entry": "src/index.ts",
+    "format": "esm",
+    "platform": "browser",
+    "target": "es2020",
+    "outDir": "dist",
+    "esbuildPlugins": ["unplugin-vue/esbuild"]
+  },
+  "dependencies": {
+    "runtime": {
+      "vue": "^3.5.30",
+      "vue-router": "^4.6.4"
+    },
+    "dev": {
+      "tsup": "^8.5.0",
+      "typescript": "^5.8.2",
+      "unplugin-vue": "^7.1.1",
+      "vue-tsc": "^3.2.5",
+      "@types/lodash": "^4.17.24",
+      "@vue/compiler-sfc": "^3.5.30"
+    },
+    "hostInjected": {
+      "_": "lodash（宿主注入全局）",
+      "initializeGlobal": "全局注册函数（可选，宿主注入）"
+    }
+  }
+}

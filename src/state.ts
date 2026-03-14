@@ -413,7 +413,8 @@ function 看起来像单势力对象(data: unknown): data is Partial<势力> {
   if (!_.isPlainObject(data)) {
     return false;
   }
-  return ['名称', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'].some(key => key in data);
+  const record = data as Record<string, unknown>;
+  return ['名称', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'].some(key => key in record);
 }
 
 export function create势力集合(data: Partial<势力集合> | Partial<势力> = {}): 势力集合 {

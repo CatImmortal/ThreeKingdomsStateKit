@@ -1,10 +1,16 @@
 import { debugWarn } from './debug';
-import { setupAssistantReplyHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook } from './runtime';
+import { setupAssistantReplyHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupVuePanelToggleButtonHook } from './runtime';
 
 try {
   setupAssistantReplyHook();
 } catch (error) {
   debugWarn('runtime-auto', '注册 AI 回复完成钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupChatChangedHook();
+} catch (error) {
+  debugWarn('runtime-auto', '注册聊天切换钩子失败，脚本主体仍可使用。', error);
 }
 
 try {
@@ -17,4 +23,10 @@ try {
   setupDebugLogToggleButtonHook('日志开关');
 } catch (error) {
   debugWarn('runtime-auto', '注册“日志开关”按钮钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupVuePanelToggleButtonHook('系统界面开关');
+} catch (error) {
+  debugWarn('runtime-auto', '注册“系统界面开关”按钮钩子失败，脚本主体仍可使用。', error);
 }

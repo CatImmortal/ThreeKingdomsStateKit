@@ -7,6 +7,12 @@ export const ANALYSIS_START = '<Analysis>';
 export const ANALYSIS_END = '</Analysis>';
 export const COMMAND_BLOCK_START = '<Commands>';
 export const COMMAND_BLOCK_END = '</Commands>';
+export const PLAYER_OPTIONS_START = '<PlayerOptions>';
+export const PLAYER_OPTIONS_END = '</PlayerOptions>';
+
+export type 玩家选项 = {
+  text: string;
+};
 
 export type 命令块提取结果 = {
   commandsText: string | null;
@@ -41,6 +47,22 @@ function 提取更新块(replyText: string): string | null {
   }
   const block = replyText.slice(start + UPDATE_VARIABLE_START.length, end).trim();
   debugLog('protocol', '提取到 UpdateVariable 内容', summarizeValue(block));
+  return block;
+}
+
+export function 提取玩家选项块(replyText: string): string | null {
+  const start = replyText.indexOf(PLAYER_OPTIONS_START);
+  const end = replyText.indexOf(PLAYER_OPTIONS_END);
+  debugLog('protocol', '扫描 PlayerOptions 包装', {
+    hasStart: start >= 0,
+    hasEnd: end >= 0,
+    reply: summarizeValue(replyText),
+  });
+  if (start < 0 || end < 0 || end < start) {
+    return null;
+  }
+  const block = replyText.slice(start + PLAYER_OPTIONS_START.length, end).trim();
+  debugLog('protocol', '提取到 PlayerOptions 内容', summarizeValue(block));
   return block;
 }
 
@@ -91,5 +113,33 @@ export function 解析命令块(replyText: string): 命令块提取结果 {
   } catch (error) {
     debugError('protocol', '命令块 JSON 解析失败', error);
     throw error;
+  }
+}
+
+export function 移除玩家选项块(replyText: string): string {
+  return String(replyText || '').replace(/\s*<PlayerOptions>[\s\S]*?<\/PlayerOptions>\s*/gi, '\n').trim();
+}
+
+export function 解析玩家选项块(replyText: string): 玩家选项[] {
+  const optionsText = 提取玩家选项块(replyText);
+  if (!optionsText) {
+    debugLog('protocol', '未找到可解析的玩家选项块');
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(optionsText) as 玩家选项[] | 玩家选项;
+    const list = Array.isArray(parsed) ? parsed : [parsed];
+    const options = list
+      .filter(item => _.isPlainObject(item))
+      .map(item => ({ text: String(item.text || '').trim() }))
+      .filter(item => Boolean(item.text));
+    debugLog('protocol', '玩家选项块 JSON 解析成功', {
+      count: options.length,
+      preview: options.slice(0, 3),
+    });
+    return options;
+  } catch (error) {
+    debugError('protocol', '玩家选项块 JSON 解析失败，已忽略该块', error);
+    return [];
   }
 }
