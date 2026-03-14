@@ -29,7 +29,11 @@
         text-anchor="middle"
       >
         <tspan :x="labelPositions[index].x" dy="0">{{ label.key }}</tspan>
-        <tspan :x="labelPositions[index].x" dy="13">{{ `${label.value}/${label.bonus}` }}</tspan>
+        <tspan :x="labelPositions[index].x" dy="13">
+          <tspan class="tk-radar-value">{{ label.value }}</tspan>
+          <tspan class="tk-radar-separator">/</tspan>
+          <tspan class="tk-radar-bonus">{{ formatBonus(label.bonus) }}</tspan>
+        </tspan>
       </text>
     </svg>
   </div>
@@ -76,6 +80,10 @@ function polygonPoints(scale: number) {
 
 function normalized(value: number) {
   return Math.max(0, Math.min(1, value / maxValue));
+}
+
+function formatBonus(value: number) {
+  return value > 0 ? `+${value}` : String(value);
 }
 
 const shapePoints = computed(() => labels.value.map((item, index) => {

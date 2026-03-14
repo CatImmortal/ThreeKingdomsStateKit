@@ -37,7 +37,6 @@ unmountUnifiedPanelApp();
 - `runtime.ts` 中的 `toggleVuePanel()`
 - `runtime-auto.ts` 自动注册的 `setupVuePanelToggleButtonHook('系统界面开关')`
 - `runtime.ts` 中的 `setupChatChangedHook()` 会在宿主 `CHAT_CHANGED` 事件触发时自动清理悬浮窗
-- `runtime.ts` 中的 `setupCharacterPageLoadedHook()` 会在宿主 `CHARACTER_PAGE_LOADED` 事件触发时按 `characterId` 兜底销毁全部 Vue 界面
 
 来驱动。
 
@@ -199,7 +198,7 @@ src/ui/
 5. 玩家选项窗默认定位在输入框上方，可拖拽移动
 6. 玩家选项点击后填入宿主输入栏，可手动修改再发送
 7. 宿主 `CHAT_CHANGED` 事件触发时，双悬浮窗会自动清理
-8. 宿主 `CHARACTER_PAGE_LOADED` 事件触发时，会按当前 `characterId` 再做一次兜底销毁，避免界面残留到另一张角色卡
+8. 宿主 `CHAT_CHANGED` 事件触发时，会清理旧聊天遗留 UI，并按新聊天重新恢复状态与玩家选项
 
 这意味着：
 

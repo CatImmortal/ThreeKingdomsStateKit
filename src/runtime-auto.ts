@@ -1,5 +1,5 @@
 import { debugLog, debugWarn } from './debug';
-import { setupAssistantReplyHook, setupCharacterPageLoadedHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupMessageDeletedHook, setupMessageSentHook, setupVuePanelToggleButtonHook, teardownRuntimeHooks } from './runtime';
+import { restoreRuntimeStateFromCurrentChat, setupAssistantReplyHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupMessageDeletedHook, setupMessageSentHook, setupVuePanelToggleButtonHook, teardownRuntimeHooks } from './runtime';
 
 let 已注册PageHide监听 = false;
 
@@ -31,12 +31,6 @@ try {
   setupChatChangedHook();
 } catch (error) {
   debugWarn('runtime-auto', '注册聊天切换钩子失败，脚本主体仍可使用。', error);
-}
-
-try {
-  setupCharacterPageLoadedHook();
-} catch (error) {
-  debugWarn('runtime-auto', '注册角色页加载钩子失败，脚本主体仍可使用。', error);
 }
 
 try {
@@ -73,4 +67,10 @@ try {
   setupPageHideHook();
 } catch (error) {
   debugWarn('runtime-auto', '注册 pagehide 兜底清理监听失败，脚本主体仍可使用。', error);
+}
+
+try {
+  restoreRuntimeStateFromCurrentChat('runtime-init');
+} catch (error) {
+  debugWarn('runtime-auto', '初始化恢复当前聊天状态失败，脚本主体仍可使用。', error);
 }

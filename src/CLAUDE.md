@@ -274,7 +274,6 @@ setDebugEnabled(false)  // 关闭 log/info 输出（warn/error 不受影响）
 5. `setupDebugLogToggleButtonHook('日志开关')` - 注册"日志开关"按钮
 6. `setupVuePanelToggleButtonHook('系统界面开关')` - 注册系统界面开关按钮
 7. `setupChatChangedHook()` - 订阅 `CHAT_CHANGED`，聊天切换时清理双悬浮窗
-8. `setupCharacterPageLoadedHook()` - 订阅 `CHARACTER_PAGE_LOADED`，角色卡切换完成后按 `characterId` 兜底销毁全部 Vue 界面
 
 ---
 
@@ -297,7 +296,6 @@ setDebugEnabled(false)  // 关闭 log/info 输出（warn/error 不受影响）
 | `teardownVuePanelToggleButtonHook()` | 卸载系统界面按钮逻辑并清理挂载 |
 | `setupChatChangedHook()` | 订阅 `CHAT_CHANGED`，聊天切换时清理双悬浮窗 |
 | `teardownChatChangedHook()` | 取消聊天切换钩子 |
-| `setupCharacterPageLoadedHook()` / `teardownCharacterPageLoadedHook()` | 监听 `CHARACTER_PAGE_LOADED`，角色卡切换完成后按 `characterId` 兜底销毁全部 Vue 界面 |
 | `handlePlayerOptionClick(messageId, optionText)` | 处理玩家选项点击，填充输入框 |
 | `updatePlayerOptionsView(messageId, options)` | 触发基于最新楼层的玩家选项窗刷新 |
 | `clearPlayerOptionsView()` | 清理独立玩家选项悬浮窗 |
@@ -319,7 +317,6 @@ window.ThreeKingdomsStateKit = {
   setupMessageSentHook,
   setupMessageDeletedHook,
   setupChatChangedHook,
-  setupCharacterPageLoadedHook,
   setupVuePanelToggleButtonHook,
   toggleVuePanel,
   handlePlayerOptionClick,

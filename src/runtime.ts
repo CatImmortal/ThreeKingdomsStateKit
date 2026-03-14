@@ -2,9 +2,10 @@ import { handleAssistantReply, type 处理回复选项 } from './bridge';
 import { debugError, debugInfo, debugLog, debugWarn, getDebugEnabled, setDebugEnabled, summarizeValue } from './debug';
 import { getHostDocument } from './dom-host';
 import { 解析玩家选项块 } from './protocol';
+import { 加载状态 } from './storage';
+import { create初始状态, type 状态总表 } from './state';
 import { mountUnifiedPanelApp, unmountUnifiedPanelApp } from './ui/app';
 import { clearUnifiedPanelState, setPlayerOptionsPanelVisible, setSystemPanelVisible, updatePlayerOptionsPanelState, updateSystemPanelState, unifiedPanelState } from './ui/store';
-import type { 状态总表 } from './state';
 
 export type 自动接线选项 = 处理回复选项;
 
@@ -30,7 +31,6 @@ type RuntimeApi = {
     MESSAGE_RECEIVED?: string;
     MESSAGE_DELETED?: string;
     CHAT_CHANGED?: string;
-    CHARACTER_PAGE_LOADED?: string;
   };
   getChatMessages?: (range: string | number, option?: { include_swipes?: false }) => ChatMessageLike[];
   executeSlashCommandsWithOptions?: (text: string, options?: any) => Promise<{ isError?: boolean; errorMessage?: string }>;
@@ -56,12 +56,10 @@ let 已注册回复钩子: { eventName: string; listener: (...args: any[]) => vo
 let 已注册发送消息钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册删除消息钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册聊天切换钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
-let 已注册角色页加载钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册日志按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 已注册Vue面板按钮钩子: { eventName: string; listener: (...args: any[]) => void; binding?: EventBinding } | null = null;
 let 最近处理记录: { chatId: string | null; messageId: number | null; message: string } = { chatId: null, messageId: null, message: '' };
-let 最近角色卡ID: string | null = 获取当前角色卡ID();
 let Vue面板已启用 = false;
 
 function 获取运行时接口(): RuntimeApi {
@@ -422,7 +420,6 @@ export function teardownRuntimeHooks(reason = 'runtime-teardown'): void {
   debugLog('runtime', '开始统一销毁运行时钩子与 Vue 界面', { reason });
   teardownAssistantReplyHook();
   teardownChatChangedHook();
-  teardownCharacterPageLoadedHook();
   teardownMessageSentHook();
   teardownMessageDeletedHook();
   teardownDebugParseButtonHook();
@@ -430,8 +427,7 @@ export function teardownRuntimeHooks(reason = 'runtime-teardown'): void {
   teardownVuePanelToggleButtonHook();
   销毁全部Vue界面(reason);
   重置运行时消息记录();
-  最近角色卡ID = 获取当前角色卡ID();
-  debugLog('runtime', '统一销毁运行时钩子与 Vue 界面完成', { reason, currentCharacterId: 最近角色卡ID });
+  debugLog('runtime', '统一销毁运行时钩子与 Vue 界面完成', { reason });
 }
 
 function 确保Vue面板已挂载(): boolean {
@@ -466,6 +462,43 @@ function 同步Vue面板(messageId: number, state: 状态总表): boolean {
     return true;
   } catch (error) {
     debugWarn('runtime', '同步 Vue 面板状态失败，继续使用正文状态栏兜底', error);
+    return false;
+  }
+}
+
+export function restoreRuntimeStateFromCurrentChat(reason = 'runtime-restore'): boolean {
+  if (!确保Vue面板已挂载()) {
+    return false;
+  }
+  try {
+    const latestAssistant = 读取最新assistant消息();
+    if (!latestAssistant || typeof latestAssistant.message_id !== 'number') {
+      updateSystemPanelState({
+        messageId: unifiedPanelState.systemPanel.latestMessageId ?? -1,
+        state: create初始状态(),
+      });
+      updatePlayerOptionsPanelState({
+        messageId: unifiedPanelState.playerOptionsPanel.latestMessageId ?? -1,
+        options: [],
+      });
+      setPlayerOptionsPanelVisible(false);
+      debugLog('runtime', '当前聊天无 assistant 楼层，已恢复为空状态', { reason });
+      return false;
+    }
+    const state = 加载状态(latestAssistant.message_id);
+    updateSystemPanelState({
+      messageId: latestAssistant.message_id,
+      state,
+    });
+    刷新玩家选项界面状态(reason);
+    debugLog('runtime', '已按当前聊天恢复系统面板与玩家选项', {
+      reason,
+      messageId: latestAssistant.message_id,
+      playerOptionsCount: unifiedPanelState.playerOptionsPanel.options.length,
+    });
+    return true;
+  } catch (error) {
+    debugWarn('runtime', '按当前聊天恢复系统面板与玩家选项失败', { reason, error });
     return false;
   }
 }
@@ -669,47 +702,6 @@ export function teardownChatChangedHook(): void {
   debugLog('runtime', '已卸载聊天切换钩子', { eventName });
 }
 
-export function teardownCharacterPageLoadedHook(): void {
-  if (!已注册角色页加载钩子) {
-    return;
-  }
-  const { eventName } = 已注册角色页加载钩子;
-  卸载事件绑定(已注册角色页加载钩子);
-  已注册角色页加载钩子 = null;
-  debugLog('runtime', '已卸载角色页加载钩子', { eventName });
-}
-
-export function setupCharacterPageLoadedHook(): boolean {
-  teardownCharacterPageLoadedHook();
-  const runtime = 获取运行时接口();
-  const eventName = runtime.tavern_events?.CHARACTER_PAGE_LOADED;
-  if (!eventName || typeof runtime.eventOn !== 'function') {
-    debugLog('runtime', '未找到 tavern_events.CHARACTER_PAGE_LOADED 或 eventOn，无法注册角色页加载钩子', {
-      hasEventOn: typeof runtime.eventOn === 'function',
-      eventName,
-    });
-    return false;
-  }
-  const listener = () => {
-    const currentCharacterId = 获取当前角色卡ID();
-    const changed = 最近角色卡ID !== null && currentCharacterId !== null && 最近角色卡ID !== currentCharacterId;
-    debugInfo('runtime', '收到 CHARACTER_PAGE_LOADED 事件', {
-      previousCharacterId: 最近角色卡ID,
-      currentCharacterId,
-      changed,
-    });
-    if (changed) {
-      销毁全部Vue界面('character-page-loaded');
-      重置运行时消息记录();
-    }
-    最近角色卡ID = currentCharacterId;
-  };
-  const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
-  已注册角色页加载钩子 = { eventName, listener, binding: binding ?? undefined };
-  debugLog('runtime', '已注册角色页加载钩子', { eventName });
-  return true;
-}
-
 export function setupChatChangedHook(): boolean {
   teardownChatChangedHook();
   const runtime = 获取运行时接口();
@@ -722,12 +714,13 @@ export function setupChatChangedHook(): boolean {
     return false;
   }
   const listener = (chatFileName?: string) => {
-    debugInfo('runtime', '收到 CHAT_CHANGED 事件，准备清理悬浮窗', {
+    debugInfo('runtime', '收到 CHAT_CHANGED 事件，准备清理并恢复当前聊天状态', {
       chatFileName: chatFileName ?? null,
       currentCharacterId: 获取当前角色卡ID(),
     });
     销毁全部Vue界面('chat-changed');
     重置运行时消息记录();
+    restoreRuntimeStateFromCurrentChat('chat-changed');
   };
   const binding = runtime.eventOn(eventName, listener) as EventBinding | void;
   已注册聊天切换钩子 = { eventName, listener, binding: binding ?? undefined };

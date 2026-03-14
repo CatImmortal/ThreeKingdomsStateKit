@@ -218,7 +218,6 @@ AI 回复文本中嵌入结构如下：
 - `src/ui/app.ts` 当前会将系统界面样式直接注入宿主 `document.head`，以兼容 SillyTavern 助手脚本只加载单个 `index.js` 的限制
 - `src/ui/styles.css` 可作为样式源码参考，但宿主实际运行时不依赖额外加载 `index.css`
 - `runtime.ts` 现已监听 `tavern_events.CHAT_CHANGED`，在聊天切换时自动清理悬浮窗 UI
-- `runtime.ts` 现已额外监听 `tavern_events.CHARACTER_PAGE_LOADED`，在角色卡切换完成后按当前 `characterId` 兜底销毁全部 Vue 界面，避免界面串到另一张角色卡
 - 运行时防重逻辑现已带上 `chatId`，与聊天级状态存档模型保持一致，避免跨聊天把相同 `message_id` 的 assistant 楼层误判为重复
 
 ---
