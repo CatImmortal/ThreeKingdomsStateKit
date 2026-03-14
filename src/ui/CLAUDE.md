@@ -34,9 +34,10 @@ unmountUnifiedPanelApp();
 
 实际使用时通常不直接手动调用，而是由：
 
-- `runtime.ts` 中的 `toggleVuePanel()` / `toggleSystemPanel()`
+- `runtime.ts` 中的 `toggleVuePanel()`
 - `runtime-auto.ts` 自动注册的 `setupVuePanelToggleButtonHook('系统界面开关')`
 - `runtime.ts` 中的 `setupChatChangedHook()` 会在宿主 `CHAT_CHANGED` 事件触发时自动清理悬浮窗
+- `runtime.ts` 中的 `setupCharacterPageLoadedHook()` 会在宿主 `CHARACTER_PAGE_LOADED` 事件触发时按 `characterId` 兜底销毁全部 Vue 界面
 
 来驱动。
 
@@ -124,7 +125,7 @@ src/ui/
 - 点击后调用 `handlePlayerOptionClick(latestMessageId, option.text)`
 - 无选项时显示“当前没有可选行动”
 
-当前版本中，玩家选项存在于**独立玩家选项悬浮窗**里，不再写入消息正文，也不再依赖宿主 document 的旧 `.tk-player-option-btn` 捕获监听链路。
+当前版本中，玩家选项存在于**独立玩家选项悬浮窗**里；同时 `<PlayerOptions>` 文本会保留在消息正文中，供宿主外部正则隐藏。运行时不再依赖一次性返回值，而是通过宿主楼层事件动态重解析最新楼层来决定是否显示选项窗。
 
 ### `views/PlayerOptionsFloatingPanel.vue`
 
@@ -159,9 +160,10 @@ src/ui/
 
 实现方式：
 
-- `StatusBarPanel.vue` 负责一级页签容器
+- `UnifiedPanel.vue` 负责外层系统界面标题与世界摘要
+- `StatusBarPanel.vue` 负责内部一级页签容器，避免再次渲染重复面板标题
 - 各一级页签拆到 `components/status/*.vue` 子组件
-- `RadarChart.vue` 负责六维雷达图
+- `RadarChart.vue` 负责六维雷达图，当前以 100 为各轴满值，并预留更高底部空间避免“政治”等底部标签被裁切
 - 无状态时显示“当前没有状态数据”
 
 ---
@@ -193,9 +195,11 @@ src/ui/
 1. 系统界面默认隐藏，AI 回复处理完成后只同步数据，不自动弹出
 2. 点击 `系统界面开关` 后显示，再次点击后隐藏
 3. 系统界面默认定位为视口中央，可拖拽移动，重置后回到中央
-4. 玩家选项窗在有选项时自动显示，默认定位在输入框上方，可拖拽移动
-5. 玩家选项点击后填入宿主输入栏，可手动修改再发送
-6. 宿主 `CHAT_CHANGED` 事件触发时，双悬浮窗会自动清理
+4. 玩家选项窗由 `MESSAGE_SENT`、`MESSAGE_RECEIVED`、`MESSAGE_DELETED`、`CHAT_CHANGED` 驱动刷新：仅当当前最新楼层仍是带有效 `<PlayerOptions>` 的 assistant 消息时才显示
+5. 玩家选项窗默认定位在输入框上方，可拖拽移动
+6. 玩家选项点击后填入宿主输入栏，可手动修改再发送
+7. 宿主 `CHAT_CHANGED` 事件触发时，双悬浮窗会自动清理
+8. 宿主 `CHARACTER_PAGE_LOADED` 事件触发时，会按当前 `characterId` 再做一次兜底销毁，避免界面残留到另一张角色卡
 
 这意味着：
 

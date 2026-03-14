@@ -1,5 +1,25 @@
-import { debugWarn } from './debug';
-import { setupAssistantReplyHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupVuePanelToggleButtonHook } from './runtime';
+import { debugLog, debugWarn } from './debug';
+import { setupAssistantReplyHook, setupCharacterPageLoadedHook, setupChatChangedHook, setupDebugLogToggleButtonHook, setupDebugParseButtonHook, setupMessageDeletedHook, setupMessageSentHook, setupVuePanelToggleButtonHook, teardownRuntimeHooks } from './runtime';
+
+let 已注册PageHide监听 = false;
+
+function setupPageHideHook(): boolean {
+  if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+    debugLog('runtime-auto', '当前环境不支持 pagehide 监听，已跳过注册');
+    return false;
+  }
+  if (已注册PageHide监听) {
+    debugLog('runtime-auto', 'pagehide 监听已注册，跳过重复绑定');
+    return true;
+  }
+  window.addEventListener('pagehide', () => {
+    debugLog('runtime-auto', '收到 pagehide 事件，准备执行 iframe 销毁兜底清理');
+    teardownRuntimeHooks('iframe-pagehide');
+  });
+  已注册PageHide监听 = true;
+  debugLog('runtime-auto', '已注册 pagehide 兜底清理监听');
+  return true;
+}
 
 try {
   setupAssistantReplyHook();
@@ -11,6 +31,24 @@ try {
   setupChatChangedHook();
 } catch (error) {
   debugWarn('runtime-auto', '注册聊天切换钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupCharacterPageLoadedHook();
+} catch (error) {
+  debugWarn('runtime-auto', '注册角色页加载钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupMessageSentHook();
+} catch (error) {
+  debugWarn('runtime-auto', '注册消息发送钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupMessageDeletedHook();
+} catch (error) {
+  debugWarn('runtime-auto', '注册消息删除钩子失败，脚本主体仍可使用。', error);
 }
 
 try {
@@ -29,4 +67,10 @@ try {
   setupVuePanelToggleButtonHook('系统界面开关');
 } catch (error) {
   debugWarn('runtime-auto', '注册“系统界面开关”按钮钩子失败，脚本主体仍可使用。', error);
+}
+
+try {
+  setupPageHideHook();
+} catch (error) {
+  debugWarn('runtime-auto', '注册 pagehide 兜底清理监听失败，脚本主体仍可使用。', error);
 }

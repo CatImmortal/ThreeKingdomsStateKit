@@ -5,7 +5,10 @@
         <div class="tk-vue-panel-title">可选行动</div>
         <div class="tk-vue-panel-subtitle">当前最新 AI 回复可选项</div>
       </div>
-      <button type="button" class="tk-vue-head-btn" @click.stop="handleResetPosition">重置位置</button>
+      <div class="tk-vue-head-actions">
+        <button type="button" class="tk-vue-head-btn" @click.stop="handleResetPosition">重置位置</button>
+        <button type="button" class="tk-vue-head-btn" @click.stop="handleClose">关闭</button>
+      </div>
     </div>
     <PlayerOptionsPanel />
   </div>
@@ -16,7 +19,7 @@ import { computed, nextTick, ref, watch, type CSSProperties } from 'vue';
 import { getHostDocument } from '../../dom-host';
 import { attachDragHandlers, computeInputAbovePosition } from '../drag';
 import PlayerOptionsPanel from '../components/PlayerOptionsPanel.vue';
-import { resetPlayerOptionsPanelPosition, setPlayerOptionsPanelPosition, unifiedPanelState } from '../store';
+import { resetPlayerOptionsPanelPosition, setPlayerOptionsPanelPosition, setPlayerOptionsPanelVisible, unifiedPanelState } from '../store';
 
 const panelRef = ref<HTMLElement | null>(null);
 const visible = computed(() => unifiedPanelState.playerOptionsPanel.visible);
@@ -94,6 +97,10 @@ const handleDragStart = (event: PointerEvent) => {
 const handleResetPosition = () => {
   resetPlayerOptionsPanelPosition();
   更新默认位置();
+};
+
+const handleClose = () => {
+  setPlayerOptionsPanelVisible(false);
 };
 
 watch([visible, () => unifiedPanelState.playerOptionsPanel.options.length, () => unifiedPanelState.playerOptionsPanel.position.mode], () => {

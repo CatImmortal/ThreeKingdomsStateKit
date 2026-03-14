@@ -1,6 +1,6 @@
 <template>
   <div class="tk-radar-wrap">
-    <svg class="tk-radar" viewBox="0 0 220 220" role="img" aria-label="主角六维雷达图">
+    <svg class="tk-radar" :viewBox="`0 0 ${viewBoxWidth} ${viewBoxHeight}`" role="img" aria-label="主角六维雷达图">
       <polygon v-for="ring in rings" :key="ring" class="tk-radar-ring" :points="polygonPoints(ring)" />
       <line
         v-for="(angle, index) in angles"
@@ -50,10 +50,13 @@ const labels = computed(() => [
   { key: '体质', value: props.stats.体质, bonus: props.stats._体质加值 ?? 0 },
 ]);
 
+const viewBoxWidth = 220;
+const viewBoxHeight = 236;
 const cx = 110;
-const cy = 110;
-const maxRadius = 72;
-const maxValue = 120;
+const cy = 104;
+const maxRadius = 68;
+const labelRadius = 96;
+const maxValue = 100;
 const rings = [0.25, 0.5, 0.75, 1];
 const angles = computed(() => labels.value.map((_, index) => (-Math.PI / 2) + (Math.PI * 2 * index) / labels.value.length));
 
@@ -71,11 +74,15 @@ function polygonPoints(scale: number) {
   }).join(' ');
 }
 
+function normalized(value: number) {
+  return Math.max(0, Math.min(1, value / maxValue));
+}
+
 const shapePoints = computed(() => labels.value.map((item, index) => {
-  const p = point(maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles.value[index]);
+  const p = point(maxRadius * normalized(item.value), angles.value[index]);
   return `${p.x},${p.y}`;
 }).join(' '));
 
-const dots = computed(() => labels.value.map((item, index) => point(maxRadius * Math.max(0, Math.min(1, item.value / maxValue)), angles.value[index])));
-const labelPositions = computed(() => labels.value.map((_, index) => point(maxRadius + 28, angles.value[index])));
+const dots = computed(() => labels.value.map((item, index) => point(maxRadius * normalized(item.value), angles.value[index])));
+const labelPositions = computed(() => labels.value.map((_, index) => point(labelRadius, angles.value[index])));
 </script>

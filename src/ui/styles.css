@@ -6,6 +6,7 @@
 #tk-vue-root .tk-vue-panel-head,#tk-vue-root .tk-vue-floating-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.03);cursor:move}
 #tk-vue-root .tk-vue-panel-title{font-size:18px;font-weight:700;color:#f6d9a2;letter-spacing:1px}
 #tk-vue-root .tk-vue-panel-subtitle{margin-top:4px;font-size:12px;color:#cfb78d}
+#tk-vue-root .tk-vue-head-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 #tk-vue-root .tk-vue-head-btn{appearance:none;border:1px solid rgba(220,181,119,.28);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;font-size:12px}
 #tk-vue-root .tk-vue-panel-content{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:14px}
 #tk-vue-root .tk-vue-panel-content.is-system-panel{grid-template-columns:minmax(0,1fr)}
@@ -50,8 +51,8 @@
 #tk-vue-root .tk-statusbar .tk-panel-detail summary::-webkit-details-marker{display:none}
 #tk-vue-root .tk-statusbar .tk-panel-detail-body{padding:0 12px 12px}
 #tk-vue-root .tk-statusbar .tk-panel-empty{padding:18px 12px;text-align:center;color:#bda681;font-size:12px}
-#tk-vue-root .tk-statusbar .tk-radar-wrap{display:block;margin-bottom:12px}
-#tk-vue-root .tk-statusbar .tk-radar{width:220px;height:220px;display:block;margin:0 auto}
+#tk-vue-root .tk-statusbar .tk-radar-wrap{display:block;margin-bottom:12px;padding-bottom:6px}
+#tk-vue-root .tk-statusbar .tk-radar{width:220px;height:236px;display:block;margin:0 auto;overflow:visible}
 #tk-vue-root .tk-statusbar .tk-radar-ring,#tk-vue-root .tk-statusbar .tk-radar-axis{fill:none;stroke:rgba(240,201,131,.18);stroke-width:1}
 #tk-vue-root .tk-statusbar .tk-radar-shape{fill:rgba(167,107,46,.28);stroke:#f0c983;stroke-width:2}
 #tk-vue-root .tk-statusbar .tk-radar-dot{fill:#f6dfb5}

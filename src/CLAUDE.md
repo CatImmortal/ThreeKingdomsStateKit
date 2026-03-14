@@ -164,7 +164,8 @@ UpsertShopItem / RemoveShopItem
 |---|---|
 | `解析命令块(replyText)` | 提取并返回 `{ commandsText, commands, replyText }` |
 | `解析玩家选项块(replyText)` | 提取并返回 `玩家选项[]` |
-| `移除玩家选项块(replyText)` | 从正文中清除 PlayerOptions 块 |
+| `移除命令协议块(replyText)` | 从正文中清除 `<UpdateVariable>...</UpdateVariable>` 协议块 |
+| `移除玩家选项块(replyText)` | 从正文中清除 PlayerOptions 块（当前运行时显隐判断仍可单独复用） |
 | `包装命令块(commands, analysis)` | 生成符合协议格式的字符串（测试/调试用） |
 
 ---
@@ -181,10 +182,10 @@ UpsertShopItem / RemoveShopItem
 | `extractAndApplyCommands(replyText, state)` | 仅提取 + 应用，不写存储 |
 | `extractApplyAndSaveCommands(...)` | 提取 + 应用 + 保存 + 刷新宏 + 更新消息正文 |
 | `buildInjectedContext(state)` | 构建 AI 上下文注入文本 |
-| `appendReplyDecorators(...)` | 返回清理协议块后的纯正文，不再附加旧状态栏 HTML |
+| `appendReplyDecorators(...)` | 清理命令协议块，但保留 `<PlayerOptions>` 文本，不再附加旧状态栏 HTML |
 | `refreshContextMacro(state, macroKey)` | 刷新宏变量内容 |
 
-说明：当前版本中，assistant 消息正文不再注入 `<StatusBar>` 或 `<PlayerOptionsPanel>`，前端可视界面全部由 `src/ui/` Vue 双悬浮窗系统承接。
+说明：当前版本中，assistant 消息正文不再注入 `<StatusBar>` 或 `<PlayerOptionsPanel>`，但会保留原始 `<PlayerOptions>` 文本供宿主外部正则隐藏；前端可视界面由 `src/ui/` Vue 双悬浮窗系统承接。
 
 ---
 
@@ -197,6 +198,7 @@ UpsertShopItem / RemoveShopItem
 - 每条 assistant 消息的 `data.sgbz_state` 字段保存当时的完整状态快照
 - 最多保留最近 **10 条**快照（`MAX_SAVED_STATE_MESSAGES = 10`），更早的自动清理
 - 加载状态时从最新快照往前搜索（`读取原始状态`），找到则 `create初始状态` + `recompute全局`
+- 如果用户删除了当前最新楼层，状态恢复会自动回退到上一个仍带有效 `data.sgbz_state` 的 assistant 楼层快照
 
 关键函数：
 
@@ -204,7 +206,7 @@ UpsertShopItem / RemoveShopItem
 |---|---|
 | `加载状态(截止消息ID?)` | 搜索并加载最近有效快照，缺省返回初始状态 |
 | `保存状态(state, messageId)` | 重算后写入楼层 data 字段，并清理过期快照 |
-| `更新消息正文(messageId, message)` | 写入楼层正文；当前只保留清理协议块后的纯文本，不再附加旧状态栏 |
+| `更新消息正文(messageId, message)` | 写入楼层正文；当前会清理命令协议块，但保留 `<PlayerOptions>` 文本，不再附加旧状态栏 |
 | `初始化状态(seed, messageId)` | 以 seed 创建初始状态并保存 |
 | `更新状态(updater, messageId)` | 加载上一楼层状态 → 应用 updater → 保存 |
 
@@ -266,10 +268,13 @@ setDebugEnabled(false)  // 关闭 log/info 输出（warn/error 不受影响）
 自动注册：
 
 1. `setupAssistantReplyHook()` - 订阅 `MESSAGE_RECEIVED` 事件
-2. `setupDebugParseButtonHook('解析命令')` - 注册"解析命令"快速回复按钮
-3. `setupDebugLogToggleButtonHook('日志开关')` - 注册"日志开关"按钮
-4. `setupVuePanelToggleButtonHook('系统界面开关')` - 注册系统界面开关按钮
-5. `setupChatChangedHook()` - 订阅 `CHAT_CHANGED`，聊天切换时清理双悬浮窗
+2. `setupMessageSentHook()` - 订阅 `MESSAGE_SENT`，用户发言后按最新楼层刷新玩家选项窗
+3. `setupMessageDeletedHook()` - 订阅 `MESSAGE_DELETED`，删除楼层后按最新楼层刷新玩家选项窗
+4. `setupDebugParseButtonHook('解析命令')` - 注册"解析命令"快速回复按钮
+5. `setupDebugLogToggleButtonHook('日志开关')` - 注册"日志开关"按钮
+6. `setupVuePanelToggleButtonHook('系统界面开关')` - 注册系统界面开关按钮
+7. `setupChatChangedHook()` - 订阅 `CHAT_CHANGED`，聊天切换时清理双悬浮窗
+8. `setupCharacterPageLoadedHook()` - 订阅 `CHARACTER_PAGE_LOADED`，角色卡切换完成后按 `characterId` 兜底销毁全部 Vue 界面
 
 ---
 
@@ -283,46 +288,49 @@ setDebugEnabled(false)  // 关闭 log/info 输出（warn/error 不受影响）
 |---|---|
 | `setupAssistantReplyHook(options)` | 订阅 `MESSAGE_RECEIVED`，自动处理 AI 回复 |
 | `teardownAssistantReplyHook()` | 取消订阅 |
+| `setupMessageSentHook()` / `teardownMessageSentHook()` | 监听 `MESSAGE_SENT`，按当前最新楼层刷新玩家选项窗 |
+| `setupMessageDeletedHook()` / `teardownMessageDeletedHook()` | 监听 `MESSAGE_DELETED`，按当前最新楼层刷新玩家选项窗 |
 | `setupDebugParseButtonHook(buttonName)` | 注册调试按钮（手动触发解析） |
 | `setupDebugLogToggleButtonHook(buttonName)` | 注册日志开关按钮 |
 | `setupVuePanelToggleButtonHook(buttonName)` | 注册系统界面开关按钮并确保 Vue UI 可挂载 |
-| `toggleVuePanel()` / `toggleSystemPanel()` | 切换系统界面显示/隐藏 |
+| `toggleVuePanel()` | 切换系统界面显示/隐藏 |
 | `teardownVuePanelToggleButtonHook()` | 卸载系统界面按钮逻辑并清理挂载 |
 | `setupChatChangedHook()` | 订阅 `CHAT_CHANGED`，聊天切换时清理双悬浮窗 |
 | `teardownChatChangedHook()` | 取消聊天切换钩子 |
+| `setupCharacterPageLoadedHook()` / `teardownCharacterPageLoadedHook()` | 监听 `CHARACTER_PAGE_LOADED`，角色卡切换完成后按 `characterId` 兜底销毁全部 Vue 界面 |
 | `handlePlayerOptionClick(messageId, optionText)` | 处理玩家选项点击，填充输入框 |
-| `updatePlayerOptionsView(messageId, options)` | 更新独立玩家选项悬浮窗数据 |
+| `updatePlayerOptionsView(messageId, options)` | 触发基于最新楼层的玩家选项窗刷新 |
 | `clearPlayerOptionsView()` | 清理独立玩家选项悬浮窗 |
 
-输入框填充策略：优先通过 `/setinput` slash 命令，回退到 DOM 操作（兼容 `<textarea>`、`<input>` 和 `contenteditable` 元素）。
+输入框填充策略：优先通过 `/setinput` slash 命令，回退到 DOM 操作（兼容 `<textarea>`、`<input>` 和 `contenteditable` 元素）。玩家选项窗显隐现在由 `MESSAGE_SENT / MESSAGE_RECEIVED / MESSAGE_DELETED / CHAT_CHANGED` 触发，并以“当前最新楼层是否为带有效 `<PlayerOptions>` 的 assistant 消息”为准；运行时防重键现已包含 `chatId + messageId + message`，避免跨聊天把新楼层误判成重复消息。
 
 ---
 
 ### `index.ts` - 入口与全局挂载
 
-**职责**：导出全部模块的 API，组装 `ThreeKingdomsStateKit` 命名空间对象，挂载到 `window` 和 `initializeGlobal`，注册宏。
+**职责**：导出运行时核心 API，组装收缩后的 `ThreeKingdomsStateKit` 命名空间对象，挂载到 `window` 和 `initializeGlobal`，注册宏。
 
 ```typescript
 window.ThreeKingdomsStateKit = {
   结构: { create世界, create主角, createNPC, ... },
-  规则: rules,
-  命令: commands,
-  存档: storage,
-  执行: executor,
-  上下文: context,
-  协议: protocol,
-  桥接: bridge,
-  宏: macro,
-  宿主DOM: domHost,
-  运行时: runtime,
-  调试: debug,
-  重算: { recompute六维, recompute角色战斗数据, ... },
-  // 快捷方法
+  协议: { 解析命令块, 解析玩家选项块, ... },
   handleAssistantReply,
   setupAssistantReplyHook,
-  setDebug, getDebug, ...
+  setupMessageSentHook,
+  setupMessageDeletedHook,
+  setupChatChangedHook,
+  setupCharacterPageLoadedHook,
+  setupVuePanelToggleButtonHook,
+  toggleVuePanel,
+  handlePlayerOptionClick,
+  teardownRuntimeHooks,
+  setDebug,
+  getDebug,
+  registerSgbzMacros,
 }
 ```
+
+说明：当前 `src/index.ts` 不再继续 `export *` 透传完整 `rules / commands / storage / executor / context / dom-host / recompute` 模块全集，以降低单个 `dist/index.js` bundle 体积；AI 回复自动解析链路仍通过内部 import 正常工作，不受公开面收缩影响。
 
 ---
 
@@ -330,7 +338,7 @@ window.ThreeKingdomsStateKit = {
 
 - 构建入口：`src/index.ts`
 - 构建命令：`pnpm build`
-- 输出：`dist/index.js`（ESM，浏览器平台）
+- 输出：`dist/index.js`（ESM，浏览器平台，压缩产物）
 - 加载后自动执行 `runtime-auto.ts` 注册钩子，并尝试注册宏
 
 ---
@@ -340,7 +348,6 @@ window.ThreeKingdomsStateKit = {
 | 依赖 | 版本 | 用途 |
 |---|---|---|
 | `vue` | ^3.5.30 | Vue 3 浮动面板 |
-| `vue-router` | ^4.6.4 | Vue 3 路由（内存历史） |
 | `tsup` | ^8.5.0 | 打包工具 |
 | `unplugin-vue` | ^7.1.1 | Vue SFC 编译 esbuild 插件 |
 | `typescript` | ^5.8.2 | TypeScript 编译器 |

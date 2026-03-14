@@ -8,7 +8,10 @@
           <template v-else>当前没有可显示的系统数据</template>
         </div>
       </div>
-      <button type="button" class="tk-vue-head-btn" @click.stop="handleResetPosition">重置位置</button>
+      <div class="tk-vue-head-actions">
+        <button type="button" class="tk-vue-head-btn" @click.stop="handleResetPosition">重置位置</button>
+        <button type="button" class="tk-vue-head-btn" @click.stop="handleClose">关闭</button>
+      </div>
     </div>
     <div class="tk-vue-panel-content is-system-panel">
       <StatusBarPanel />
@@ -21,7 +24,7 @@ import { computed, nextTick, ref, watch, type CSSProperties } from 'vue';
 import { getHostDocument } from '../../dom-host';
 import { attachDragHandlers, computeCenteredPosition } from '../drag';
 import StatusBarPanel from '../components/StatusBarPanel.vue';
-import { resetSystemPanelPosition, setSystemPanelPosition, unifiedPanelState } from '../store';
+import { resetSystemPanelPosition, setSystemPanelPosition, setSystemPanelVisible, unifiedPanelState } from '../store';
 
 const panelRef = ref<HTMLElement | null>(null);
 const visible = computed(() => unifiedPanelState.systemPanel.visible);
@@ -93,6 +96,10 @@ const handleDragStart = (event: PointerEvent) => {
 const handleResetPosition = () => {
   resetSystemPanelPosition();
   更新默认位置();
+};
+
+const handleClose = () => {
+  setSystemPanelVisible(false);
 };
 
 watch([visible, () => unifiedPanelState.systemPanel.position.mode], () => {

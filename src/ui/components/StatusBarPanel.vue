@@ -1,10 +1,6 @@
 <template>
   <section class="tk-vue-card tk-vue-status tk-statusbar">
     <div class="tk-panel-shell" v-if="state">
-      <div class="tk-panel-head">
-        <div class="tk-panel-title">三国霸主 · 系统面板</div>
-        <div class="tk-panel-subtitle"><span>{{ header }}</span></div>
-      </div>
       <div class="tk-panel-tabs">
         <button v-for="tab in tabs" :key="tab.key" type="button" class="tk-panel-tab-label" :class="{ 'is-active': activeTab === tab.key }" @click="activeTab = tab.key">{{ tab.label }}</button>
       </div>
@@ -41,12 +37,6 @@ const tabs = [
   { key: 'faction', label: '势力' },
 ] as const;
 const activeTab = ref<(typeof tabs)[number]['key']>('hero');
-const header = computed(() => {
-  if (!state.value) {
-    return '';
-  }
-  return `${state.value.世界.当前时间 || '未知时刻'} · ${state.value.世界.当前地点 || '未知地点'} · ${state.value.世界.天气 || '未知天气'} · ${state.value.世界.当前剧本 || '未知剧本'}`;
-});
 watch(state, value => {
   if (!value) {
     activeTab.value = 'hero';

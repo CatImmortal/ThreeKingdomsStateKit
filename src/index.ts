@@ -11,33 +11,80 @@ import {
   create政策,
   create初始状态,
 } from './state';
-import * as rules from './rules';
-import * as commands from './commands';
-import * as storage from './storage';
-import * as executor from './executor';
-import * as context from './context';
-import * as protocol from './protocol';
-import * as bridge from './bridge';
-import * as macro from './macro';
+import {
+  解析命令块,
+  解析玩家选项块,
+  移除命令协议块,
+  移除玩家选项块,
+  包装命令块,
+} from './protocol';
+import { handleAssistantReply } from './bridge';
+import { registerSgbzMacros } from './macro';
 import './runtime-auto';
-import * as runtime from './runtime';
-import * as debug from './debug';
-import * as domHost from './dom-host';
-import { recomputeNPC, recompute主角, recompute全局, recompute六维, recompute美人属性, recompute角色战斗数据, recompute城池, recompute军队, recompute势力, recompute势力集合 } from './recompute';
+import {
+  handlePlayerOptionClick,
+  setupAssistantReplyHook,
+  teardownAssistantReplyHook,
+  setupMessageSentHook,
+  teardownMessageSentHook,
+  setupMessageDeletedHook,
+  teardownMessageDeletedHook,
+  setupChatChangedHook,
+  teardownChatChangedHook,
+  setupCharacterPageLoadedHook,
+  teardownCharacterPageLoadedHook,
+  setupDebugParseButtonHook,
+  teardownDebugParseButtonHook,
+  setupDebugLogToggleButtonHook,
+  teardownDebugLogToggleButtonHook,
+  setupVuePanelToggleButtonHook,
+  teardownVuePanelToggleButtonHook,
+  toggleVuePanel,
+  teardownRuntimeHooks,
+} from './runtime';
+import { getDebugEnabled, setDebugEnabled, debugWarn } from './debug';
 
-export * from './state';
-export * from './rules';
-export * from './recompute';
-export * from './commands';
-export * from './storage';
-export * from './executor';
-export * from './context';
-export * from './protocol';
-export * from './bridge';
-export * from './macro';
-export * from './runtime';
-export * from './debug';
-export * from './dom-host';
+export {
+  create世界,
+  create主角,
+  createNPC,
+  create任务,
+  create商品条目,
+  create势力,
+  create势力集合,
+  create城池,
+  create军队,
+  create政策,
+  create初始状态,
+  解析命令块,
+  解析玩家选项块,
+  移除命令协议块,
+  移除玩家选项块,
+  包装命令块,
+  handleAssistantReply,
+  registerSgbzMacros,
+  handlePlayerOptionClick,
+  setupAssistantReplyHook,
+  teardownAssistantReplyHook,
+  setupMessageSentHook,
+  teardownMessageSentHook,
+  setupMessageDeletedHook,
+  teardownMessageDeletedHook,
+  setupChatChangedHook,
+  teardownChatChangedHook,
+  setupCharacterPageLoadedHook,
+  teardownCharacterPageLoadedHook,
+  setupDebugParseButtonHook,
+  teardownDebugParseButtonHook,
+  setupDebugLogToggleButtonHook,
+  teardownDebugLogToggleButtonHook,
+  setupVuePanelToggleButtonHook,
+  teardownVuePanelToggleButtonHook,
+  toggleVuePanel,
+  teardownRuntimeHooks,
+  setDebugEnabled,
+  getDebugEnabled,
+};
 
 export const ThreeKingdomsStateKit = {
   结构: {
@@ -53,51 +100,36 @@ export const ThreeKingdomsStateKit = {
     create政策,
     create初始状态,
   },
-  规则: rules,
-  命令: commands,
-  存档: storage,
-  执行: executor,
-  上下文: context,
-  协议: protocol,
-  桥接: bridge,
-  宏: macro,
-  运行时: runtime,
-  调试: debug,
-  宿主DOM: domHost,
-  handleAssistantReply: bridge.handleAssistantReply,
-  setupAssistantReplyHook: runtime.setupAssistantReplyHook,
-  teardownAssistantReplyHook: runtime.teardownAssistantReplyHook,
-  setupChatChangedHook: runtime.setupChatChangedHook,
-  teardownChatChangedHook: runtime.teardownChatChangedHook,
-  setupDebugParseButtonHook: runtime.setupDebugParseButtonHook,
-  teardownDebugParseButtonHook: runtime.teardownDebugParseButtonHook,
-  setupDebugLogToggleButtonHook: runtime.setupDebugLogToggleButtonHook,
-  teardownDebugLogToggleButtonHook: runtime.teardownDebugLogToggleButtonHook,
-  setupVuePanelToggleButtonHook: runtime.setupVuePanelToggleButtonHook,
-  setupSystemPanelToggleButtonHook: runtime.setupSystemPanelToggleButtonHook,
-  teardownVuePanelToggleButtonHook: runtime.teardownVuePanelToggleButtonHook,
-  toggleVuePanel: runtime.toggleVuePanel,
-  toggleSystemPanel: runtime.toggleSystemPanel,
-  handlePlayerOptionClick: runtime.handlePlayerOptionClick,
-  syncPlayerOptionsQuickReplies: runtime.syncPlayerOptionsQuickReplies,
-  clearPlayerOptionsQuickReplies: runtime.clearPlayerOptionsQuickReplies,
-  rehydratePlayerOptionsQuickRepliesFromLatestMessage: runtime.rehydratePlayerOptionsQuickRepliesFromLatestMessage,
-  updatePlayerOptionsView: runtime.updatePlayerOptionsView,
-  clearPlayerOptionsView: runtime.clearPlayerOptionsView,
-  setDebug: debug.setDebugEnabled,
-  getDebug: debug.getDebugEnabled,
-  重算: {
-    recompute六维,
-    recompute角色战斗数据,
-    recompute美人属性,
-    recompute城池,
-    recompute军队,
-    recompute势力,
-    recompute势力集合,
-    recomputeNPC,
-    recompute主角,
-    recompute全局,
+  协议: {
+    解析命令块,
+    解析玩家选项块,
+    移除命令协议块,
+    移除玩家选项块,
+    包装命令块,
   },
+  handleAssistantReply,
+  setupAssistantReplyHook,
+  teardownAssistantReplyHook,
+  setupMessageSentHook,
+  teardownMessageSentHook,
+  setupMessageDeletedHook,
+  teardownMessageDeletedHook,
+  setupChatChangedHook,
+  teardownChatChangedHook,
+  setupCharacterPageLoadedHook,
+  teardownCharacterPageLoadedHook,
+  setupDebugParseButtonHook,
+  teardownDebugParseButtonHook,
+  setupDebugLogToggleButtonHook,
+  teardownDebugLogToggleButtonHook,
+  setupVuePanelToggleButtonHook,
+  teardownVuePanelToggleButtonHook,
+  toggleVuePanel,
+  handlePlayerOptionClick,
+  teardownRuntimeHooks,
+  setDebug: setDebugEnabled,
+  getDebug: getDebugEnabled,
+  registerSgbzMacros,
 };
 
 if (typeof initializeGlobal === 'function') {
@@ -107,9 +139,9 @@ if (typeof initializeGlobal === 'function') {
 (window as Window & { ThreeKingdomsStateKit?: typeof ThreeKingdomsStateKit }).ThreeKingdomsStateKit = ThreeKingdomsStateKit;
 
 try {
-  macro.registerSgbzMacros();
+  registerSgbzMacros();
 } catch (error) {
-  debug.debugWarn('index', '注册宏失败，脚本主体仍可使用。', error);
+  debugWarn('index', '注册宏失败，脚本主体仍可使用。', error);
 }
 
 export default ThreeKingdomsStateKit;

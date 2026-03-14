@@ -116,6 +116,10 @@ export function 解析命令块(replyText: string): 命令块提取结果 {
   }
 }
 
+export function 移除命令协议块(replyText: string): string {
+  return String(replyText || '').replace(/\s*<UpdateVariable>[\s\S]*?<\/UpdateVariable>\s*/gi, '\n').trim();
+}
+
 export function 移除玩家选项块(replyText: string): string {
   return String(replyText || '').replace(/\s*<PlayerOptions>[\s\S]*?<\/PlayerOptions>\s*/gi, '\n').trim();
 }

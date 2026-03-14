@@ -2,7 +2,7 @@ import { 执行命令, 执行并保存命令, type 执行结果 } from './execut
 import { 构建宏注入文本, 构建注入文本, 构建注入视图, type 注入视图 } from './context';
 import { 解析命令输入, type 状态命令 } from './commands';
 import { debugError, debugInfo, debugLog, summarizeState, summarizeValue } from './debug';
-import { 解析命令块, 解析玩家选项块, 移除玩家选项块, type 玩家选项 } from './protocol';
+import { 解析命令块, 解析玩家选项块, 移除命令协议块, type 玩家选项 } from './protocol';
 import { CONTEXT_MACRO_KEY, 保存上下文宏, 加载状态, 更新消息正文 } from './storage';
 import { type 状态总表 } from './state';
 
@@ -34,7 +34,7 @@ export function appendReplyDecorators(replyText: string, state: 状态总表, pl
   void state;
   void playerOptions;
   void messageId;
-  return String(replyText || '').trim();
+  return 移除命令协议块(String(replyText || ''));
 }
 
 export function refreshContextMacro(state: 状态总表, macroKey = CONTEXT_MACRO_KEY): string {
@@ -56,7 +56,7 @@ export function extractCommands(replyText: string): { commandsText: string | nul
     const parsed = 解析命令块(replyText);
     const commands = parsed.commandsText ? 解析命令输入(parsed.commands) : [];
     const playerOptions = 解析玩家选项块(parsed.replyText);
-    const cleanedReplyText = 移除玩家选项块(parsed.replyText);
+    const cleanedReplyText = parsed.replyText;
     debugInfo('bridge', '命令与选项提取完成', {
       hasCommandsText: Boolean(parsed.commandsText),
       commandsCount: commands.length,
