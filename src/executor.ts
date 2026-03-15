@@ -68,56 +68,65 @@ function 应用主角基础更新(state: 状态总表, command: Extract<状态�
   state.主角 = recompute主角(create主角(合并对象(_.cloneDeep(state.主角), command.changes)));
 }
 
-function 获取目标势力(state: 状态总表, factionId: string): 势力 {
-  return 断言存在(state.势力[factionId], `势力不存在: ${factionId}`);
+function 获取目标势力(state: 状态总表, 势力名称: string): 势力 {
+  return 断言存在(state.势力[势力名称], `势力不存在: ${势力名称}`);
+}
+
+function 断言未改名(定位名称: string, 数据名称: string | undefined, 类型: string): void {
+  if (数据名称 !== undefined && 数据名称 !== 定位名称) {
+    throw new Error(`${类型} 不允许改名: ${定位名称} -> ${数据名称}`);
+  }
 }
 
 function 应用势力更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateFaction' }>): void {
-  const current = state.势力[command.factionId];
+  const current = state.势力[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`势力不存在: ${command.factionId}`);
+    throw new Error(`势力不存在: ${command.名称}`);
   }
-  state.势力[command.factionId] = create势力(合并对象(_.cloneDeep(current ?? create势力()), command.changes as Partial<势力>));
+  断言未改名(command.名称, command.changes.名称, '势力');
+  state.势力[command.名称] = create势力(合并对象(_.cloneDeep(current ?? create势力({ 名称: command.名称 })), command.changes as Partial<势力>));
 }
 
 function 应用城池更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertCity' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
-  const current = faction.城池[command.id];
+  const faction = 获取目标势力(state, command.势力名称);
+  const current = faction.城池[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`城池不存在: ${command.id}`);
+    throw new Error(`城池不存在: ${command.名称}`);
   }
-  const next: 城池 = create城池(合并对象(_.cloneDeep(current ?? create城池()), command.data));
-  faction.城池[command.id] = next;
+  断言未改名(command.名称, command.data.名称, '城池');
+  const next: 城池 = create城池(合并对象(_.cloneDeep(current ?? create城池({ 名称: command.名称 })), command.data));
+  faction.城池[command.名称] = next;
 }
 
 function 应用城池设施追加(state: 状态总表, command: Extract<状态命令, { type: 'AddCityFacility' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
-  const current = 断言存在(faction.城池[command.id], `城池不存在: ${command.id}`);
+  const faction = 获取目标势力(state, command.势力名称);
+  const current = 断言存在(faction.城池[command.名称], `城池不存在: ${command.名称}`);
   const set = new Set([...(current.设施 || []), String(command.facility || '')].filter(Boolean));
-  faction.城池[command.id] = create城池({ ...current, 设施: [...set] });
+  faction.城池[command.名称] = create城池({ ...current, 设施: [...set] });
 }
 
 function 应用城池设施移除(state: 状态总表, command: Extract<状态命令, { type: 'RemoveCityFacility' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
-  const current = 断言存在(faction.城池[command.id], `城池不存在: ${command.id}`);
-  faction.城池[command.id] = create城池({
+  const faction = 获取目标势力(state, command.势力名称);
+  const current = 断言存在(faction.城池[command.名称], `城池不存在: ${command.名称}`);
+  faction.城池[command.名称] = create城池({
     ...current,
     设施: (current.设施 || []).filter(item => item !== command.facility),
   });
 }
 
 function 应用军队更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertArmy' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
-  const current = faction.军队[command.id];
+  const faction = 获取目标势力(state, command.势力名称);
+  const current = faction.军队[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`军队不存在: ${command.id}`);
+    throw new Error(`军队不存在: ${command.名称}`);
   }
-  const next: 军队 = create军队(合并对象(_.cloneDeep(current ?? create军队()), command.data));
-  faction.军队[command.id] = next;
+  断言未改名(command.名称, command.data.名称, '军队');
+  const next: 军队 = create军队(合并对象(_.cloneDeep(current ?? create军队({ 名称: command.名称 })), command.data));
+  faction.军队[command.名称] = next;
 }
 
 function 应用外交更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateDiplomacy' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
+  const faction = 获取目标势力(state, command.名称);
   faction.外交 = {
     ...faction.外交,
     ..._.mapValues(command.changes, value => Math.max(0, Math.min(100, 数值(value)))),
@@ -125,21 +134,22 @@ function 应用外交更新(state: 状态总表, command: Extract<状态命令, 
 }
 
 function 应用政策更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdatePolicy' }>): void {
-  const faction = 获取目标势力(state, command.factionId);
+  const faction = 获取目标势力(state, command.名称);
   faction.政策 = create政策(合并对象(_.cloneDeep(faction.政策), command.changes));
 }
 
 function 应用NPC更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertNpc' }>): void {
-  const current = state.NPC[command.id];
+  const current = state.NPC[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`NPC 不存在: ${command.id}`);
+    throw new Error(`NPC 不存在: ${command.名称}`);
   }
-  const next = createNPC(合并对象(_.cloneDeep(current ?? createNPC()), command.data));
-  state.NPC[command.id] = recomputeNPC(next);
+  断言未改名(command.名称, command.data.名称, 'NPC');
+  const next = createNPC(合并对象(_.cloneDeep(current ?? createNPC({ 名称: command.名称 })), command.data));
+  state.NPC[command.名称] = recomputeNPC(next);
 }
 
 function 应用NPC关系更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateNpcRelation' }>): void {
-  const current = 断言存在(state.NPC[command.id], `NPC 不存在: ${command.id}`);
+  const current = 断言存在(state.NPC[command.名称], `NPC 不存在: ${command.名称}`);
   const next: NPC = _.cloneDeep(current);
   if (command.好感 !== undefined) {
     next.好感 = (command.mode ?? 'delta') === 'set' ? 数值(command.好感) : next.好感 + 数值(command.好感);
@@ -150,40 +160,42 @@ function 应用NPC关系更新(state: 状态总表, command: Extract<状态命�
       ..._.mapValues(command.羁绊, value => String(value ?? '')),
     };
   }
-  state.NPC[command.id] = recomputeNPC(createNPC(next));
+  state.NPC[command.名称] = recomputeNPC(createNPC(next));
 }
 
 function 应用任务更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertQuest' }>): void {
-  const current = state.任务[command.id];
+  const current = state.任务[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`任务不存在: ${command.id}`);
+    throw new Error(`任务不存在: ${command.名称}`);
   }
-  const next = create任务(合并对象(_.cloneDeep(current ?? create任务()), command.data));
-  state.任务[command.id] = next;
+  断言未改名(command.名称, command.data.名称, '任务');
+  const next = create任务(合并对象(_.cloneDeep(current ?? create任务({ 名称: command.名称 })), command.data));
+  state.任务[command.名称] = next;
 }
 
 function 应用任务状态(state: 状态总表, command: Extract<状态命令, { type: 'UpdateQuestState' }>): void {
-  const current = 断言存在(state.任务[command.id], `任务不存在: ${command.id}`);
+  const current = 断言存在(state.任务[command.名称], `任务不存在: ${command.名称}`);
   const next: 任务 = _.cloneDeep(current);
   next.状态 = command.状态;
   if (command.目标) {
-    for (const [targetId, patch] of Object.entries(command.目标)) {
-      next.目标[targetId] = {
-        ...(next.目标[targetId] ?? { 类型: '主要', 状态: '未完成', 描述: '', 积分: 0, 其他奖励: '' }),
+    for (const [targetName, patch] of Object.entries(command.目标)) {
+      next.目标[targetName] = {
+        ...(next.目标[targetName] ?? { 类型: '主要', 状态: '未完成', 描述: '', 积分: 0, 其他奖励: '' }),
         ...patch,
       };
     }
   }
-  state.任务[command.id] = create任务(next);
+  state.任务[command.名称] = create任务(next);
 }
 
 function 应用商品更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertShopItem' }>): void {
-  const current = state.商城[command.id];
+  const current = state.商城[command.名称];
   if (!current && command.createIfMissing === false) {
-    throw new Error(`商品不存在: ${command.id}`);
+    throw new Error(`商品不存在: ${command.名称}`);
   }
-  const next: 商品条目 = create商品条目(合并对象(_.cloneDeep(current ?? create商品条目()), command.data));
-  state.商城[command.id] = next;
+  断言未改名(command.名称, command.data.名称, '商品');
+  const next: 商品条目 = create商品条目(合并对象(_.cloneDeep(current ?? create商品条目({ 名称: command.名称 })), command.data));
+  state.商城[command.名称] = next;
 }
 
 export function 执行命令(state: 状态总表, commandInput: string | 状态命令 | 状态命令[]): 执行结果 {
@@ -199,8 +211,8 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
       debugLog('executor', '执行单条命令', {
         index,
         type: command.type,
-        id: 'id' in command ? command.id : undefined,
-        factionId: 'factionId' in command ? command.factionId : undefined,
+        名称: '名称' in command ? command.名称 : undefined,
+        势力名称: '势力名称' in command ? command.势力名称 : undefined,
       });
       switch (command.type) {
         case 'UpdateWorld':
@@ -228,13 +240,13 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
           应用城池设施移除(next, command);
           break;
         case 'RemoveCity':
-          delete 获取目标势力(next, command.factionId).城池[command.id];
+          delete 获取目标势力(next, command.势力名称).城池[command.名称];
           break;
         case 'UpsertArmy':
           应用军队更新(next, command);
           break;
         case 'RemoveArmy':
-          delete 获取目标势力(next, command.factionId).军队[command.id];
+          delete 获取目标势力(next, command.势力名称).军队[command.名称];
           break;
         case 'UpdateDiplomacy':
           应用外交更新(next, command);
@@ -249,7 +261,7 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
           应用NPC关系更新(next, command);
           break;
         case 'RemoveNpc':
-          delete next.NPC[command.id];
+          delete next.NPC[command.名称];
           break;
         case 'UpsertQuest':
           应用任务更新(next, command);
@@ -258,13 +270,13 @@ export function 执行命令(state: 状态总表, commandInput: string | 状态�
           应用任务状态(next, command);
           break;
         case 'RemoveQuest':
-          delete next.任务[command.id];
+          delete next.任务[command.名称];
           break;
         case 'UpsertShopItem':
           应用商品更新(next, command);
           break;
         case 'RemoveShopItem':
-          delete next.商城[command.id];
+          delete next.商城[command.名称];
           break;
       }
       debugLog('executor', '单条命令执行后状态摘要', {

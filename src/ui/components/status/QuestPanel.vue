@@ -6,7 +6,7 @@
     <section class="tk-panel-card">
       <div class="tk-panel-card-title">{{ activeTab ? `${activeTab}任务` : '任务列表' }}</div>
       <div v-if="currentTasks.length > 0" class="tk-panel-detail-list">
-        <details v-for="[id, task] in currentTasks" :key="id" class="tk-panel-detail">
+        <details v-for="[名称, task] in currentTasks" :key="名称" class="tk-panel-detail">
           <summary><span>{{ task.名称 || '未命名任务' }}</span><span>{{ task.类型 }} / {{ task.状态 }}</span></summary>
           <div class="tk-panel-detail-body">
             <div class="tk-panel-inline-note">时限：{{ task.时限 || '无时限' }}</div>

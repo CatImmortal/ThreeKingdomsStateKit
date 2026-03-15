@@ -9,7 +9,6 @@
         <div v-else-if="activeTab === 'npc'" class="tk-panel-page is-npc"><NpcPanel :state="state" /></div>
         <div v-else-if="activeTab === 'quest'" class="tk-panel-page is-quest"><QuestPanel :state="state" /></div>
         <div v-else-if="activeTab === 'shop'" class="tk-panel-page is-shop"><ShopPanel :state="state" /></div>
-        <div v-else-if="activeTab === 'army'" class="tk-panel-page is-army"><ArmyPanel :state="state" /></div>
         <div v-else class="tk-panel-page is-faction"><FactionPanel :state="state" /></div>
       </div>
     </div>
@@ -20,7 +19,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { unifiedPanelState } from '../store';
-import ArmyPanel from './status/ArmyPanel.vue';
 import FactionPanel from './status/FactionPanel.vue';
 import HeroPanel from './status/HeroPanel.vue';
 import NpcPanel from './status/NpcPanel.vue';
@@ -33,7 +31,6 @@ const tabs = [
   { key: 'npc', label: '当前地点NPC' },
   { key: 'quest', label: '任务' },
   { key: 'shop', label: '商城' },
-  { key: 'army', label: '军队' },
   { key: 'faction', label: '势力' },
 ] as const;
 const activeTab = ref<(typeof tabs)[number]['key']>('hero');

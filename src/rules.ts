@@ -20,6 +20,7 @@ export const 枚举 = {
   任务目标状态: ['未发现', '未完成', '已完成'],
   势力规模: ['无', '草莽', '县级', '郡级', '州级', '霸主', '帝国'],
   城池等级: ['村落', '县城', '郡城', '州城', '雄城', '帝都'],
+  基础兵种: ['刀盾兵', '枪矛兵', '弓弩兵', '骑兵', '水军'],
   军队等级: ['新兵', '普通', '老兵', '精锐', '特殊兵种'],
   军队装备等级: ['简陋', '普通', '精良', '上等', '精锐'],
   阵型: ['无', '锋矢阵', '鹤翼阵', '鱼鳞阵', '方圆阵', '长蛇阵', '雁行阵', '偃月阵'],
@@ -65,6 +66,7 @@ export type 任务目标类型 = (typeof 枚举.任务目标类型)[number];
 export type 任务目标状态 = (typeof 枚举.任务目标状态)[number];
 export type 势力规模 = (typeof 枚举.势力规模)[number];
 export type 城池等级 = (typeof 枚举.城池等级)[number];
+export type 基础兵种 = (typeof 枚举.基础兵种)[number];
 export type 军队等级 = (typeof 枚举.军队等级)[number];
 export type 军队装备等级 = (typeof 枚举.军队装备等级)[number];
 export type 阵型 = (typeof 枚举.阵型)[number];
@@ -210,6 +212,14 @@ export function 疲惫系数(v: number): number {
 export function 统率系数(v: number): number {
   if (v <= 30) return 1 + v / 100;
   return 1.3 + (v - 30) / 60;
+}
+
+export function 兵种适性修正(v: number): number {
+  if (v <= 19) return -0.1;
+  if (v <= 39) return 0;
+  if (v <= 59) return 0.1;
+  if (v <= 79) return 0.2;
+  return 0.3;
 }
 
 export function 汇总装备加值(装备: 装备栏): {

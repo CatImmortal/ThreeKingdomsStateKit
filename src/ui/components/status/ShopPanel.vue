@@ -6,7 +6,7 @@
     <section class="tk-panel-card">
       <div class="tk-panel-card-title">{{ activeTab || '商城' }}</div>
       <div class="tk-panel-list">
-        <div v-for="[id, item] in currentItems" :key="id" class="tk-panel-list-item">
+        <div v-for="[名称, item] in currentItems" :key="名称" class="tk-panel-list-item">
           <div class="tk-panel-list-title">{{ item.名称 || '未命名商品' }}</div>
           <div class="tk-panel-list-meta">{{ item.分类 }} / {{ item.价格 }} 积分</div>
           <div class="tk-panel-list-desc">{{ item.描述 || '' }}</div>

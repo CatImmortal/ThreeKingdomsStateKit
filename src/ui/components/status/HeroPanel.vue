@@ -60,6 +60,7 @@ const resourceItems = computed(() => [
   { label: '金钱', value: player.value.金钱 },
   { label: '积分', value: player.value.积分 },
   { label: '声望', value: player.value.声望 },
+  { label: '兵种适性', value: formatAptitude(player.value.兵种适性) },
 ]);
 const battleItems = computed(() => [
   { label: '先攻', value: player.value._先攻值 ?? 0 },
@@ -69,7 +70,8 @@ const battleItems = computed(() => [
   { label: '伤害减免', value: player.value._伤害减免 ?? 0 },
 ]);
 const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
-const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.武将信息?.驻扎地 || '无驻地'} · ${npc.简述 || '无'}` })));
+const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息?.是否已招募)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.所在地 || '未知地点'} · ${npc.简述 || '无'}` })));
+const formatAptitude = (aptitude?: Record<string, number>) => Object.entries(aptitude || {}).map(([兵种, 数值]) => `${兵种}:${数值}`).join(' / ') || '无';
 const lists = computed(() => ({
   equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无' ? ({ title: slot, meta: '未装备', desc: '' }) : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, desc: item.描述 || item.其他效果 || '无' })),
   bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.名称 || '未命名物品', meta: `${item.品质} / 数量:${item.数量}`, desc: item.描述 || '无' })),

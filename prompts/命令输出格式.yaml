@@ -10,11 +10,12 @@
     - 不允许输出任何 `_` 开头字段。
     - 同一轮可输出多条命令，按数组顺序执行。
     - 只写本轮正文中明确出现或变化的字段。
-    - `id` 必须稳定可复用。
-    - 势力相关命令必须显式提供 `factionId`，不能省略。
-    - 名称字段必须显式提供，不能依赖外层 key 推断。
-    - `Update*` 的 `changes` 只写发生变化的局部字段，不要整对象重写。
+    - 名称是唯一标识，所有相关命令必须显式提供 `名称` 或 `势力名称`。
+    - 不允许修改已有对象名称；`data.名称` 必须与命令定位名称一致，不能依赖外层 key 推断。若需改名，只能删除旧对象后按新名称重建。
+    - `Update*` 的 `changes` 与 `Upsert*` 的 `data` 至少包含一个字段；`changes` 只写发生变化的局部字段，不要整对象重写。
     - `Upsert*` 的 `data` 必须符合下列共享子结构；已有对象只写变化字段，新建对象再补齐必要字段。
+    - 对所有按名称定位的 `Update* / Upsert*` 命令，若同时提供 `data.名称` 或 `changes.名称`，则必须与命令定位名称一致；不允许借更新命令改名。
+    - 凡涉及城池或军队的命令，`势力名称` 用于定位所属势力，`名称` 用于定位该对象本身。
     - 没有状态变化时，不要输出 `UpdateVariable` 块。
   标签模板: |-
     ${正常叙事正文}
@@ -50,6 +51,7 @@
     任务目标状态: [未发现, 未完成, 已完成]
     势力规模: [无, 草莽, 县级, 郡级, 州级, 霸主, 帝国]
     城池等级: [村落, 县城, 郡城, 州城, 雄城, 帝都]
+    基础兵种: [刀盾兵, 枪矛兵, 弓弩兵, 骑兵, 水军]
     军队等级: [新兵, 普通, 老兵, 精锐, 特殊兵种]
     军队装备等级: [简陋, 普通, 精良, 上等, 精锐]
     阵型: [无, 锋矢阵, 鹤翼阵, 鱼鳞阵, 方圆阵, 长蛇阵, 雁行阵, 偃月阵]
@@ -111,13 +113,22 @@
       品质: 装备品质
       描述: string
       数量: number
+    兵种适性表:
+      刀盾兵: number
+      枪矛兵: number
+      弓弩兵: number
+      骑兵: number
+      水军: number
     武将信息:
       野心值: number
       性格: 武将性格
       官职: string
       当前状态: 武将状态
       状态描述: string
-      驻扎地: string
+      势力: string
+      忠诚: number
+      是否已招募: boolean
+      兵种适性: 兵种适性表
       特技: Record<string, string>
     美人属性:
       依赖度: number
@@ -151,7 +162,7 @@
       设施: string[]
     军队:
       名称: string
-      兵种: string
+      兵种: 基础兵种
       等级: 军队等级
       兵力: number
       士气: number
@@ -170,6 +181,7 @@
       王道: number
     势力:
       名称: string
+      主公: string
       规模: 势力规模
       正统性: number
       情报网: number
@@ -225,6 +237,7 @@
         专长: Record<string, 专长条目>
         状态: 状态记录
         物品栏: Record<string, 物品栏条目>
+        兵种适性: 兵种适性表
         声望: number
         金钱: number
         积分: number
@@ -263,127 +276,114 @@
           "changes": { "当前生命值": -12, "声望": 3 }
         }
     UpdateFaction:
-      必填字段: [type, factionId, changes]
-      可选字段: [createIfMissing]
+      必填字段: [type, 名称, changes]
       changes可填字段:
         名称: string
+        主公: string
         规模: 势力规模
         正统性: number
         情报网: number
         金钱: number
         粮草: number
       关键约束:
-        - `factionId` 必填，表示要更新哪个势力
-        - `changes` 至少包含一个字段
         - 不要写入 `城池` / `军队` / `外交` / `政策` 的整块重写；这些优先使用专用命令
       示例: |-
         {
           "type": "UpdateFaction",
-          "factionId": "liubei",
-          "changes": { "名称": "刘备军", "规模": "郡级", "粮草": 2400 }
+          "名称": "刘备军",
+          "changes": { "名称": "刘备军", "主公": "刘备", "规模": "郡级", "粮草": 2400 }
         }
     UpsertCity:
-      必填字段: [type, factionId, id, data]
-      可选字段: [createIfMissing]
+      必填字段: [type, 势力名称, 名称, data]
       data可填字段: 城池
       关键约束:
-        - `factionId` 必填，表示该城池隶属哪个势力
-        - `data` 至少包含一个字段
-        - `data.名称` 必须显式提供，不能只依赖 id 表示城池名称
+        - `data.名称` 必须显式提供
       示例: |-
         {
           "type": "UpsertCity",
-          "factionId": "liubei",
-          "id": "xinye",
+          "势力名称": "刘备军",
+          "名称": "新野",
           "data": { "名称": "新野", "等级": "县城", "城防": 42, "太守": "关羽" }
         }
     AddCityFacility:
-      必填字段: [type, factionId, id, facility]
+      必填字段: [type, 势力名称, 名称, facility]
       关键约束:
-        - `factionId` 必填
         - 仅追加单个设施，不重写整个 `设施` 数组
       示例: |-
         {
           "type": "AddCityFacility",
-          "factionId": "liubei",
-          "id": "xinye",
+          "势力名称": "刘备军",
+          "名称": "新野",
           "facility": "官府"
         }
     RemoveCityFacility:
-      必填字段: [type, factionId, id, facility]
+      必填字段: [type, 势力名称, 名称, facility]
       关键约束:
-        - `factionId` 必填
         - 仅移除单个设施，不重写整个 `设施` 数组
       示例: |-
         {
           "type": "RemoveCityFacility",
-          "factionId": "liubei",
-          "id": "xinye",
+          "势力名称": "刘备军",
+          "名称": "新野",
           "facility": "校场"
         }
     RemoveCity:
-      必填字段: [type, factionId, id]
+      必填字段: [type, 势力名称, 名称]
       示例: |-
         {
           "type": "RemoveCity",
-          "factionId": "liubei",
-          "id": "abandoned_outpost"
+          "势力名称": "刘备军",
+          "名称": "废弃前哨"
         }
     UpsertArmy:
-      必填字段: [type, factionId, id, data]
-      可选字段: [createIfMissing]
+      必填字段: [type, 势力名称, 名称, data]
       data可填字段: 军队
       关键约束:
-        - `factionId` 必填，表示该军队隶属哪个势力
-        - `data` 至少包含一个字段
-        - `data.名称` 必须显式提供，不能只依赖 id 表示军队名称
+        - `data.名称` 必须显式提供
+        - 特色军名写在 `名称`，`兵种` 只允许 5 类基础兵种
       示例: |-
         {
           "type": "UpsertArmy",
-          "factionId": "liubei",
-          "id": "first_cavalry",
+          "势力名称": "刘备军",
+          "名称": "白马骑营",
           "data": { "名称": "白马骑营", "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
         }
     RemoveArmy:
-      必填字段: [type, factionId, id]
+      必填字段: [type, 势力名称, 名称]
       示例: |-
         {
           "type": "RemoveArmy",
-          "factionId": "liubei",
-          "id": "bandit_raiders"
+          "势力名称": "刘备军",
+          "名称": "山贼骑队"
         }
     UpdateDiplomacy:
-      必填字段: [type, factionId, changes]
+      必填字段: [type, 名称, changes]
       changes可填字段: Record<string, number>
       关键约束:
-        - `factionId` 必填
-        - `changes` 至少包含一个势力关系值
+        - `changes` 至少包含一个势力关系值；键名直接使用势力名称
       示例: |-
         {
           "type": "UpdateDiplomacy",
-          "factionId": "liubei",
-          "changes": { "caocao": 28, "sunquan": 66 }
+          "名称": "刘备军",
+          "changes": { "曹操军": 28, "孙吴": 66 }
         }
     UpdatePolicy:
-      必填字段: [type, factionId, changes]
+      必填字段: [type, 名称, changes]
       changes可填字段: 政策
-      关键约束:
-        - `factionId` 必填
-        - `changes` 至少包含一个字段
       示例: |-
         {
           "type": "UpdatePolicy",
-          "factionId": "liubei",
+          "名称": "刘备军",
           "changes": { "当前研究": "屯田制", "研究进度": 2, "富国": 1 }
         }
     UpsertNpc:
-      必填字段: [type, id, data]
-      可选字段: [createIfMissing]
+      必填字段: [type, 名称, data]
       data可填字段:
         名称: string
         品质: 品质
         阵营: string
         定位: string
+        所在地: string
         好感: number
         简述: string
         羁绊: Record<string, string>
@@ -391,16 +391,15 @@
         武将信息: 武将信息
         美人属性: 美人属性
       关键约束:
-        - `data` 至少包含一个字段
-        - 名称建议显式提供
-        - 只填写正文中明确出现或可直接推出的 NPC 信息
-        - 若正文只出现基础身份信息，则只写基础字段；不要自动补全其他详细字段
-        - `角色数据` / `武将信息` / `美人属性` 正文明确出现对应具体数据时必须写入
+        - `data.名称` 必须显式提供
+        - NPC 出现且可确定位置时，应显式提供 `所在地`
+        - 若写入 `武将信息`，应显式提供 `势力` 与 `是否已招募`
+        - 仅写正文中明确出现或可直接推出的信息；未明确出现的详细子结构不要补全，`角色数据` / `武将信息` / `美人属性` 只有正文明确涉及具体数据时才写入
         - 只填写重要 NPC，或本轮与主角发生了明确互动的 NPC；路人、背景板、杂兵、无名字小兵不要输出 `UpsertNpc`
       示例: |-
         {
           "type": "UpsertNpc",
-          "id": "npc_zhaoyun",
+          "名称": "赵云",
           "data": {
             "名称": "赵云",
             "品质": "SSR",
@@ -410,7 +409,7 @@
           }
         }
     UpdateNpcRelation:
-      必填字段: [type, id]
+      必填字段: [type, 名称]
       可选字段: [mode, 好感, 羁绊]
       关键约束:
         - `好感` 与 `羁绊` 至少提供一个
@@ -418,20 +417,19 @@
       示例: |-
         {
           "type": "UpdateNpcRelation",
-          "id": "npc_zhaoyun",
+          "名称": "赵云",
           "mode": "delta",
           "好感": 6
         }
     RemoveNpc:
-      必填字段: [type, id]
+      必填字段: [type, 名称]
       示例: |-
         {
           "type": "RemoveNpc",
-          "id": "bandit_leader"
+          "名称": "山贼头目"
         }
     UpsertQuest:
-      必填字段: [type, id, data]
-      可选字段: [createIfMissing]
+      必填字段: [type, 名称, data]
       data可填字段:
         名称: string
         类型: 任务类型
@@ -439,19 +437,18 @@
         时限: string
         目标: Record<string, 任务目标更新>
       关键约束:
-        - `data` 至少包含一个字段
-        - 名称必须显式提供
+        - `data.名称` 必须显式提供
       示例: |-
         {
           "type": "UpsertQuest",
-          "id": "quest_bandit_camp",
+          "名称": "清剿山匪营地",
           "data": {
             "名称": "清剿山匪营地",
             "状态": "进行中"
           }
         }
     UpdateQuestState:
-      必填字段: [type, id, 状态]
+      必填字段: [type, 名称, 状态]
       可选字段: [目标]
       目标可填字段:
         类型: 任务目标类型
@@ -464,31 +461,29 @@
       示例: |-
         {
           "type": "UpdateQuestState",
-          "id": "quest_bandit_camp",
+          "名称": "清剿山匪营地",
           "状态": "可提交"
         }
     RemoveQuest:
-      必填字段: [type, id]
+      必填字段: [type, 名称]
       示例: |-
         {
           "type": "RemoveQuest",
-          "id": "expired_side_001"
+          "名称": "过期委托"
         }
     UpsertShopItem:
-      必填字段: [type, id, data]
-      可选字段: [createIfMissing]
+      必填字段: [type, 名称, data]
       data可填字段:
         名称: string
         分类: 商品分类
         价格: number
         描述: string
       关键约束:
-        - `data` 至少包含一个字段
-        - 名称建议显式提供
+        - `data.名称` 必须显式提供
       示例: |-
         {
           "type": "UpsertShopItem",
-          "id": "item_healing_herb",
+          "名称": "止血草",
           "data": {
             "名称": "止血草",
             "分类": "消耗品",
@@ -497,11 +492,11 @@
           }
         }
     RemoveShopItem:
-      必填字段: [type, id]
+      必填字段: [type, 名称]
       示例: |-
         {
           "type": "RemoveShopItem",
-          "id": "limited_offer_001"
+          "名称": "限时礼包"
         }
   最终检查清单:
     - 是否先写正文，再在最末尾输出命令块

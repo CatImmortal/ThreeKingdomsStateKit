@@ -45,98 +45,98 @@ export type 状态命令 =
     }
   | {
       type: 'UpdateFaction';
-      factionId: string;
+      名称: string;
       changes: 势力更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'UpsertCity';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
       data: 城池更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'AddCityFacility';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
       facility: string;
     }
   | {
       type: 'RemoveCityFacility';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
       facility: string;
     }
   | {
       type: 'RemoveCity';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
     }
   | {
       type: 'UpsertArmy';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
       data: 军队更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'RemoveArmy';
-      factionId: string;
-      id: string;
+      势力名称: string;
+      名称: string;
     }
   | {
       type: 'UpdateDiplomacy';
-      factionId: string;
+      名称: string;
       changes: Record<string, number>;
     }
   | {
       type: 'UpdatePolicy';
-      factionId: string;
+      名称: string;
       changes: 政策更新;
     }
   | {
       type: 'UpsertNpc';
-      id: string;
+      名称: string;
       data: NPC更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'UpdateNpcRelation';
-      id: string;
+      名称: string;
       mode?: 'delta' | 'set';
       好感?: number;
       羁绊?: Record<string, string>;
     }
   | {
       type: 'RemoveNpc';
-      id: string;
+      名称: string;
     }
   | {
       type: 'UpsertQuest';
-      id: string;
+      名称: string;
       data: 任务更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'UpdateQuestState';
-      id: string;
+      名称: string;
       状态: 任务状态;
       目标?: Record<string, 任务目标更新>;
     }
   | {
       type: 'RemoveQuest';
-      id: string;
+      名称: string;
     }
   | {
       type: 'UpsertShopItem';
-      id: string;
+      名称: string;
       data: 商品更新;
       createIfMissing?: boolean;
     }
   | {
       type: 'RemoveShopItem';
-      id: string;
+      名称: string;
     };
 
 export type 命令输入 = string | 状态命令 | 状态命令[];
@@ -148,23 +148,23 @@ const 命令字段白名单 = {
   AppendRecentEvent: ['type', 'event'],
   UpdatePlayerBase: ['type', 'changes'],
   AdjustPlayerResource: ['type', 'mode', 'changes'],
-  UpdateFaction: ['type', 'factionId', 'changes', 'createIfMissing'],
-  UpsertCity: ['type', 'factionId', 'id', 'data', 'createIfMissing'],
-  AddCityFacility: ['type', 'factionId', 'id', 'facility'],
-  RemoveCityFacility: ['type', 'factionId', 'id', 'facility'],
-  RemoveCity: ['type', 'factionId', 'id'],
-  UpsertArmy: ['type', 'factionId', 'id', 'data', 'createIfMissing'],
-  RemoveArmy: ['type', 'factionId', 'id'],
-  UpdateDiplomacy: ['type', 'factionId', 'changes'],
-  UpdatePolicy: ['type', 'factionId', 'changes'],
-  UpsertNpc: ['type', 'id', 'data', 'createIfMissing'],
-  UpdateNpcRelation: ['type', 'id', 'mode', '好感', '羁绊'],
-  RemoveNpc: ['type', 'id'],
-  UpsertQuest: ['type', 'id', 'data', 'createIfMissing'],
-  UpdateQuestState: ['type', 'id', '状态', '目标'],
-  RemoveQuest: ['type', 'id'],
-  UpsertShopItem: ['type', 'id', 'data', 'createIfMissing'],
-  RemoveShopItem: ['type', 'id'],
+  UpdateFaction: ['type', '名称', 'changes', 'createIfMissing'],
+  UpsertCity: ['type', '势力名称', '名称', 'data', 'createIfMissing'],
+  AddCityFacility: ['type', '势力名称', '名称', 'facility'],
+  RemoveCityFacility: ['type', '势力名称', '名称', 'facility'],
+  RemoveCity: ['type', '势力名称', '名称'],
+  UpsertArmy: ['type', '势力名称', '名称', 'data', 'createIfMissing'],
+  RemoveArmy: ['type', '势力名称', '名称'],
+  UpdateDiplomacy: ['type', '名称', 'changes'],
+  UpdatePolicy: ['type', '名称', 'changes'],
+  UpsertNpc: ['type', '名称', 'data', 'createIfMissing'],
+  UpdateNpcRelation: ['type', '名称', 'mode', '好感', '羁绊'],
+  RemoveNpc: ['type', '名称'],
+  UpsertQuest: ['type', '名称', 'data', 'createIfMissing'],
+  UpdateQuestState: ['type', '名称', '状态', '目标'],
+  RemoveQuest: ['type', '名称'],
+  UpsertShopItem: ['type', '名称', 'data', 'createIfMissing'],
+  RemoveShopItem: ['type', '名称'],
 } as const;
 
 const 世界字段 = ['当前时间', '当前地点', '当前剧本', '天气', '近期事件'] as const;
@@ -174,14 +174,15 @@ const 装备条目字段 = ['名称', '品质', '类型', '描述', '伤害骰',
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
 const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度', '体力消耗'] as const;
 const 专长条目字段 = ['名称', '等级', '效果'] as const;
-const 主角字段 = ['六维', '当前生命值', '当前体力值', '生命值上限加成', '体力值上限加成', '装备', '武技', '专长', '状态', '物品栏', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
+const 主角字段 = ['六维', '当前生命值', '当前体力值', '生命值上限加成', '体力值上限加成', '装备', '武技', '专长', '状态', '物品栏', '兵种适性', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['名称', '品质', '描述', '数量'] as const;
-const 势力字段 = ['名称', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
+const 势力字段 = ['名称', '主公', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
 const 城池字段 = ['名称', '等级', '城防', '人口', '农业', '商业', '民心', '治安', '繁荣度', '太守', '设施'] as const;
 const 军队字段 = ['名称', '兵种', '等级', '兵力', '士气', '疲惫', '装备等级', '统属将领', '驻扎地', '训练进度', '阵型'] as const;
 const 政策字段 = ['当前研究', '研究进度', '富国', '强兵', '霸道', '王道'] as const;
-const NPC字段 = ['名称', '品质', '阵营', '定位', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
-const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '驻扎地', '特技'] as const;
+const NPC字段 = ['名称', '品质', '阵营', '定位', '所在地', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
+const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '势力', '忠诚', '是否已招募', '兵种适性', '特技'] as const;
+const 兵种适性字段 = ['刀盾兵', '枪矛兵', '弓弩兵', '骑兵', '水军'] as const;
 const 美人属性字段 = ['依赖度', '敏感度', '贞洁度', '位份', '性格', '当前状态'] as const;
 const 任务字段 = ['名称', '类型', '状态', '时限', '目标'] as const;
 const 任务目标字段 = ['类型', '状态', '描述', '积分', '其他奖励'] as const;
@@ -257,6 +258,14 @@ function 校验数字映射(value: unknown, path: string): void {
   for (const [key, item] of Object.entries(value)) {
     断言字符串(key, `${path} 键名`);
     断言数字(item, `${path}.${key}`);
+  }
+}
+
+function 校验名称一致性(定位名称: string, data: unknown, path: string): void {
+  断言对象(data, path);
+  断言字符串(定位名称, `${path} 对应名称`);
+  if (data.名称 !== undefined) {
+    断言(data.名称 === 定位名称, `${path}.名称 不允许改名，必须与定位名称一致`);
   }
 }
 
@@ -380,6 +389,15 @@ function 校验物品栏(value: unknown, path: string): void {
   }
 }
 
+function 校验兵种适性表(value: unknown, path: string): void {
+  断言对象(value, path);
+  断言字段白名单(value, 兵种适性字段, path);
+  for (const [key, item] of Object.entries(value)) {
+    断言枚举值(key, 枚举.基础兵种, `${path} 键名`);
+    断言数字(item, `${path}.${key}`);
+  }
+}
+
 function 校验武将信息(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 武将信息字段, path);
@@ -388,7 +406,10 @@ function 校验武将信息(value: unknown, path: string): void {
   if (value.官职 !== undefined) 断言字符串(value.官职, `${path}.官职`);
   if (value.当前状态 !== undefined) 断言枚举值(value.当前状态, 枚举.武将状态, `${path}.当前状态`);
   if (value.状态描述 !== undefined) 断言字符串(value.状态描述, `${path}.状态描述`);
-  if (value.驻扎地 !== undefined) 断言字符串(value.驻扎地, `${path}.驻扎地`);
+  if (value.势力 !== undefined) 断言字符串(value.势力, `${path}.势力`);
+  if (value.忠诚 !== undefined) 断言数字(value.忠诚, `${path}.忠诚`);
+  if (value.是否已招募 !== undefined) 断言布尔(value.是否已招募, `${path}.是否已招募`);
+  if (value.兵种适性 !== undefined) 校验兵种适性表(value.兵种适性, `${path}.兵种适性`);
   if (value.特技 !== undefined) 校验字符串映射(value.特技, `${path}.特技`);
 }
 
@@ -456,6 +477,7 @@ function 校验主角更新(value: unknown, path: string): void {
   if (value.专长 !== undefined) 校验专长映射(value.专长, `${path}.专长`);
   if (value.状态 !== undefined) 校验状态记录(value.状态, `${path}.状态`);
   if (value.物品栏 !== undefined) 校验物品栏(value.物品栏, `${path}.物品栏`);
+  if (value.兵种适性 !== undefined) 校验兵种适性表(value.兵种适性, `${path}.兵种适性`);
   if (value.声望 !== undefined) 断言数字(value.声望, `${path}.声望`);
   if (value.金钱 !== undefined) 断言数字(value.金钱, `${path}.金钱`);
   if (value.积分 !== undefined) 断言数字(value.积分, `${path}.积分`);
@@ -483,7 +505,7 @@ function 校验军队更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 军队字段, path);
   if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
-  if (value.兵种 !== undefined) 断言字符串(value.兵种, `${path}.兵种`);
+  if (value.兵种 !== undefined) 断言枚举值(value.兵种, 枚举.基础兵种, `${path}.兵种`);
   if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.军队等级, `${path}.等级`);
   for (const key of ['兵力', '士气', '疲惫', '训练进度'] as const) {
     if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
@@ -507,6 +529,7 @@ function 校验势力更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 势力字段, path);
   if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
+  if (value.主公 !== undefined) 断言字符串(value.主公, `${path}.主公`);
   if (value.规模 !== undefined) 断言枚举值(value.规模, 枚举.势力规模, `${path}.规模`);
   for (const key of ['正统性', '情报网', '金钱', '粮草'] as const) {
     if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
@@ -538,6 +561,7 @@ function 校验NPC更新(value: unknown, path: string): void {
   if (value.品质 !== undefined) 断言枚举值(value.品质, 枚举.品质, `${path}.品质`);
   if (value.阵营 !== undefined) 断言字符串(value.阵营, `${path}.阵营`);
   if (value.定位 !== undefined) 断言字符串(value.定位, `${path}.定位`);
+  if (value.所在地 !== undefined) 断言字符串(value.所在地, `${path}.所在地`);
   if (value.好感 !== undefined) 断言数字(value.好感, `${path}.好感`);
   if (value.简述 !== undefined) 断言字符串(value.简述, `${path}.简述`);
   if (value.羁绊 !== undefined) 校验字符串映射(value.羁绊, `${path}.羁绊`);
@@ -625,74 +649,78 @@ export function 校验命令(command: 状态命令, index = 0): void {
         校验资源变化(command.changes, `${path}.changes`);
         return;
       case 'UpdateFaction':
-        debugLog('commands', '校验 UpdateFaction', { index, factionId: command.factionId });
-        断言字符串(command.factionId, `${path}.factionId`);
+        debugLog('commands', '校验 UpdateFaction', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验势力更新(command.changes, `${path}.changes`);
+        校验名称一致性(command.名称, command.changes, `${path}.changes`);
         return;
       case 'UpsertCity':
-        debugLog('commands', '校验 UpsertCity', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpsertCity', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验城池更新(command.data, `${path}.data`);
+        校验名称一致性(command.名称, command.data, `${path}.data`);
         return;
       case 'AddCityFacility':
-        debugLog('commands', '校验 AddCityFacility', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 AddCityFacility', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         断言字符串(command.facility, `${path}.facility`);
         return;
       case 'RemoveCityFacility':
-        debugLog('commands', '校验 RemoveCityFacility', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveCityFacility', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         断言字符串(command.facility, `${path}.facility`);
         return;
       case 'RemoveCity':
-        debugLog('commands', '校验 RemoveCity', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveCity', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         return;
       case 'UpsertArmy':
-        debugLog('commands', '校验 UpsertArmy', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpsertArmy', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验军队更新(command.data, `${path}.data`);
+        校验名称一致性(command.名称, command.data, `${path}.data`);
         return;
       case 'RemoveArmy':
-        debugLog('commands', '校验 RemoveArmy', { index, factionId: command.factionId, id: command.id });
-        断言字符串(command.factionId, `${path}.factionId`);
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveArmy', { index, 势力名称: command.势力名称, 名称: command.名称 });
+        断言字符串(command.势力名称, `${path}.势力名称`);
+        断言字符串(command.名称, `${path}.名称`);
         return;
       case 'UpdateDiplomacy':
-        debugLog('commands', '校验 UpdateDiplomacy', { index, factionId: command.factionId });
-        断言字符串(command.factionId, `${path}.factionId`);
+        debugLog('commands', '校验 UpdateDiplomacy', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         校验数字映射(command.changes, `${path}.changes`);
         return;
       case 'UpdatePolicy':
-        debugLog('commands', '校验 UpdatePolicy', { index, factionId: command.factionId });
-        断言字符串(command.factionId, `${path}.factionId`);
+        debugLog('commands', '校验 UpdatePolicy', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         校验政策更新(command.changes, `${path}.changes`);
         return;
       case 'UpsertNpc':
-        debugLog('commands', '校验 UpsertNpc', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpsertNpc', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验NPC更新(command.data, `${path}.data`);
+        校验名称一致性(command.名称, command.data, `${path}.data`);
         return;
       case 'UpdateNpcRelation':
-        debugLog('commands', '校验 UpdateNpcRelation', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpdateNpcRelation', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         if (command.mode !== undefined) {
           断言枚举值(command.mode, ['delta', 'set'], `${path}.mode`);
         }
@@ -701,40 +729,42 @@ export function 校验命令(command: 状态命令, index = 0): void {
         if (command.羁绊 !== undefined) 校验字符串映射(command.羁绊, `${path}.羁绊`);
         return;
       case 'RemoveNpc':
-        debugLog('commands', '校验 RemoveNpc', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveNpc', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         return;
       case 'UpsertQuest':
-        debugLog('commands', '校验 UpsertQuest', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpsertQuest', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验任务更新(command.data, `${path}.data`);
+        校验名称一致性(command.名称, command.data, `${path}.data`);
         return;
       case 'UpdateQuestState':
-        debugLog('commands', '校验 UpdateQuestState', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpdateQuestState', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         断言枚举值(command.状态, 枚举.任务状态, `${path}.状态`);
         if (command.目标 !== undefined) {
           校验任务目标映射(command.目标, `${path}.目标`);
         }
         return;
       case 'RemoveQuest':
-        debugLog('commands', '校验 RemoveQuest', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveQuest', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         return;
       case 'UpsertShopItem':
-        debugLog('commands', '校验 UpsertShopItem', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 UpsertShopItem', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         if (command.createIfMissing !== undefined) {
           断言布尔(command.createIfMissing, `${path}.createIfMissing`);
         }
         校验商品条目(command.data, `${path}.data`);
+        校验名称一致性(command.名称, command.data, `${path}.data`);
         return;
       case 'RemoveShopItem':
-        debugLog('commands', '校验 RemoveShopItem', { index, id: command.id });
-        断言字符串(command.id, `${path}.id`);
+        debugLog('commands', '校验 RemoveShopItem', { index, 名称: command.名称 });
+        断言字符串(command.名称, `${path}.名称`);
         return;
     }
   } catch (error) {
