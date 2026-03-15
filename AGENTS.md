@@ -1,104 +1,105 @@
 # ThreeKingdomsStateKit
 
-## Instruction Priority
+## 指令优先级
 
-When working in this repository, follow instructions in this order:
+在本仓库中工作时，请按以下顺序理解并遵守指令：
 
-1. Current user request in the active session
-2. The nearest relevant `CLAUDE.md`
-3. This root `AGENTS.md`
-4. Existing code structure and established project patterns
-5. Other supporting reference material
+1. 当前会话中用户的明确要求
+2. 离正在编辑目录最近的 `CLAUDE.md`
+3. 本根目录 `AGENTS.md`
+4. 现有代码结构与既有实现模式
+5. 其他补充参考材料
 
-Important repo rule:
-- If a directory being edited contains its own `CLAUDE.md`, read and follow that file before making changes in that directory.
-- Treat this `AGENTS.md` as the global baseline, and treat nearby `CLAUDE.md` files as higher-priority local guidance.
+重要仓库规则：
+- 如果某个目录下存在自己的 `CLAUDE.md`，在修改该目录内容前必须先阅读并遵循它。
+- 本 `AGENTS.md` 作为全局基线，优先级低于就近目录的 `CLAUDE.md`。
 
-Known `CLAUDE.md` files currently present:
+当前已知的 `CLAUDE.md`：
 - `./CLAUDE.md`
 - `./src/CLAUDE.md`
 - `./src/ui/CLAUDE.md`
 - `./reference/CLAUDE.md`
 
-## Core Commands
+## 核心命令
 
-- Build: `npm run build`
-- Type check: `npm run typecheck`
-- Default validation order after code changes:
+- 构建：`npm run build`
+- 类型检查：`npm run typecheck`
+- 本地预览：`npm run dev:preview`
+- 完成代码修改后的默认校验顺序：
   1. `npm run typecheck`
   2. `npm run build`
 
-## Project Layout
+## 项目结构
 
-- `src/` contains all source code.
-- `src/index.ts` is the public entry and global export surface.
-- `src/runtime.ts` and `src/runtime-auto.ts` handle host integration, event hooks, slash/input behavior, and runtime UI wiring.
-- `src/bridge.ts` is the main assistant-reply pipeline: parse protocol blocks, apply commands, save state, and rewrite assistant message bodies.
-- `src/protocol.ts` defines reply block formats such as `<UpdateVariable>` and `<PlayerOptions>`.
-- `src/storage.ts` reads/writes per-message state snapshots and updates assistant message bodies.
-- `src/status-panel.ts` renders the message-body status bar fallback.
-- `src/ui/` contains the Vue SFC overlay panel and related store/router files.
-- `dist/` is generated output only; do not hand-edit it.
-- `reference/` is for examples and host reference material, not the primary runtime implementation.
+- `src/`：全部生产源码。
+- `src/index.ts`：公开入口与全局导出面。
+- `src/runtime.ts` 与 `src/runtime-auto.ts`：宿主接线、事件钩子、输入填充、运行时恢复与 UI 挂载。
+- `src/bridge.ts`：AI 回复主流程，负责协议解析、命令应用、状态持久化、上下文宏刷新与消息正文更新。
+- `src/protocol.ts`：定义并解析 `<UpdateVariable>` 与 `<PlayerOptions>`。
+- `src/storage.ts`：按消息楼层读写状态快照。
+- `src/ui/`：Vue 浮动界面实现。
+- `src/preview/`：本地预览与 mock 数据，不参与生产注入。
+- `dist/`：构建产物目录，禁止手改。
+- `reference/`：宿主参考与示例，不是主运行时实现。
 
-## Architecture Overview
+## 架构总览
 
-This project is a browser-targeted TypeScript toolkit for a Three Kingdoms roleplay/state system used in a SillyTavern-like host environment.
+本项目是一个面向浏览器宿主环境的 TypeScript 工具库，用于支撑《三国霸主系统》的状态管理、协议处理与可视化界面。
 
-Main flow:
-1. Host runtime receives an assistant message.
-2. `bridge.ts` extracts protocol blocks and state commands.
-3. Commands are applied and persisted through `executor.ts` and `storage.ts`.
-4. The assistant message body is rewritten with cleaned content plus the fallback status bar.
-5. Runtime hooks may additionally sync a Vue overlay panel, but the message-body fallback path must remain reliable.
+主流程大致如下：
+1. 宿主接收到 assistant 消息。
+2. `bridge.ts` 提取协议块与状态命令。
+3. 命令经 `commands.ts` 校验后由 `executor.ts` 应用。
+4. `storage.ts` 将最新状态快照写回 assistant 楼层的 `data` 字段。
+5. `runtime.ts` 把最新状态与玩家选项同步给 Vue UI。
 
-Preserve this separation of concerns:
-- protocol parsing in `protocol.ts`
-- state mutation and recompute logic in `commands.ts`, `executor.ts`, `recompute.ts`, `state.ts`
-- host integration in `runtime.ts`
-- rendering in `status-panel.ts`, `player-options.ts`, and `src/ui/`
+请保持以下职责分离：
+- 协议解析放在 `protocol.ts`
+- 状态变更与派生字段重算放在 `commands.ts`、`executor.ts`、`recompute.ts`、`state.ts`
+- 持久化放在 `storage.ts`
+- 宿主接线放在 `runtime.ts`
+- UI 渲染放在 `src/ui/`
 
-## Conventions & Patterns
+## 约定与实现模式
 
-- Match the coding style already used in nearby files.
-- Keep user-facing Chinese naming and domain vocabulary consistent.
-- Prefer extending existing modules over introducing parallel implementations.
-- Avoid `any` unless there is a clear host-integration reason.
-- Do not introduce new runtime dependencies unless necessary and justified.
-- For protocol changes, make optional-block parsing tolerant when possible so one malformed optional block does not break the full reply pipeline.
-- Keep the message-body status bar as the stable fallback even when changing Vue UI behavior.
-- Vue/UI work must not break core script initialization or assistant-reply handling.
-- Prefer small, explicit helpers over broad rewrites.
+- 尽量匹配附近文件的既有代码风格。
+- 保持面向用户的中文领域词汇一致。
+- 优先扩展现有模块，而不是新增平行实现。
+- 除非确有宿主兼容原因，否则避免使用 `any`。
+- 不要随意引入新的运行时依赖。
+- 协议相关改动应尽量保持可容错，避免单个可选块格式错误导致整个回复链路失败。
+- Vue/UI 改动不得破坏运行时初始化、玩家选项处理或聊天切换后的恢复链路。
+- 优先使用小而明确的辅助函数，避免大范围重写。
 
-## Build & Validation Rules
+## 构建与校验规则
 
-- Always validate code changes before finishing.
-- Minimum required validation in this repository:
+- 完成改动前必须进行校验。
+- 本仓库最低要求：
   - `npm run typecheck`
   - `npm run build`
-- Treat validation failures as blockers.
-- If a change touches runtime hooks, protocol parsing, message rewriting, bundling, or Vue integration, be especially careful to verify the fallback path still works.
-- If Vue-related dependencies or bundling change, ensure the final `dist/index.js` does not rely on unresolved bare-module imports in the host environment.
+- 校验失败视为阻塞问题。
+- 如果改动涉及 runtime 钩子、协议解析、消息正文写回、打包或 Vue 集成，要特别检查回复处理链路与聊天切换恢复链路。
+- 如果改动涉及 Vue 依赖或打包配置，要确认最终 `dist/index.js` 不依赖宿主无法解析的裸模块导入。
 
-## Security & Safety
+## 安全与注意事项
 
-- Never commit secrets, tokens, or environment-specific credentials.
-- Do not log sensitive data.
-- Be careful when changing message rewriting logic in `storage.ts` and `bridge.ts`; avoid corrupting unrelated messages.
-- Keep slash command execution and DOM input fallback scoped to the host chat UI.
+- 不要提交密钥、令牌或环境敏感信息。
+- 不要记录敏感数据到日志。
+- 修改 `storage.ts` 或 `bridge.ts` 的消息写回逻辑时，要避免误伤无关消息。
+- slash 命令执行与 DOM 输入回退逻辑必须限定在宿主聊天输入区域内。
 
-## Git Workflow
+## Git 工作流
 
-- Follow the existing commit style seen in history, such as `feat: ...`, `fix: ...`, `update ...`.
-- Keep commits focused and avoid mixing unrelated refactors with behavior changes.
-- Before any commit, review staged changes and confirm no generated noise or sensitive data is included.
+- 遵循仓库现有提交风格，如 `feat: ...`、`fix: ...`、`refactor: ...`。
+- 保持单次提交聚焦，不要混入无关重构。
+- 提交前检查 staged 内容，确认没有生成噪音或敏感信息。
 
-## Agent Guidance
+## 对代理的额外要求
 
-- Before editing, read the nearest relevant `CLAUDE.md` if one exists.
-- For work inside `src/`, read `src/CLAUDE.md` first.
-- For work inside `src/ui/`, read `src/ui/CLAUDE.md` first.
-- For work inside `reference/`, read `reference/CLAUDE.md` first.
-- When the user asks for a new interaction model, clarify whether it affects message-body HTML, Vue overlay UI, runtime hooks, protocol definitions, or some combination of them.
-- Do not proactively update any `CLAUDE.md` after finishing development unless the user explicitly asks for documentation updates.
-- If code behavior, directory responsibilities, or the build/integration approach changes substantially and the user asks for doc sync, update the nearest relevant `CLAUDE.md` to reflect those concrete changes.
+- 修改前先读取最近的 `CLAUDE.md`。
+- 修改 `src/` 下内容前，先看 `src/CLAUDE.md`。
+- 修改 `src/ui/` 下内容前，先看 `src/ui/CLAUDE.md`。
+- 修改 `reference/` 下内容前，先看 `reference/CLAUDE.md`。
+- 当用户提出新的交互模型时，要先判断它影响的是 runtime 钩子、协议定义、状态存储，还是 Vue UI。
+- 不要主动更新各级 `CLAUDE.md`，除非用户明确要求同步文档。
+- 如果代码行为、目录职责或构建/集成方式发生明显变化，且用户要求同步文档，应更新离改动最近的 `CLAUDE.md`，确保其反映当前实现。

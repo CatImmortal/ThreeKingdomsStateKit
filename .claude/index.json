@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-03-14T11:33:02+08:00",
-  "schemaVersion": "1.0",
+  "generatedAt": "2026-03-15T21:53:00+08:00",
+  "schemaVersion": "1.1",
   "projectName": "ThreeKingdomsStateKit",
   "projectRoot": ".",
   "truncated": false,
   "coverage": {
-    "estimatedTotalFiles": 28,
-    "scannedFiles": 28,
+    "estimatedTotalFiles": 46,
+    "scannedFiles": 46,
     "coveragePercent": 100,
     "ignoredDirs": ["node_modules", ".git", ".idea", "dist"],
     "ignoredReasons": {
@@ -31,13 +31,18 @@
         "window.ThreeKingdomsStateKit（全局命名空间对象）",
         "handleAssistantReply(replyText, options) - 主流程 API",
         "setupAssistantReplyHook(options) - 事件钩子",
-        "toggleVuePanel() - Vue 面板控制"
+        "toggleVuePanel() - Vue 面板控制",
+        "handlePlayerOptionClick(messageId, optionText) - 玩家选项点击",
+        "teardownRuntimeHooks(reason?) - 统一销毁所有钩子",
+        "registerSgbzMacros() - 宏注册",
+        "setDebug(enabled) / getDebug() - 调试开关"
       ],
       "keyFiles": [
         "src/index.ts",
         "src/state.ts",
         "src/rules.ts",
         "src/commands.ts",
+        "src/commander.ts",
         "src/executor.ts",
         "src/recompute.ts",
         "src/protocol.ts",
@@ -47,10 +52,16 @@
         "src/runtime.ts",
         "src/runtime-auto.ts",
         "src/macro.ts",
-        "src/status-panel.ts",
-        "src/player-options.ts",
-        "src/player-options-panel.ts",
+        "src/dom-host.ts",
         "src/debug.ts"
+      ],
+      "newSinceLastScan": [
+        "src/commander.ts（主角统军判断，从 recompute.ts 拆出）"
+      ],
+      "removedSinceLastScan": [
+        "src/status-panel.ts（已删除）",
+        "src/player-options.ts（已删除）",
+        "src/player-options-panel.ts（已删除）"
       ],
       "gaps": []
     },
@@ -60,32 +71,59 @@
       "language": "TypeScript + Vue 3 SFC",
       "entryFile": "src/ui/app.ts",
       "claudeMd": "src/ui/CLAUDE.md",
-      "description": "Vue 3 浮动交互面板，含 store、router、视图组件",
+      "description": "Vue 3 浮动系统界面（系统界面主窗 + 玩家选项悬浮窗 + NPC 详情浮层）",
       "hasTesting": false,
       "hasConfig": false,
       "interfaces": [
         "mountUnifiedPanelApp() - 挂载面板",
         "unmountUnifiedPanelApp() - 卸载面板",
-        "updateUnifiedPanelState(payload) - 推送状态",
-        "clearUnifiedPanelState() - 清空状态"
+        "updateSystemPanelState({ messageId, state }) - 推送状态数据",
+        "updatePlayerOptionsPanelState({ messageId, options? }) - 推送玩家选项",
+        "setSystemPanelVisible(visible) / setPlayerOptionsPanelVisible(visible) - 显隐控制",
+        "openNpcDetailWindow(npcName) - 打开 NPC 详情窗",
+        "clearUnifiedPanelState() - 清空所有状态"
       ],
       "keyFiles": [
         "src/ui/app.ts",
-        "src/ui/router.ts",
+        "src/ui/SystemUiRoot.vue",
         "src/ui/store.ts",
-        "src/ui/App.vue",
+        "src/ui/drag.ts",
         "src/ui/views/UnifiedPanel.vue",
+        "src/ui/views/PlayerOptionsFloatingPanel.vue",
+        "src/ui/views/NpcDetailWindows.vue",
         "src/ui/components/PlayerOptionsPanel.vue",
-        "src/ui/components/StatusBarPanel.vue"
+        "src/ui/components/StatusBarPanel.vue",
+        "src/ui/components/status/qualityStyles.ts",
+        "src/ui/components/status/HeroPanel.vue",
+        "src/ui/components/status/NpcPanel.vue",
+        "src/ui/components/status/NpcDetailPanel.vue",
+        "src/ui/components/status/QuestPanel.vue",
+        "src/ui/components/status/ShopPanel.vue",
+        "src/ui/components/status/ArmyPanel.vue",
+        "src/ui/components/status/FactionPanel.vue",
+        "src/ui/components/status/RadarChart.vue",
+        "src/ui/components/status/AptitudeRadarChart.vue",
+        "src/ui/components/status/CityRadarChart.vue",
+        "src/ui/components/status/BoundedBar.vue"
       ],
-      "gaps": [
-        "PlayerOptionsPanel.vue 当前仅展示数量，缺乏点击交互（预留扩展）"
-      ]
+      "newSinceLastScan": [
+        "src/ui/views/NpcDetailWindows.vue（NPC 多窗口浮层，支持并发）",
+        "src/ui/components/status/NpcDetailPanel.vue",
+        "src/ui/components/status/AptitudeRadarChart.vue",
+        "src/ui/components/status/CityRadarChart.vue",
+        "src/ui/components/status/BoundedBar.vue",
+        "src/ui/components/status/qualityStyles.ts"
+      ],
+      "removedSinceLastScan": [
+        "src/ui/router.ts（已删除）",
+        "src/ui/App.vue（已删除）"
+      ],
+      "gaps": []
     },
     {
       "id": "reference",
       "path": "reference",
-      "language": "TypeScript 类型声明 + YAML + 文本",
+      "language": "TypeScript 类型声明 + 文本",
       "entryFile": null,
       "claudeMd": null,
       "description": "SillyTavern 宿主 API 类型参考文档与角色卡示例，不参与构建",
@@ -93,21 +131,37 @@
       "hasConfig": false,
       "interfaces": [],
       "keyFiles": [
-        "reference/@types.txt",
-        "reference/@types/function/",
-        "reference/@types/iframe/",
-        "reference/SillyTavern_Macros.txt",
-        "reference/slash_command.txt",
-        "reference/示例/"
+        "reference/酒馆助手/@types.txt"
       ],
       "gaps": [
         "无 CLAUDE.md 文档（参考目录，不构建，低优先级）"
+      ]
+    },
+    {
+      "id": "src/preview",
+      "path": "src/preview",
+      "language": "TypeScript + Vue 3 SFC",
+      "entryFile": "src/preview/main.ts",
+      "claudeMd": null,
+      "description": "本地开发预览用场景数据与 Vite 入口，不参与生产构建（pnpm dev:preview）",
+      "hasTesting": false,
+      "hasConfig": false,
+      "interfaces": [],
+      "keyFiles": [
+        "src/preview/main.ts",
+        "src/preview/scenes.ts",
+        "src/preview/mock-data.ts",
+        "src/preview/PreviewApp.vue"
+      ],
+      "gaps": [
+        "无 CLAUDE.md 文档（开发辅助目录，低优先级）"
       ]
     }
   ],
   "globalGaps": [
     "无自动化测试（无 Vitest / Jest 配置）",
-    "reference/ 目录无 CLAUDE.md 说明文档"
+    "reference/ 目录无 CLAUDE.md 说明文档",
+    "src/preview/ 目录无 CLAUDE.md 说明文档"
   ],
   "nextScanRecommendations": [],
   "buildInfo": {
@@ -118,24 +172,41 @@
     "platform": "browser",
     "target": "es2020",
     "outDir": "dist",
-    "esbuildPlugins": ["unplugin-vue/esbuild"]
+    "minify": true,
+    "noExternal": ["vue"],
+    "esbuildPlugins": ["unplugin-vue/esbuild"],
+    "vueDefines": {
+      "__VUE_OPTIONS_API__": false,
+      "__VUE_PROD_DEVTOOLS__": false,
+      "__VUE_PROD_HYDRATION_MISMATCH_DETAILS__": false
+    }
   },
   "dependencies": {
     "runtime": {
-      "vue": "^3.5.30",
-      "vue-router": "^4.6.4"
+      "lodash": "^4.17.23"
     },
     "dev": {
       "tsup": "^8.5.0",
       "typescript": "^5.8.2",
       "unplugin-vue": "^7.1.1",
+      "vue": "^3.5.30",
       "vue-tsc": "^3.2.5",
       "@types/lodash": "^4.17.24",
-      "@vue/compiler-sfc": "^3.5.30"
+      "@vue/compiler-sfc": "^3.5.30",
+      "vite": "^8.0.0",
+      "@vitejs/plugin-vue": "^6.0.5"
     },
     "hostInjected": {
-      "_": "lodash（宿主注入全局）",
-      "initializeGlobal": "全局注册函数（可选，宿主注入）"
+      "_": "lodash（宿主注入全局，通过 global.d.ts 声明）",
+      "initializeGlobal": "全局注册函数（可选，宿主注入）",
+      "getChatMessages / setChatMessages": "楼层状态读写",
+      "eventOn / eventRemoveListener": "事件订阅",
+      "getButtonEvent": "快速回复按钮事件名",
+      "tavern_events.*": "SillyTavern 事件常量",
+      "registerMacroLike": "宏注册",
+      "triggerSlash / executeSlashCommandsWithOptions": "斜杠命令",
+      "TavernHelper.*": "上述接口的备用来源",
+      "toastr": "Toast 通知（可选）"
     }
   }
 }
