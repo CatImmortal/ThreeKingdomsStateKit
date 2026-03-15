@@ -43,17 +43,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { 六维 } from '../../../state';
-import { 属性等级文本样式 } from './qualityStyles';
+import { 属性等级SVG文本样式 } from './qualityStyles';
 
 const props = defineProps<{ stats: 六维 }>();
 
 const labels = computed(() => [
-  { key: '武力', value: props.stats.武力, bonus: props.stats._武力加值 ?? 0, rank: props.stats._武力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._武力等级) },
-  { key: '智力', value: props.stats.智力, bonus: props.stats._智力加值 ?? 0, rank: props.stats._智力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._智力等级) },
-  { key: '统率', value: props.stats.统率, bonus: props.stats._统率加值 ?? 0, rank: props.stats._统率等级 ?? '', rankStyle: 属性等级文本样式(props.stats._统率等级) },
-  { key: '政治', value: props.stats.政治, bonus: props.stats._政治加值 ?? 0, rank: props.stats._政治等级 ?? '', rankStyle: 属性等级文本样式(props.stats._政治等级) },
-  { key: '魅力', value: props.stats.魅力, bonus: props.stats._魅力加值 ?? 0, rank: props.stats._魅力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._魅力等级) },
-  { key: '体质', value: props.stats.体质, bonus: props.stats._体质加值 ?? 0, rank: props.stats._体质等级 ?? '', rankStyle: 属性等级文本样式(props.stats._体质等级) },
+  { key: '武力', value: props.stats.武力, bonus: props.stats._武力加值 ?? 0, rank: props.stats._武力等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._武力等级) },
+  { key: '智力', value: props.stats.智力, bonus: props.stats._智力加值 ?? 0, rank: props.stats._智力等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._智力等级) },
+  { key: '统率', value: props.stats.统率, bonus: props.stats._统率加值 ?? 0, rank: props.stats._统率等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._统率等级) },
+  { key: '政治', value: props.stats.政治, bonus: props.stats._政治加值 ?? 0, rank: props.stats._政治等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._政治等级) },
+  { key: '魅力', value: props.stats.魅力, bonus: props.stats._魅力加值 ?? 0, rank: props.stats._魅力等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._魅力等级) },
+  { key: '体质', value: props.stats.体质, bonus: props.stats._体质加值 ?? 0, rank: props.stats._体质等级 ?? '', rankStyle: 属性等级SVG文本样式(props.stats._体质等级) },
 ]);
 
 const viewBoxWidth = 220;

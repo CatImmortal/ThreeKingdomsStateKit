@@ -4,7 +4,8 @@ export const MAX_RECENT_EVENTS = 5;
 
 export const 枚举 = {
   品质: ['N', 'R', 'SR', 'SSR', 'UR'],
-  装备品质: ['凡品', '良品', '上品', '极品', '传说', '神话'],
+  物品品质: ['凡品', '良品', '上品', '极品', '传说', '神话'],
+  物品类型: ['武器', '护甲', '坐骑', '饰品', '技能书', '消耗品'],
   属性等级: ['低下', '普通', '优秀', '一流', '超一流', '当世巅峰', '传说', '神话'],
   武技等级: ['入门', '精通', '大成', '绝学', '神技'],
   武技类型: ['攻击', '防御', '辅助', '反击'],
@@ -51,7 +52,8 @@ export const 阵型数据 = {
 } as const;
 
 export type 品质 = (typeof 枚举.品质)[number];
-export type 装备品质 = (typeof 枚举.装备品质)[number];
+export type 物品品质 = (typeof 枚举.物品品质)[number];
+export type 物品类型 = (typeof 枚举.物品类型)[number];
 export type 属性等级 = (typeof 枚举.属性等级)[number];
 export type 武技等级 = (typeof 枚举.武技等级)[number];
 export type 武技类型 = (typeof 枚举.武技类型)[number];
@@ -244,13 +246,13 @@ export function 汇总装备加值(装备: 装备栏): {
   const slots = Object.values(装备 || {});
   return slots.reduce(
     (acc, item) => {
-      if (!item || item === '无') {
+      if (!item || item === '无' || !item.装备条目) {
         return acc;
       }
-      acc.先攻 += 数值(item.先攻加值);
-      acc.攻击 += 数值(item.攻击加值);
-      acc.防御DC += 数值(item.防御DC加值);
-      acc.减免 += 数值(item.伤害减免);
+      acc.先攻 += 数值(item.装备条目.先攻加值);
+      acc.攻击 += 数值(item.装备条目.攻击加值);
+      acc.防御DC += 数值(item.装备条目.防御DC加值);
+      acc.减免 += 数值(item.装备条目.伤害减免);
       return acc;
     },
     { 先攻: 0, 攻击: 0, 防御DC: 0, 减免: 0 },

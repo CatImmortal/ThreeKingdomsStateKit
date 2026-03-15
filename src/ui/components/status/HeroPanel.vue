@@ -9,7 +9,7 @@
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(player.当前生命值, player._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前生命值 }} / {{ player._生命值上限 ?? 0 }}</div></div>
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(player.当前体力值, player._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前体力值 }} / {{ player._体力值上限 ?? 0 }}</div></div>
         <BoundedBar label="声望" :value="player.声望" :max="100" color-class="is-gold" />
-        <div class="tk-panel-inline-note">伤势：{{ player._伤势 || '完好' }}　减值：{{ player._伤势减值 ?? 0 }}</div>
+        <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(player._伤势)">{{ player._伤势 || '完好' }}</span>　减值：{{ player._伤势减值 ?? 0 }}</div>
         <div class="tk-panel-kv-grid" style="margin-top: 18px;">
           <div v-for="item in resourceItems" :key="item.label" class="tk-panel-kv" :class="{ 'is-accent': item.accent }"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
         </div>
@@ -30,7 +30,7 @@
       <div class="tk-panel-card-title">{{ currentTitle }}</div>
       <div v-if="currentListKey === 'bag'" class="tk-panel-page-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
         <div v-for="item in currentList" :key="item.title + item.meta" class="tk-panel-kv" :style="bagCellStyle(item)">
-          <span class="tk-panel-k" :style="装备品质文本样式(item.meta)">{{ item.meta }}</span>
+          <span class="tk-panel-k" :style="物品品质文本样式(item.meta)">{{ item.meta }}</span>
           <span class="tk-panel-v">{{ item.title }}</span>
           <span class="tk-panel-inline-note" style="margin-top: 6px;">数量 × {{ item.quantity ?? 0 }}</span>
           <span class="tk-panel-inline-note" style="margin-top: 6px; line-height: 1.45;">{{ item.desc }}</span>
@@ -42,7 +42,7 @@
           <div class="tk-panel-list-title">{{ item.title }}</div>
           <div v-if="item.meta" class="tk-panel-list-meta">
             <template v-if="currentListKey === 'equip'">
-              <span :style="装备品质文本样式(item.metaPrimary)">{{ item.metaPrimary }}</span>
+              <span :style="物品品质文本样式(item.metaPrimary)">{{ item.metaPrimary }}</span>
               <span v-if="item.metaSuffix"> / {{ item.metaSuffix }}</span>
             </template>
             <template v-else-if="currentListKey === 'skills'">
@@ -81,7 +81,7 @@ import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
-import { 品质文本样式, 属性等级文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
+import { 品质文本样式, 属性等级文本样式, 伤势文本样式, 物品品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ state: 状态总表 }>();
 const player = computed(() => props.state.主角);
@@ -159,8 +159,8 @@ type ListTabKey = 'equip' | 'bag' | 'skills' | 'perks' | 'consorts' | 'generals'
 const lists = computed<Record<ListTabKey, 列表项[]>>(() => ({
   equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无'
     ? ({ title: slot, meta: '未装备', desc: '' })
-    : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.其他效果 || '无' })),
-  bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.名称 || '未命名物品', meta: item.品质 || '凡品', desc: item.描述 || '无', quality: item.品质 || '凡品', quantity: item.数量 ?? 0 })),
+    : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.装备条目?.其他效果 || '无' })),
+  bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.物品?.名称 || '未命名物品', meta: item.物品?.品质 || '凡品', desc: item.物品?.描述 || '无', quality: item.物品?.品质 || '凡品', quantity: item.数量 ?? 0 })),
   skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型}`, metaPrimary: skill.等级, metaSuffix: skill.类型, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
   perks: Object.entries(player.value.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,

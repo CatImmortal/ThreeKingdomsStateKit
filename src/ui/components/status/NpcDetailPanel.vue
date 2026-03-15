@@ -42,7 +42,7 @@
                 <div class="tk-panel-card-title">角色面板</div>
                 <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.角色数据.当前生命值, npc.角色数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前生命值 }} / {{ npc.角色数据._生命值上限 ?? 0 }}</div></div>
                 <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.角色数据.当前体力值, npc.角色数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前体力值 }} / {{ npc.角色数据._体力值上限 ?? 0 }}</div></div>
-                <div class="tk-panel-inline-note">伤势：{{ npc.角色数据._伤势 || '完好' }}　减值：{{ npc.角色数据._伤势减值 ?? 0 }}</div>
+                <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(npc.角色数据._伤势)">{{ npc.角色数据._伤势 || '完好' }}</span>　减值：{{ npc.角色数据._伤势减值 ?? 0 }}</div>
                 <div class="tk-panel-kv-grid compact" style="margin-top: 18px;">
                   <div v-for="item in battleItems" :key="item.label" class="tk-panel-kv">
                     <span class="tk-panel-k">{{ item.label }}</span>
@@ -62,7 +62,7 @@
             <div class="tk-panel-list">
               <div v-for="item in equipmentList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
-                <div class="tk-panel-list-meta"><span :style="装备品质文本样式(item.quality)">{{ item.quality }}</span> / {{ item.type }}</div>
+                <div class="tk-panel-list-meta"><span :style="物品品质文本样式(item.quality)">{{ item.quality }}</span> / {{ item.type }}</div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -139,7 +139,7 @@ import type { NPC } from '../../../state';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
-import { 品质文本样式, 属性等级文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
+import { 品质文本样式, 属性等级文本样式, 伤势文本样式, 物品品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ npc: NPC }>();
 const npc = computed(() => props.npc);
@@ -184,7 +184,7 @@ const equipmentList = computed(() => {
       title: `${slot} · ${item.名称}`,
       quality: item.品质,
       type: item.类型,
-      desc: item.描述 || item.其他效果 || '无',
+      desc: item.描述 || item.装备条目?.其他效果 || '无',
     });
   }
   return list;

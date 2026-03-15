@@ -6,7 +6,7 @@ const 品质颜色映射: Record<string, string> = {
   UR: '#fb923c',
 };
 
-const 装备品质颜色映射: Record<string, string> = {
+const 物品品质颜色映射: Record<string, string> = {
   凡品: '#9ca3af',
   良品: '#4ade80',
   上品: '#60a5fa',
@@ -34,22 +34,42 @@ const 武技等级颜色映射: Record<string, string> = {
   神技: '#fb923c',
 };
 
+const 伤势颜色映射: Record<string, string> = {
+  完好: '#d6c4a4',
+  轻伤: '#f59e0b',
+  中伤: '#ef4444',
+  重伤: '#b91c1c',
+  濒死: '#7f1d1d',
+};
+
 function toStyle(color?: string): string {
   return color ? `color:${color};font-weight:700;` : '';
+}
+
+function toSvgTextStyle(color?: string): string {
+  return color ? `fill:${color};font-weight:700;` : '';
 }
 
 export function 品质文本样式(品质?: string | null): string {
   return toStyle(品质 ? 品质颜色映射[品质] : undefined);
 }
 
-export function 装备品质文本样式(品质?: string | null): string {
-  return toStyle(品质 ? 装备品质颜色映射[品质] : undefined);
+export function 物品品质文本样式(品质?: string | null): string {
+  return toStyle(品质 ? 物品品质颜色映射[品质] : undefined);
 }
 
 export function 属性等级文本样式(等级?: string | null): string {
   return toStyle(等级 ? 属性等级颜色映射[等级] : undefined);
 }
 
+export function 属性等级SVG文本样式(等级?: string | null): string {
+  return toSvgTextStyle(等级 ? 属性等级颜色映射[等级] : undefined);
+}
+
 export function 武技等级文本样式(等级?: string | null): string {
   return toStyle(等级 ? 武技等级颜色映射[等级] : undefined);
+}
+
+export function 伤势文本样式(伤势?: string | null): string {
+  return toStyle(伤势 ? 伤势颜色映射[伤势] : undefined);
 }

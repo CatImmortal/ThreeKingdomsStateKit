@@ -8,9 +8,9 @@
       <div class="tk-panel-page-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
         <div v-for="[名称, item] in currentItems" :key="名称" class="tk-panel-kv" style="min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; background: linear-gradient(180deg, rgba(123,77,38,.18), rgba(74,45,24,.16)); border-color: rgba(220,181,119,.34);">
           <span class="tk-panel-k">{{ item.分类 || '未分类' }}</span>
-          <span class="tk-panel-v">{{ item.名称 || '未命名商品' }}</span>
+          <span class="tk-panel-v">{{ item.物品?.名称 || '未命名商品' }}</span>
           <span class="tk-panel-inline-note" style="margin-top: 6px; color: #f0c983;">{{ item.价格 }} 积分</span>
-          <span class="tk-panel-inline-note" style="margin-top: 6px; line-height: 1.45;">{{ item.描述 || '' }}</span>
+          <span class="tk-panel-inline-note" style="margin-top: 6px; line-height: 1.45;">{{ item.物品?.描述 || '' }}</span>
         </div>
         <div v-if="currentItems.length === 0" class="tk-panel-empty" style="grid-column: 1 / -1;">当前没有可见商品</div>
       </div>

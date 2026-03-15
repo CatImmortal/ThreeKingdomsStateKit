@@ -193,8 +193,8 @@ function 应用商品更新(state: 状态总表, command: Extract<状态命令, 
   if (!current && command.createIfMissing === false) {
     throw new Error(`商品不存在: ${command.名称}`);
   }
-  断言未改名(command.名称, command.data.名称, '商品');
-  const next: 商品条目 = create商品条目(合并对象(_.cloneDeep(current ?? create商品条目({ 名称: command.名称 })), command.data));
+  断言未改名(command.名称, command.data.物品?.名称, '商品');
+  const next: 商品条目 = create商品条目(合并对象(_.cloneDeep(current ?? create商品条目({ 物品: { 名称: command.名称, 品质: '凡品', 类型: '消耗品', 描述: '' } })), command.data));
   state.商城[command.名称] = next;
 }
 
