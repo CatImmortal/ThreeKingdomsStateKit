@@ -209,7 +209,7 @@ export function recompute全局(state: 状态总表): 状态总表 {
   next.主角 = recompute主角(next.主角);
   next.NPC = _.mapValues(next.NPC || {}, npc => recomputeNPC(npc));
   next.势力 = recompute势力集合(create势力集合(next.势力), { NPC: next.NPC, 主角: next.主角 });
-  next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中', '可提交'].includes(task.状态));
+  next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中'].includes(task.状态));
   next.meta.updatedAt = new Date().toISOString();
   return next;
 }

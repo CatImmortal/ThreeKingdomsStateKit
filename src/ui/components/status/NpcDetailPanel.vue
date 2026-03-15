@@ -229,8 +229,7 @@ const consortItems = computed(() => {
     return [];
   }
   return [
-    { label: '是否已攻略', value: consort.是否已攻略 ? '是' : '否' },
-    ...(consort.是否已攻略 ? [{ label: '位份', value: consort.位份 || '未纳入' }] : []),
+    { label: '位份', value: consort.位份 || '未纳入' },
     { label: '性格', value: consort.性格 || '无' },
     { label: '当前状态', value: consort.当前状态 || '无' },
     { label: '依赖等级', value: consort._依赖等级 || '无' },

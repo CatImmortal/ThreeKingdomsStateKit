@@ -163,13 +163,25 @@ function 应用NPC关系更新(state: 状态总表, command: Extract<状态命�
   state.NPC[command.名称] = recomputeNPC(createNPC(next));
 }
 
+function 自动结算任务状态(task: 任务): 任务 {
+  const next = _.cloneDeep(task);
+  if (['已失败', '已过期'].includes(next.状态)) {
+    return next;
+  }
+  const 主要目标列表 = Object.values(next.目标 || {}).filter(target => target.类型 === '主要');
+  if (主要目标列表.length > 0 && 主要目标列表.every(target => target.状态 === '已完成')) {
+    next.状态 = '已完成';
+  }
+  return next;
+}
+
 function 应用任务更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertQuest' }>): void {
   const current = state.任务[command.名称];
   if (!current && command.createIfMissing === false) {
     throw new Error(`任务不存在: ${command.名称}`);
   }
   断言未改名(command.名称, command.data.名称, '任务');
-  const next = create任务(合并对象(_.cloneDeep(current ?? create任务({ 名称: command.名称 })), command.data));
+  const next = 自动结算任务状态(create任务(合并对象(_.cloneDeep(current ?? create任务({ 名称: command.名称 })), command.data)));
   state.任务[command.名称] = next;
 }
 
@@ -185,7 +197,9 @@ function 应用任务状态(state: 状态总表, command: Extract<状态命令, 
       };
     }
   }
+  
   state.任务[command.名称] = create任务(next);
+  //state.任务[command.名称] = 自动结算任务状态(create任务(next));
 }
 
 function 应用商品更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertShopItem' }>): void {

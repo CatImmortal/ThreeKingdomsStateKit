@@ -54,7 +54,7 @@ export function 选择当前地点相关NPC(state: 状态总表, limit = MAX_CON
 }
 
 export function 选择进行中任务(state: 状态总表, limit = MAX_CONTEXT_QUESTS): 状态总表['任务'] {
-  const selected = Object.entries(state.任务 || {}).filter(([, task]) => ['进行中', '可提交', '可接取'].includes(task.状态));
+  const selected = Object.entries(state.任务 || {}).filter(([, task]) => ['进行中', '可接取'].includes(task.状态));
   return Object.fromEntries(selected.slice(0, limit));
 }
 

@@ -107,7 +107,7 @@ type 列表项 = {
   metaPrimary?: string;
   metaSuffix?: string;
 };
-const 后宫项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性?.是否已攻略)).map(([, npc]) => ({
+const 后宫项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性?.位份 && npc.美人属性.位份 !== '未纳入')).map(([, npc]) => ({
   title: npc.名称 || '未命名角色',
   meta: '',
   desc: npc.简述 || '无',
@@ -119,7 +119,6 @@ const 后宫项列表 = computed<列表项[]>(() => Object.entries(props.state.N
     { label: `贞洁度\n（${npc.美人属性?._贞洁等级 || '无'}）`, value: npc.美人属性?.贞洁度 ?? 0, colorClass: 'is-cyan' },
   ],
   details: [
-    { label: '是否已攻略', value: npc.美人属性?.是否已攻略 ? '是' : '否' },
     { label: '位份', value: npc.美人属性?.位份 || '未纳入' },
     { label: '性格', value: npc.美人属性?.性格 || '无' },
     { label: '当前状态', value: npc.美人属性?.当前状态 || '正常' },
