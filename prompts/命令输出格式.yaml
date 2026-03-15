@@ -1,23 +1,20 @@
 命令输出格式:
   目标:
-    - 正文正常输出；只有发生状态变化时，才在回复末尾追加命令块。
-    - 命令块只用于驱动{{char}}数据层，不属于正文内容。
-    - 只能输出白名单命令与字段。
+    - 正文照常输出；仅在确有状态变化时，于最末尾追加命令块。
+    - 命令块只驱动 {{char}} 数据层，不属于正文。
+    - 只允许使用白名单命令、字段与枚举值。
   全局规则:
-    - 更新块固定放在回复最末尾，格式必须为 `<UpdateVariable><Analysis>...</Analysis><Commands>...</Commands></UpdateVariable>`。
-    - `Commands` 必须是合法 JSON 数组，不带注释、解释或 markdown 代码块。
-    - 每个命令对象都必须有 `type`，且只能使用白名单命令名。
-    - 不允许输出任何 `_` 开头字段。
+    - 更新块固定为 `<UpdateVariable><Analysis>...</Analysis><Commands>...</Commands></UpdateVariable>`，且必须放在回复最后。
+    - `Commands` 必须是合法 JSON 数组；不得带注释、解释、markdown 代码块。
+    - 每条命令都必须有 `type`，且只能是白名单命令。
+    - 严禁输出任何 `_` 开头字段。
     - 同一轮可输出多条命令，按数组顺序执行。
-    - 只写本轮正文中明确出现或变化的字段。
-    - 名称是唯一标识，所有相关命令必须显式提供 `名称` 或 `势力名称`。
-    - 不允许修改已有对象名称；`data.名称` 必须与命令定位名称一致。若需改名，只能删除旧对象后按新名称重建。
-    - `Update*` 的 `changes` 与 `Upsert*` 的 `data` 至少包含一个字段；`changes` 只写发生变化的局部字段，不要整对象重写。
-    - `Upsert*` 的 `data` 必须符合下列共享子结构；已有对象只写变化字段，新建对象再补齐必要字段。
-    - 对所有按名称定位的 `Update* / Upsert*` 命令，若同时提供 `data.名称` 或 `changes.名称`，则必须与命令定位名称一致；不允许借更新命令改名。
-    - 凡涉及城池或军队的命令，`势力名称` 用于定位所属势力，`名称` 用于定位该对象本身。
-    - `势力.主公` 必须填写为一个已存在或本轮同步创建的 NPC 名称，不能写称号、职位、势力名或泛指身份。
-    - 没有状态变化时，不要输出 `UpdateVariable` 块。
+    - 只写本轮正文中明确出现、确认变化、或可直接推出的字段；未提及的不补全。
+    - 名称为唯一定位键：按名称定位的命令必须显式提供 `名称`；城池/军队相关命令还必须提供 `势力名称`。
+    - 不允许改名：若命令中同时出现 `data.名称` / `changes.名称`，其值必须与定位用 `名称` 一致；需要改名时只能删旧建新。
+    - `Update*` 的 `changes`、`Upsert*` 的 `data` 都至少包含 1 个字段；对已有对象只写局部变化，不整对象重写。
+    - `势力.主公` 必须是已存在或本轮同步创建的 NPC 名称，不能写称号、职位、势力名或泛指身份。
+    - 没有状态变化时，不输出 `UpdateVariable`。
   标签模板: |-
     ${正常叙事正文}
 
@@ -25,7 +22,7 @@
     <Analysis>$(不超过150词)
     - ${经过时间: 从上一时间点到现在经过了多久}
     - ${场景类型: 日常/社交/检定/战斗/经营/军队战/军团战}
-    - ${基于本轮正文，逐项分析本轮哪些数据需要更新、哪些不需要更新}
+    - ${基于本轮正文，逐项分析哪些数据需要更新、哪些不需要更新}
     </Analysis>
     <Commands>
     [
@@ -37,7 +34,8 @@
   枚举白名单:
     当前剧本: [S1黄巾起义, S2讨伐董卓]
     品质: [N, R, SR, SSR, UR]
-    装备品质: [凡品, 良品, 上品, 极品, 传说, 神话]
+    物品品质: [凡品, 良品, 上品, 极品, 传说, 神话]
+    物品类型: [武器, 护甲, 坐骑, 饰品, 技能书, 消耗品]
     属性等级: [低下, 普通, 优秀, 一流, 超一流, 当世巅峰, 传说, 神话]
     武技等级: [入门, 精通, 大成, 绝学, 神技]
     武技类型: [攻击, 防御, 辅助, 反击]
@@ -58,452 +56,142 @@
     军队装备等级: [简陋, 普通, 精良, 上等, 精锐]
     阵型: [无, 锋矢阵, 鹤翼阵, 鱼鳞阵, 方圆阵, 长蛇阵, 雁行阵, 偃月阵]
   共享子结构:
-    世界事件输入:
-      事件名: string
-      简述: string
-      日期: string
-    六维基础字段:
-      武力: number
-      智力: number
-      统率: number
-      政治: number
-      魅力: number
-      体质: number
-    装备条目:
-      名称: string
-      品质: 装备品质
-      类型: string
-      描述: string
-      伤害骰: string
-      先攻加值: number
-      攻击加值: number
-      防御DC加值: number
-      伤害减免: number
-      其他效果: string
-    装备栏:
-      主武器: 装备条目 | 无
-      副武器: 装备条目 | 无
-      护甲: 装备条目 | 无
-      坐骑: 装备条目 | 无
-      饰品1: 装备条目 | 无
-      饰品2: 装备条目 | 无
-      饰品3: 装备条目 | 无
+    世界事件输入: { 事件名: string, 简述: string, 日期: string }
+    六维基础字段: { 武力: number, 智力: number, 统率: number, 政治: number, 魅力: number, 体质: number }
+    装备条目: { 伤害骰: string, 先攻加值: number, 攻击加值: number, 防御DC加值: number, 伤害减免: number, 其他效果: string }
+    物品条目: { 名称: string, 品质: 物品品质, 类型: 物品类型, 描述: string, 装备条目?: 装备条目 | null }
+    装备栏: { 主武器: 物品条目 | 无, 副武器: 物品条目 | 无, 护甲: 物品条目 | 无, 坐骑: 物品条目 | 无, 饰品1: 物品条目 | 无, 饰品2: 物品条目 | 无, 饰品3: 物品条目 | 无 }
     状态记录: Record<string, { 效果: string, 剩余: string }>
-    武技条目:
-      名称: string
-      等级: 武技等级
-      类型: 武技类型
-      效果: string
-      熟练度: number
-      体力消耗: number
-    专长条目:
-      名称: string
-      等级: 属性等级
-      效果: string
-    角色战斗数据基础字段:
-      六维: 六维基础字段
-      当前生命值: number
-      当前体力值: number
-      生命上限加成值: number
-      体力上限加成值: number
-      装备: 装备栏
-      武技: Record<string, 武技条目>
-      专长: Record<string, 专长条目>
-      状态: 状态记录
-    物品栏条目:
-      名称: string
-      品质: 装备品质
-      描述: string
-      数量: number
-    兵种适性表:
-      刀盾兵: number
-      枪矛兵: number
-      弓弩兵: number
-      骑兵: number
-      水军: number
-    武将信息:
-      野心值: number
-      性格: 武将性格
-      官职: string
-      当前状态: 武将状态
-      状态描述: string
-      势力: string
-      忠诚: number
-      是否已招募: boolean
-      兵种适性: 兵种适性表
-      特技: Record<string, string>
-    美人属性:
-      依赖度: number
-      敏感度: number
-      贞洁度: number
-      位份: 美人位份
-      性格: 美人性格
-      当前状态: 美人状态
-    任务目标更新:
-      类型: 任务目标类型
-      状态: 任务目标状态
-      描述: string
-      积分: number
-      其他奖励: string
-    商品条目:
-      名称: string
-      分类: 商品分类
-      价格: number
-      描述: string
-    城池:
-      名称: string
-      等级: 城池等级
-      城防: number
-      人口: number
-      农业: number
-      商业: number
-      民心: number
-      治安: number
-      繁荣度: number
-      太守: string
-      设施: string[]
-    军队:
-      名称: string
-      兵种: 基础兵种
-      等级: 军队等级
-      兵力: number
-      士气: number
-      疲惫: number
-      装备等级: 军队装备等级
-      统属将领: string
-      驻扎地: string
-      训练进度: number
-      阵型: 阵型
-    政策:
-      当前研究: string
-      研究进度: number
-      富国: number
-      强兵: number
-      霸道: number
-      王道: number
-    势力:
-      名称: string
-      主公: string（必须是 NPC 名）
-      规模: 势力规模
-      正统性: number
-      情报网: number
-      金钱: number
-      粮草: number
-      城池: Record<string, 城池>
-      军队: Record<string, 军队>
-      外交: Record<string, number>
-      政策: 政策
-    势力集合:
-      Record<string, 势力>
+    武技条目: { 名称: string, 等级: 武技等级, 类型: 武技类型, 效果: string, 熟练度?: number, 体力消耗?: number }
+    专长条目: { 名称: string, 等级: 属性等级, 效果: string }
+    角色战斗数据基础字段: { 六维: 六维基础字段, 当前生命值: number, 当前体力值: number, 生命上限加成值: number, 体力上限加成值: number, 装备: 装备栏, 武技: Record<string, 武技条目>, 专长: Record<string, 专长条目>, 状态: 状态记录 }
+    物品栏条目: { 物品: 物品条目, 数量: number }
+    兵种适性表: { 刀盾兵: number, 枪矛兵: number, 弓弩兵: number, 骑兵: number, 水军: number }
+    武将信息: { 野心值: number, 性格: 武将性格, 官职: string, 当前状态: 武将状态, 状态描述: string, 势力: string, 忠诚: number, 是否已招募: boolean, 兵种适性: 兵种适性表, 特技: Record<string, string> }
+    美人属性: { 依赖度: number, 敏感度: number, 贞洁度: number, 位份: 美人位份, 性格: 美人性格, 当前状态: 美人状态 }
+    任务目标更新: { 类型: 任务目标类型, 状态: 任务目标状态, 描述: string, 积分: number, 其他奖励: string }
+    商品条目: { 物品: 物品条目, 分类: 商品分类, 价格: number }
+    城池: { 名称: string, 等级: 城池等级, 城防: number, 人口: number, 农业: number, 商业: number, 民心: number, 治安: number, 繁荣度: number, 太守: string, 设施: string[] }
+    军队: { 名称: string, 兵种: 基础兵种, 等级: 军队等级, 兵力: number, 士气: number, 疲惫: number, 装备等级: 军队装备等级, 统属将领: string, 驻扎地: string, 训练进度: number, 阵型: 阵型 }
+    政策: { 当前研究: string, 研究进度: number, 富国: number, 强兵: number, 霸道: number, 王道: number }
+    势力: { 名称: string, 主公: string, 规模: 势力规模, 正统性: number, 情报网: number, 金钱: number, 粮草: number, 城池: Record<string, 城池>, 军队: Record<string, 军队>, 外交: Record<string, number>, 政策: 政策 }
+    势力集合: Record<string, 势力>
   命令白名单:
     UpdateWorld:
-      必填字段: [type, changes]
-      changes可填字段:
-        当前时间: string
-        当前地点: string
-        当前剧本: 当前剧本
-        天气: string
-        近期事件: 世界事件输入[]
-      关键约束:
-        - `changes` 至少包含一个字段
-        - 追加单条事件优先用 `AppendRecentEvent`
-      示例: |-
-        {
-          "type": "UpdateWorld",
-          "changes": { "当前时间": "建安元年三月初三", "当前地点": "洛阳" }
-        }
+      必填: [type, changes]
+      changes: { 当前时间?: string, 当前地点?: string, 当前剧本?: 当前剧本, 天气?: string, 近期事件?: 世界事件输入[] }
+      约束:
+        - `changes` 至少 1 项
+        - 追加单条近期事件优先用 `AppendRecentEvent`
+      示例: '{"type":"UpdateWorld","changes":{"当前时间":"建安元年三月初三","当前地点":"洛阳"}}'
     AppendRecentEvent:
-      必填字段: [type, event]
-      event字段: 世界事件输入
-      关键约束:
+      必填: [type, event]
+      event: 世界事件输入
+      约束:
         - 仅用于追加单条新事件
-      示例: |-
-        {
-          "type": "AppendRecentEvent",
-          "event": {
-            "事件名": "斩杀敌先锋",
-            "简述": "主角在阵前取胜，士气大振。",
-            "日期": "建安元年三月初三"
-          }
-        }
     UpdatePlayerBase:
-      必填字段: [type, changes]
-      changes可填字段:
-        六维: 六维基础字段
-        当前生命值: number
-        当前体力值: number
-        生命上限加成值: number
-        体力上限加成值: number
-        装备: 装备栏
-        武技: Record<string, 武技条目>
-        专长: Record<string, 专长条目>
-        状态: 状态记录
-        物品栏: Record<string, 物品栏条目>
-        所属势力: string
-        兵种适性: 兵种适性表
-        声望: number
-        金钱: number
-        积分: number
-        官职: string
-        爵位: string
-        后宫和谐度: number
-      关键约束:
-        - `changes` 至少包含一个字段
-        - `物品栏` 中每个条目都必须显式提供 `名称`，不能只依赖 key 表示名称
+      必填: [type, changes]
+      changes: { 六维?: 六维基础字段, 当前生命值?: number, 当前体力值?: number, 生命上限加成值?: number, 体力上限加成值?: number, 装备?: 装备栏, 武技?: Record<string, 武技条目>, 专长?: Record<string, 专长条目>, 状态?: 状态记录, 物品栏?: Record<string, 物品栏条目>, 所属势力?: string, 兵种适性?: 兵种适性表, 声望?: number, 金钱?: number, 积分?: number, 官职?: string, 爵位?: string, 后宫和谐度?: number }
+      约束:
+        - `changes` 至少 1 项
+        - `物品栏` 中每个条目都必须显式写 `物品.名称`
         - 小幅资源增减优先用 `AdjustPlayerResource`
-      示例: |-
-        {
-          "type": "UpdatePlayerBase",
-          "changes": {
-            "官职": "校尉",
-            "六维": { "武力": 68, "统率": 61 }
-          }
-        }
+      示例: '{"type":"UpdatePlayerBase","changes":{"官职":"校尉","六维":{"武力":68,"统率":61}}}'
     AdjustPlayerResource:
-      必填字段: [type, changes]
-      可选字段: [mode]
-      changes可填字段:
-        当前生命值: number
-        当前体力值: number
-        声望: number
-        金钱: number
-        积分: number
-        后宫和谐度: number
-      关键约束:
-        - `mode` 缺省时为 `delta`
+      必填: [type, changes]
+      可选: [mode]
+      changes: { 当前生命值?: number, 当前体力值?: number, 声望?: number, 金钱?: number, 积分?: number, 后宫和谐度?: number }
+      约束:
+        - `mode` 仅可为 `delta` / `set`；缺省视为 `delta`
         - 只允许资源字段
-      示例: |-
-        {
-          "type": "AdjustPlayerResource",
-          "mode": "delta",
-          "changes": { "当前生命值": -12, "声望": 3 }
-        }
+      示例: '{"type":"AdjustPlayerResource","mode":"delta","changes":{"当前生命值":-12,"声望":3}}'
     UpdateFaction:
-      必填字段: [type, 名称, changes]
-      changes可填字段:
-        名称: string
-        主公: string
-        规模: 势力规模
-        正统性: number
-        情报网: number
-        金钱: number
-        粮草: number
-      关键约束:
-        - 不要写入 `城池` / `军队` / `外交` / `政策` 的整块重写；这些优先使用专用命令
-      示例: |-
-        {
-          "type": "UpdateFaction",
-          "名称": "刘备军",
-          "changes": { "名称": "刘备军", "主公": "刘备", "规模": "郡级", "粮草": 2400 }
-        }
+      必填: [type, 名称, changes]
+      changes: { 名称?: string, 主公?: string, 规模?: 势力规模, 正统性?: number, 情报网?: number, 金钱?: number, 粮草?: number }
+      约束:
+        - 不要整块重写 `城池` / `军队` / `外交` / `政策`
+        - `changes.名称` 若出现，必须与定位 `名称` 一致
+      示例: '{"type":"UpdateFaction","名称":"刘备军","changes":{"名称":"刘备军","主公":"刘备","规模":"郡级","粮草":2400}}'
     UpsertCity:
-      必填字段: [type, 势力名称, 名称, data]
-      data可填字段: 城池
-      关键约束:
-        - `data.名称` 必须显式提供
-      示例: |-
-        {
-          "type": "UpsertCity",
-          "势力名称": "刘备军",
-          "名称": "新野",
-          "data": { "名称": "新野", "等级": "县城", "城防": 42, "太守": "关羽" }
-        }
+      必填: [type, 势力名称, 名称, data]
+      data: 城池
+      约束:
+        - `data.名称` 必须显式提供且与定位 `名称` 一致
+      示例: '{"type":"UpsertCity","势力名称":"刘备军","名称":"新野","data":{"名称":"新野","等级":"县城","城防":42,"太守":"关羽"}}'
     AddCityFacility:
-      必填字段: [type, 势力名称, 名称, facility]
-      关键约束:
-        - 仅追加单个设施，不重写整个 `设施` 数组
-      示例: |-
-        {
-          "type": "AddCityFacility",
-          "势力名称": "刘备军",
-          "名称": "新野",
-          "facility": "官府"
-        }
+      必填: [type, 势力名称, 名称, facility]
+      约束:
+        - 只追加单个设施，不重写整个 `设施`
     RemoveCityFacility:
-      必填字段: [type, 势力名称, 名称, facility]
-      关键约束:
-        - 仅移除单个设施，不重写整个 `设施` 数组
-      示例: |-
-        {
-          "type": "RemoveCityFacility",
-          "势力名称": "刘备军",
-          "名称": "新野",
-          "facility": "校场"
-        }
+      必填: [type, 势力名称, 名称, facility]
+      约束:
+        - 只移除单个设施，不重写整个 `设施`
     RemoveCity:
-      必填字段: [type, 势力名称, 名称]
-      示例: |-
-        {
-          "type": "RemoveCity",
-          "势力名称": "刘备军",
-          "名称": "废弃前哨"
-        }
+      必填: [type, 势力名称, 名称]
     UpsertArmy:
-      必填字段: [type, 势力名称, 名称, data]
-      data可填字段: 军队
-      关键约束:
-        - `data.名称` 必须显式提供
-        - 特色军名写在 `名称`，`兵种` 只允许 5 类基础兵种
-      示例: |-
-        {
-          "type": "UpsertArmy",
-          "势力名称": "刘备军",
-          "名称": "白马骑营",
-          "data": { "名称": "白马骑营", "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
-        }
+      必填: [type, 势力名称, 名称, data]
+      data: 军队
+      约束:
+        - `data.名称` 必须显式提供且与定位 `名称` 一致
+        - 特色军名写在 `名称`；`兵种` 只能取基础兵种 5 类之一
+      示例: '{"type":"UpsertArmy","势力名称":"刘备军","名称":"白马骑营","data":{"名称":"白马骑营","兵种":"骑兵","等级":"精锐","兵力":3000,"统属将领":"赵云","阵型":"锋矢阵"}}'
     RemoveArmy:
-      必填字段: [type, 势力名称, 名称]
-      示例: |-
-        {
-          "type": "RemoveArmy",
-          "势力名称": "刘备军",
-          "名称": "山贼骑队"
-        }
+      必填: [type, 势力名称, 名称]
     UpdateDiplomacy:
-      必填字段: [type, 名称, changes]
-      changes可填字段: Record<string, number>
-      关键约束:
-        - `changes` 至少包含一个势力关系值；键名直接使用势力名称
-      示例: |-
-        {
-          "type": "UpdateDiplomacy",
-          "名称": "刘备军",
-          "changes": { "曹操军": 28, "孙吴": 66 }
-        }
+      必填: [type, 名称, changes]
+      changes: Record<string, number>
+      约束:
+        - `changes` 至少 1 项；键名直接写目标势力名称
     UpdatePolicy:
-      必填字段: [type, 名称, changes]
-      changes可填字段: 政策
-      示例: |-
-        {
-          "type": "UpdatePolicy",
-          "名称": "刘备军",
-          "changes": { "当前研究": "屯田制", "研究进度": 2, "富国": 1 }
-        }
+      必填: [type, 名称, changes]
+      changes: 政策
     UpsertNpc:
-      必填字段: [type, 名称, data]
-      data可填字段:
-        名称: string
-        品质: 品质
-        阵营: string
-        定位: string
-        所在地: string
-        好感: number
-        简述: string
-        羁绊: Record<string, string>
-        角色数据: 角色战斗数据基础字段
-        武将信息: 武将信息
-        美人属性: 美人属性
-      关键约束:
-        - `data.名称` 必须显式提供
-        - NPC 出现且可确定位置时，应显式提供 `所在地`
-        - 若写入 `武将信息`，应显式提供 `势力` 与 `是否已招募`
-        - 仅写正文中明确出现或可直接推出的信息；未明确出现的详细子结构不要补全，`角色数据` / `武将信息` / `美人属性` 只有正文明确涉及具体数据时才写入
-        - 只填写重要 NPC，或本轮与主角发生了明确互动的 NPC；路人、背景板、杂兵、无名字小兵不要输出 `UpsertNpc`
-      示例: |-
-        {
-          "type": "UpsertNpc",
-          "名称": "赵云",
-          "data": {
-            "名称": "赵云",
-            "品质": "SSR",
-            "阵营": "蜀",
-            "定位": "武将",
-            "简述": "白马银枪，随刘备同行。"
-          }
-        }
+      必填: [type, 名称, data]
+      data: { 名称?: string, 品质?: 品质, 阵营?: string, 定位?: string, 所在地?: string, 好感?: number, 简述?: string, 羁绊?: Record<string, string>, 角色数据?: 角色战斗数据基础字段, 武将信息?: 武将信息, 美人属性?: 美人属性 }
+      约束:
+        - `data.名称` 必须显式提供且与定位 `名称` 一致
+        - NPC 出现且可确定位置时，应尽量写 `所在地`
+        - 若写 `武将信息`，应显式写 `势力` 与 `是否已招募`
+        - 只写重要 NPC，或本轮与主角有明确互动的 NPC；路人、背景板、杂兵、无名小兵不要输出
+        - 未明确出现的详细子结构不要补全；`角色数据` / `武将信息` / `美人属性` 仅在正文明确涉及时写入
+      示例: '{"type":"UpsertNpc","名称":"赵云","data":{"名称":"赵云","品质":"SSR","阵营":"蜀","定位":"武将","简述":"白马银枪，随刘备同行。"}}'
     UpdateNpcRelation:
-      必填字段: [type, 名称]
-      可选字段: [mode, 好感, 羁绊]
-      关键约束:
-        - `好感` 与 `羁绊` 至少提供一个
-        - `mode` 仅对 `好感` 生效
-      示例: |-
-        {
-          "type": "UpdateNpcRelation",
-          "名称": "赵云",
-          "mode": "delta",
-          "好感": 6
-        }
+      必填: [type, 名称]
+      可选: [mode, 好感, 羁绊]
+      约束:
+        - `好感` 与 `羁绊` 至少提供 1 项
+        - `mode` 仅对 `好感` 生效，且仅可为 `delta` / `set`
     RemoveNpc:
-      必填字段: [type, 名称]
-      示例: |-
-        {
-          "type": "RemoveNpc",
-          "名称": "山贼头目"
-        }
+      必填: [type, 名称]
     UpsertQuest:
-      必填字段: [type, 名称, data]
-      data可填字段:
-        名称: string
-        类型: 任务类型
-        状态: 任务状态
-        时限: string
-        目标: Record<string, 任务目标更新>
-      关键约束:
-        - `data.名称` 必须显式提供
-      示例: |-
-        {
-          "type": "UpsertQuest",
-          "名称": "清剿山匪营地",
-          "data": {
-            "名称": "清剿山匪营地",
-            "状态": "进行中"
-          }
-        }
+      必填: [type, 名称, data]
+      data: { 名称?: string, 类型?: 任务类型, 状态?: 任务状态, 时限?: string, 目标?: Record<string, 任务目标更新> }
+      约束:
+        - `data.名称` 必须显式提供且与定位 `名称` 一致
+      示例: '{"type":"UpsertQuest","名称":"清剿山匪营地","data":{"名称":"清剿山匪营地","状态":"进行中"}}'
     UpdateQuestState:
-      必填字段: [type, 名称, 状态]
-      可选字段: [目标]
-      目标可填字段:
-        类型: 任务目标类型
-        状态: 任务目标状态
-        描述: string
-        积分: number
-        其他奖励: string
-      关键约束:
+      必填: [type, 名称, 状态]
+      可选: [目标]
+      目标: Record<string, 任务目标更新>
+      约束:
+        - `状态` 只能取任务状态枚举：`可接取 / 进行中 / 已完成 / 已失败 / 已过期`
         - 只推进状态，不重写整个任务
-      示例: |-
-        {
-          "type": "UpdateQuestState",
-          "名称": "清剿山匪营地",
-          "状态": "可提交"
-        }
+      示例: '{"type":"UpdateQuestState","名称":"清剿山匪营地","状态":"已完成"}'
     RemoveQuest:
-      必填字段: [type, 名称]
-      示例: |-
-        {
-          "type": "RemoveQuest",
-          "名称": "过期委托"
-        }
+      必填: [type, 名称]
     UpsertShopItem:
-      必填字段: [type, 名称, data]
-      data可填字段:
-        名称: string
-        分类: 商品分类
-        价格: number
-        描述: string
-      关键约束:
-        - `data.名称` 必须显式提供
-      示例: |-
-        {
-          "type": "UpsertShopItem",
-          "名称": "止血草",
-          "data": {
-            "名称": "止血草",
-            "分类": "消耗品",
-            "价格": 80,
-            "描述": "可用于简单止血疗伤。"
-          }
-        }
+      必填: [type, 名称, data]
+      data: { 物品?: 物品条目, 分类?: 商品分类, 价格?: number }
+      约束:
+        - `data.物品.名称` 建议显式提供，且应与定位 `名称` 一致
+        - 商品本体结构是 `{ 物品, 分类, 价格 }`，不是 `{ 名称, 分类, 价格, 描述 }`
+      示例: '{"type":"UpsertShopItem","名称":"止血草","data":{"物品":{"名称":"止血草","品质":"凡品","类型":"消耗品","描述":"可用于简单止血疗伤。"},"分类":"消耗品","价格":80}}'
     RemoveShopItem:
-      必填字段: [type, 名称]
-      示例: |-
-        {
-          "type": "RemoveShopItem",
-          "名称": "限时礼包"
-        }
+      必填: [type, 名称]
   最终检查清单:
     - 是否先写正文，再在最末尾输出命令块
-    - 是否只使用了白名单命令与字段
-    - 是否显式提供了需要的名称字段
+    - 是否只使用了白名单命令、字段与枚举值
+    - 是否显式提供了定位所需名称字段
     - 是否误写了 `_` 开头字段
+    - 是否只写了本轮明确变化，而非整对象重写
     - 是否输出了合法 JSON
