@@ -30,7 +30,7 @@
       <div class="tk-panel-card-title">{{ currentTitle }}</div>
       <div v-if="currentListKey === 'bag'" class="tk-panel-page-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
         <div v-for="item in currentList" :key="item.title + item.meta" class="tk-panel-kv" :style="bagCellStyle(item)">
-          <span class="tk-panel-k">{{ item.meta }}</span>
+          <span class="tk-panel-k" :style="装备品质文本样式(item.meta)">{{ item.meta }}</span>
           <span class="tk-panel-v">{{ item.title }}</span>
           <span class="tk-panel-inline-note" style="margin-top: 6px;">数量 × {{ item.quantity ?? 0 }}</span>
           <span class="tk-panel-inline-note" style="margin-top: 6px; line-height: 1.45;">{{ item.desc }}</span>
@@ -40,7 +40,17 @@
       <div v-else class="tk-panel-list">
         <div v-for="item in currentList" :key="item.title + item.meta" class="tk-panel-list-item">
           <div class="tk-panel-list-title">{{ item.title }}</div>
-          <div v-if="item.meta" class="tk-panel-list-meta">{{ item.meta }}</div>
+          <div v-if="item.meta" class="tk-panel-list-meta">
+            <template v-if="currentListKey === 'equip'">
+              <span :style="装备品质文本样式(item.metaPrimary)">{{ item.metaPrimary }}</span>
+              <span v-if="item.metaSuffix"> / {{ item.metaSuffix }}</span>
+            </template>
+            <template v-else-if="currentListKey === 'skills'">
+              <span :style="武技等级文本样式(item.metaPrimary)">{{ item.metaPrimary }}</span>
+              <span v-if="item.metaSuffix"> / {{ item.metaSuffix }}</span>
+            </template>
+            <template v-else>{{ item.meta }}</template>
+          </div>
           <template v-if="currentListKey === 'consorts' || currentListKey === 'generals'">
             <div style="margin-top: 8px;">
               <BoundedBar v-for="bar in item.bars || []" :key="bar.label" :label="bar.label" :value="bar.value" :max="100" :color-class="bar.colorClass" />
@@ -68,6 +78,7 @@ import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
+import { 品质文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ state: 状态总表 }>();
 const player = computed(() => props.state.主角);
@@ -90,6 +101,8 @@ type 列表项 = {
   npcName?: string;
   quality?: string;
   quantity?: number;
+  metaPrimary?: string;
+  metaSuffix?: string;
 };
 const 后宫项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性?.是否已攻略)).map(([, npc]) => ({
   title: npc.名称 || '未命名角色',
@@ -141,9 +154,11 @@ const 武将项列表 = computed<列表项[]>(() => Object.entries(props.state.N
 })));
 type ListTabKey = 'equip' | 'bag' | 'skills' | 'perks' | 'consorts' | 'generals';
 const lists = computed<Record<ListTabKey, 列表项[]>>(() => ({
-  equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无' ? ({ title: slot, meta: '未装备', desc: '' }) : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, desc: item.描述 || item.其他效果 || '无' })),
+  equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无'
+    ? ({ title: slot, meta: '未装备', desc: '' })
+    : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.其他效果 || '无' })),
   bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.名称 || '未命名物品', meta: item.品质 || '凡品', desc: item.描述 || '无', quality: item.品质 || '凡品', quantity: item.数量 ?? 0 })),
-  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
+  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型}`, metaPrimary: skill.等级, metaSuffix: skill.类型, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
   perks: Object.entries(player.value.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,
   generals: 武将项列表.value,

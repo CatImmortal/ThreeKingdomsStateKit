@@ -30,6 +30,16 @@
       >
         {{ label.key }}
       </text>
+      <text
+        v-for="(label, index) in labels"
+        :key="`${label.key}-value`"
+        class="tk-radar-value"
+        :x="valuePositions[index].x"
+        :y="valuePositions[index].y"
+        text-anchor="middle"
+      >
+        {{ label.value }}
+      </text>
     </svg>
   </div>
 </template>
@@ -83,4 +93,5 @@ const shapePoints = computed(() => labels.value.map((item, index) => {
 
 const dots = computed(() => labels.value.map((item, index) => point(maxRadius * normalized(item.value), angles.value[index])));
 const labelPositions = computed(() => labels.value.map((_, index) => point(labelRadius, angles.value[index])));
+const valuePositions = computed(() => labels.value.map((item, index) => point((maxRadius * normalized(item.value)) + 12, angles.value[index])));
 </script>

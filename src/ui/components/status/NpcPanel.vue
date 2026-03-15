@@ -7,7 +7,7 @@
       <div class="tk-panel-card-title">{{ activeTab || '当前地点 NPC' }}</div>
       <div class="tk-panel-detail-list">
         <details v-for="[名称, npc] in currentEntries" :key="名称" class="tk-panel-detail">
-          <summary><span>{{ npc.名称 || '未命名角色' }}</span><span>{{ npc.品质 }} / {{ npc.定位 || '未知' }}</span></summary>
+          <summary><span>{{ npc.名称 || '未命名角色' }}</span><span><span :style="品质文本样式(npc.品质)">{{ npc.品质 }}</span> / {{ npc.定位 || '未知' }}</span></summary>
           <div class="tk-panel-detail-body">
             <div class="tk-panel-page-grid cols-2">
               <section class="tk-panel-card">
@@ -60,6 +60,7 @@ import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
+import { 品质文本样式 } from './qualityStyles';
 
 const props = defineProps<{ state: 状态总表 }>();
 const UNKNOWN_LOCATION = '未知地点';

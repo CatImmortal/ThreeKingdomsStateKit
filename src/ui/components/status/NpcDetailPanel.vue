@@ -8,7 +8,7 @@
             <div class="tk-panel-kv-grid compact">
               <div v-for="item in baseItems" :key="item.label" class="tk-panel-kv">
                 <span class="tk-panel-k">{{ item.label }}</span>
-                <span class="tk-panel-v">{{ item.value }}</span>
+                <span class="tk-panel-v" :style="item.label === '品质' ? 品质文本样式(String(item.value)) : ''">{{ item.value }}</span>
               </div>
             </div>
             <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
@@ -53,12 +53,6 @@
               <section class="tk-panel-card">
                 <div class="tk-panel-card-title">六维与战斗</div>
                 <RadarChart :stats="npc.角色数据.六维" />
-                <div class="tk-panel-kv-grid compact">
-                  <div v-for="item in statItems" :key="item.label" class="tk-panel-kv">
-                    <span class="tk-panel-k">{{ item.label }}</span>
-                    <span class="tk-panel-v">{{ item.value }}</span>
-                  </div>
-                </div>
               </section>
             </div>
           </section>
@@ -68,7 +62,7 @@
             <div class="tk-panel-list">
               <div v-for="item in equipmentList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
-                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-meta"><span :style="装备品质文本样式(item.quality)">{{ item.quality }}</span> / {{ item.type }}</div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -79,7 +73,7 @@
             <div class="tk-panel-list">
               <div v-for="item in skillList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
-                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-meta"><span :style="武技等级文本样式(item.level)">{{ item.level }}</span> / {{ item.type }}</div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -145,6 +139,7 @@ import type { NPC } from '../../../state';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
+import { 品质文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ npc: NPC }>();
 const npc = computed(() => props.npc);
@@ -179,29 +174,16 @@ const battleItems = computed(() => {
     { label: '伤害减免', value: data._伤害减免基础值 ?? 0 },
   ];
 });
-const statItems = computed(() => {
-  const stats = npc.value.角色数据?.六维;
-  if (!stats) {
-    return [];
-  }
-  return [
-    { label: '武力', value: `${stats.武力} (${stats._武力加值 ?? 0})` },
-    { label: '智力', value: `${stats.智力} (${stats._智力加值 ?? 0})` },
-    { label: '统率', value: `${stats.统率} (${stats._统率加值 ?? 0})` },
-    { label: '政治', value: `${stats.政治} (${stats._政治加值 ?? 0})` },
-    { label: '魅力', value: `${stats.魅力} (${stats._魅力加值 ?? 0})` },
-    { label: '体质', value: `${stats.体质} (${stats._体质加值 ?? 0})` },
-  ];
-});
 const equipmentList = computed(() => {
-  const list: Array<{ title: string; meta: string; desc: string }> = [];
+  const list: Array<{ title: string; quality: string; type: string; desc: string }> = [];
   for (const [slot, item] of Object.entries(npc.value.角色数据?.装备 || {})) {
     if (!item || item === '无') {
       continue;
     }
     list.push({
       title: `${slot} · ${item.名称}`,
-      meta: `${item.品质} / ${item.类型}`,
+      quality: item.品质,
+      type: item.类型,
       desc: item.描述 || item.其他效果 || '无',
     });
   }
@@ -210,7 +192,8 @@ const equipmentList = computed(() => {
 const skillList = computed(() => Object.entries(npc.value.角色数据?.武技 || {})
   .map(([, skill]) => ({
     title: skill.名称 || '未命名武技',
-    meta: `${skill.等级} / ${skill.类型}`,
+    level: skill.等级,
+    type: skill.类型,
     desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}`,
   })));
 const perkList = computed(() => Object.entries(npc.value.角色数据?.专长 || {})

@@ -44,9 +44,8 @@
 
                 <section class="tk-panel-card">
                   <div class="tk-panel-card-title">防务信息</div>
+                  <BoundedBar label="城防" :value="city.城防 ?? 0" :max="city._城防上限 ?? 1" color-class="is-cyan" />
                   <div class="tk-panel-kv-grid compact">
-                    <div class="tk-panel-kv"><span class="tk-panel-k">城防</span><span class="tk-panel-v">{{ city.城防 ?? 0 }}</span></div>
-                    <div class="tk-panel-kv"><span class="tk-panel-k">城防上限</span><span class="tk-panel-v">{{ city._城防上限 ?? 0 }}</span></div>
                     <div class="tk-panel-kv"><span class="tk-panel-k">防御系数</span><span class="tk-panel-v">{{ city._防御系数 ?? 0 }}</span></div>
                     <div class="tk-panel-kv"><span class="tk-panel-k">城池防御力</span><span class="tk-panel-v">{{ city._城池防御力 ?? 0 }}</span></div>
                     <div class="tk-panel-kv"><span class="tk-panel-k">驻军上限</span><span class="tk-panel-v">{{ city._驻军上限 ?? 0 }}</span></div>
