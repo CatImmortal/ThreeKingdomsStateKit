@@ -1,4 +1,4 @@
-import { type NPC, type 势力, type 状态总表 } from './state';
+import { type NPC, type 状态总表 } from './state';
 
 function 隐藏伤势减值<T extends { _伤势减值?: number }>(data: T): T {
   const next = _.cloneDeep(data);
@@ -30,7 +30,6 @@ export type 注入视图 = {
   世界: 状态总表['世界'];
   主角: 状态总表['主角'];
   势力: 状态总表['势力'];
-  当前势力: { 名称: string; 数据: 势力 } | null;
   当前地点相关NPC: Record<string, NPC>;
   进行中任务: 状态总表['任务'];
   商城: 状态总表['商城'];
@@ -63,21 +62,11 @@ export function 选择商城条目(state: 状态总表, limit = MAX_CONTEXT_SHOP
   return Object.fromEntries(Object.entries(state.商城 || {}).slice(0, limit));
 }
 
-function 选择当前势力(state: 状态总表): { 名称: string; 数据: 势力 } | null {
-  const entries = Object.entries(state.势力 || {});
-  if (entries.length === 0) {
-    return null;
-  }
-  const [名称, 数据] = entries[0];
-  return { 名称, 数据 };
-}
-
 export function 构建注入视图(state: 状态总表): 注入视图 {
   return {
     世界: _.cloneDeep(state.世界),
     主角: 构建注入主角(state),
     势力: _.cloneDeep(state.势力),
-    当前势力: _.cloneDeep(选择当前势力(state)),
     当前地点相关NPC: 构建注入NPC集合(state),
     进行中任务: _.cloneDeep(选择进行中任务(state)),
     商城: _.cloneDeep(选择商城条目(state)),

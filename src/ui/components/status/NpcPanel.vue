@@ -9,15 +9,34 @@
         <details v-for="[名称, npc] in currentEntries" :key="名称" class="tk-panel-detail">
           <summary><span>{{ npc.名称 || '未命名角色' }}</span><span>{{ npc.品质 }} / {{ npc.定位 || '未知' }}</span></summary>
           <div class="tk-panel-detail-body">
-            <div class="tk-panel-kv-grid compact">
-              <div class="tk-panel-kv"><span class="tk-panel-k">所在地</span><span class="tk-panel-v">{{ npc.所在地 || '未知地点' }}</span></div>
-              <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
-              <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
-              <div class="tk-panel-kv"><span class="tk-panel-k">关系</span><span class="tk-panel-v">{{ relationText(npc) }}</span></div>
-              <div v-if="npc.武将信息" class="tk-panel-kv"><span class="tk-panel-k">效忠势力</span><span class="tk-panel-v">{{ npc.武将信息.势力 || '无' }}</span></div>
-              <div v-if="npc.武将信息" class="tk-panel-kv"><span class="tk-panel-k">兵种适性</span><span class="tk-panel-v">{{ formatAptitude(npc.武将信息.兵种适性) }}</span></div>
+            <div class="tk-panel-page-grid cols-2">
+              <section class="tk-panel-card">
+                <div class="tk-panel-card-title">基础信息</div>
+                <div class="tk-panel-kv-grid compact">
+                  <div class="tk-panel-kv"><span class="tk-panel-k">所在地</span><span class="tk-panel-v">{{ npc.所在地 || '未知地点' }}</span></div>
+                  <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
+                  <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
+                </div>
+                <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
+              </section>
+              <section class="tk-panel-card">
+                <div class="tk-panel-card-title">关系</div>
+                <div class="tk-panel-inline-note">{{ relationLevelText(npc) }}</div>
+                <BoundedBar label="好感" :value="npc.好感 ?? 0" :max="100" color-class="is-gold" />
+              </section>
+              <section v-if="npc.武将信息" class="tk-panel-card">
+                <div class="tk-panel-card-title">效忠势力</div>
+                <div class="tk-panel-inline-note">{{ loyaltyTitle(npc) }}</div>
+                <BoundedBar label="忠诚" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
+              </section>
+              <section v-if="npc.武将信息" class="tk-panel-card">
+                <div class="tk-panel-card-title">兵种适性</div>
+                <AptitudeRadarChart :aptitude="npc.武将信息.兵种适性" />
+              </section>
             </div>
-            <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
+            <div class="tk-panel-actions">
+              <button type="button" class="tk-panel-action-btn" @click="openNpcDetailWindow(名称)">查看详情</button>
+            </div>
           </div>
         </details>
         <div v-if="currentEntries.length === 0" class="tk-panel-empty">当前分页暂无关键 NPC</div>
@@ -29,6 +48,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import type { NPC, 状态总表 } from '../../../state';
+import { openNpcDetailWindow } from '../../store';
+import AptitudeRadarChart from './AptitudeRadarChart.vue';
+import BoundedBar from './BoundedBar.vue';
+
 const props = defineProps<{ state: 状态总表 }>();
 const UNKNOWN_LOCATION = '未知地点';
 const activeTab = ref('');
@@ -51,20 +74,19 @@ const currentEntries = computed(() => {
   return entries.value.filter(([, npc]) => (npc.所在地 || UNKNOWN_LOCATION) === location);
 });
 
-function formatAptitude(aptitude?: Record<string, number>): string {
-  return Object.entries(aptitude || {}).map(([兵种, 数值]) => `${兵种}:${数值}`).join(' / ') || '无';
+function relationLevelText(npc: NPC): string {
+  if (npc.美人属性?._好感等级) {
+    return npc.美人属性._好感等级;
+  }
+  if (npc._交情等级) {
+    return npc._交情等级;
+  }
+  return String(npc.好感 ?? 0);
 }
 
-function relationText(npc: NPC): string {
-  const relations: string[] = [];
-  if (npc.美人属性?._好感等级) {
-    relations.push(npc.美人属性._好感等级);
-  } else if (npc._交情等级) {
-    relations.push(npc._交情等级);
-  }
-  if (npc.武将信息?._忠诚等级) {
-    relations.push(npc.武将信息._忠诚等级);
-  }
-  return relations.join(' / ') || String(npc.好感 ?? 0);
+function loyaltyTitle(npc: NPC): string {
+  const faction = npc.武将信息?.势力 || '无';
+  const loyalty = npc.武将信息?._忠诚等级 || '未知';
+  return `${faction} / ${loyalty}`;
 }
 </script>

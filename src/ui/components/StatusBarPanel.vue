@@ -28,7 +28,7 @@ import ShopPanel from './status/ShopPanel.vue';
 const state = computed(() => unifiedPanelState.systemPanel.state);
 const tabs = [
   { key: 'hero', label: '主角' },
-  { key: 'npc', label: '当前地点NPC' },
+  { key: 'npc', label: 'NPC' },
   { key: 'quest', label: '任务' },
   { key: 'shop', label: '商城' },
   { key: 'faction', label: '势力' },

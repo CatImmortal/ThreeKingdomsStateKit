@@ -8,6 +8,7 @@
         <div class="tk-panel-card-title">主角面板</div>
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(player.当前生命值, player._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前生命值 }} / {{ player._生命值上限 ?? 0 }}</div></div>
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(player.当前体力值, player._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前体力值 }} / {{ player._体力值上限 ?? 0 }}</div></div>
+        <BoundedBar label="声望" :value="player.声望" :max="100" color-class="is-gold" />
         <div class="tk-panel-inline-note">伤势：{{ player._伤势 || '完好' }}　减值：{{ player._伤势减值 ?? 0 }}</div>
         <div class="tk-panel-kv-grid">
           <div v-for="item in resourceItems" :key="item.label" class="tk-panel-kv" :class="{ 'is-accent': item.accent }"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
@@ -19,6 +20,10 @@
         <div class="tk-panel-kv-grid compact">
           <div v-for="item in battleItems" :key="item.label" class="tk-panel-kv"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
         </div>
+      </section>
+      <section class="tk-panel-card">
+        <div class="tk-panel-card-title">兵种适性</div>
+        <AptitudeRadarChart :aptitude="player.兵种适性" />
       </section>
     </div>
     <section v-else class="tk-panel-card">
@@ -38,6 +43,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { 状态总表 } from '../../../state';
+import AptitudeRadarChart from './AptitudeRadarChart.vue';
+import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
 
 const props = defineProps<{ state: 状态总表 }>();
@@ -52,15 +59,14 @@ const tabs = [
   { key: 'generals', label: '武将' },
 ] as const;
 const activeTab = ref<(typeof tabs)[number]['key']>('attrs');
+const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性?.是否已攻略)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
 const resourceItems = computed(() => [
   { label: '官职', value: player.value.官职 || '无', accent: true },
   { label: '爵位', value: player.value.爵位 || '无', accent: true },
   { label: '声望称号', value: player.value._声望称号 || '无' },
-  { label: '和谐等级', value: player.value._和谐等级 || '无' },
+  ...(后宫项列表.value.length >= 2 ? [{ label: '和谐等级', value: player.value._和谐等级 || '无' }] : []),
   { label: '金钱', value: player.value.金钱 },
   { label: '积分', value: player.value.积分 },
-  { label: '声望', value: player.value.声望 },
-  { label: '兵种适性', value: formatAptitude(player.value.兵种适性) },
 ]);
 const battleItems = computed(() => [
   { label: '先攻', value: player.value._先攻基础值 ?? 0 },
@@ -69,7 +75,6 @@ const battleItems = computed(() => [
   { label: '防御DC', value: player.value._防御DC基础值 ?? 0 },
   { label: '伤害减免', value: player.value._伤害减免基础值 ?? 0 },
 ]);
-const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
 const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息?.是否已招募)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.所在地 || '未知地点'} · ${npc.简述 || '无'}` })));
 const formatAptitude = (aptitude?: Record<string, number>) => Object.entries(aptitude || {}).map(([兵种, 数值]) => `${兵种}:${数值}`).join(' / ') || '无';
 const lists = computed(() => ({

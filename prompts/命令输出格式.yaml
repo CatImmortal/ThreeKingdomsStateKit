@@ -134,6 +134,7 @@
       依赖度: number
       敏感度: number
       贞洁度: number
+      是否已攻略: boolean
       位份: 美人位份
       性格: 美人性格
       当前状态: 美人状态
@@ -237,6 +238,7 @@
         专长: Record<string, 专长条目>
         状态: 状态记录
         物品栏: Record<string, 物品栏条目>
+        所属势力: string
         兵种适性: 兵种适性表
         声望: number
         金钱: number

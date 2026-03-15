@@ -14,9 +14,18 @@ export type PanelState<T> = {
   position: PanelPosition;
 } & T;
 
+export type NpcDetailWindowState = {
+  id: string;
+  npcName: string;
+  latestMessageId: number | null;
+  position: PanelPosition;
+  zIndex: number;
+};
+
 export type UnifiedPanelStore = {
   systemPanel: PanelState<{ state: 状态总表 | null }>;
   playerOptionsPanel: PanelState<{ options: 玩家选项[] }>;
+  npcDetailWindows: NpcDetailWindowState[];
 };
 
 const SYSTEM_PANEL_POSITION_KEY = 'tk-system-panel-position';
@@ -48,6 +57,9 @@ function 保存位置(key: string, position: PanelPosition): void {
   } catch {}
 }
 
+let npcDetailWindowSequence = 0;
+let npcDetailWindowZIndex = 1;
+
 export const unifiedPanelState = reactive<UnifiedPanelStore>({
   systemPanel: {
     visible: false,
@@ -61,6 +73,7 @@ export const unifiedPanelState = reactive<UnifiedPanelStore>({
     options: [],
     position: 读取位置(PLAYER_OPTIONS_POSITION_KEY),
   },
+  npcDetailWindows: [],
 });
 
 export function updateSystemPanelState(payload: { messageId: number; state: 状态总表 }): void {
@@ -107,6 +120,62 @@ export function resetPlayerOptionsPanelPosition(): void {
   保存位置(PLAYER_OPTIONS_POSITION_KEY, position);
 }
 
+export function openNpcDetailWindow(npcName: string): string | null {
+  const state = unifiedPanelState.systemPanel.state;
+  if (!npcName || !state?.NPC?.[npcName]) {
+    return null;
+  }
+  npcDetailWindowSequence += 1;
+  npcDetailWindowZIndex += 1;
+  const index = unifiedPanelState.npcDetailWindows.length;
+  const windowId = `npc-detail-${npcDetailWindowSequence}`;
+  unifiedPanelState.npcDetailWindows.push({
+    id: windowId,
+    npcName,
+    latestMessageId: unifiedPanelState.systemPanel.latestMessageId,
+    position: {
+      mode: 'default',
+      left: 40 + index * 28,
+      top: 64 + index * 28,
+    },
+    zIndex: npcDetailWindowZIndex,
+  });
+  return windowId;
+}
+
+export function closeNpcDetailWindow(id: string): void {
+  unifiedPanelState.npcDetailWindows = unifiedPanelState.npcDetailWindows.filter(window => window.id !== id);
+}
+
+export function focusNpcDetailWindow(id: string): void {
+  const window = unifiedPanelState.npcDetailWindows.find(item => item.id === id);
+  if (!window) {
+    return;
+  }
+  npcDetailWindowZIndex += 1;
+  window.zIndex = npcDetailWindowZIndex;
+}
+
+export function setNpcDetailWindowPosition(id: string, left: number, top: number): void {
+  const window = unifiedPanelState.npcDetailWindows.find(item => item.id === id);
+  if (!window) {
+    return;
+  }
+  window.position = { mode: 'custom', left, top };
+}
+
+export function resetNpcDetailWindowPosition(id: string): void {
+  const index = unifiedPanelState.npcDetailWindows.findIndex(window => window.id === id);
+  if (index < 0) {
+    return;
+  }
+  unifiedPanelState.npcDetailWindows[index].position = {
+    mode: 'default',
+    left: 40 + index * 28,
+    top: 64 + index * 28,
+  };
+}
+
 export function clearUnifiedPanelState(): void {
   unifiedPanelState.systemPanel.visible = false;
   unifiedPanelState.systemPanel.latestMessageId = null;
@@ -114,4 +183,5 @@ export function clearUnifiedPanelState(): void {
   unifiedPanelState.playerOptionsPanel.visible = false;
   unifiedPanelState.playerOptionsPanel.latestMessageId = null;
   unifiedPanelState.playerOptionsPanel.options = [];
+  unifiedPanelState.npcDetailWindows = [];
 }
