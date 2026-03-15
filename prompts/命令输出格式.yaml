@@ -102,8 +102,8 @@
       六维: 六维基础字段
       当前生命值: number
       当前体力值: number
-      生命值上限加成: number
-      体力值上限加成: number
+      生命上限加成值: number
+      体力上限加成值: number
       装备: 装备栏
       武技: Record<string, 武技条目>
       专长: Record<string, 专长条目>
@@ -230,8 +230,8 @@
         六维: 六维基础字段
         当前生命值: number
         当前体力值: number
-        生命值上限加成: number
-        体力值上限加成: number
+        生命上限加成值: number
+        体力上限加成值: number
         装备: 装备栏
         武技: Record<string, 武技条目>
         专长: Record<string, 专长条目>

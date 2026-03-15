@@ -8,7 +8,7 @@
         <div class="tk-panel-card-title">主角面板</div>
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(player.当前生命值, player._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前生命值 }} / {{ player._生命值上限 ?? 0 }}</div></div>
         <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(player.当前体力值, player._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前体力值 }} / {{ player._体力值上限 ?? 0 }}</div></div>
-        <div class="tk-panel-inline-note">伤势：{{ player._伤势 || '完好' }}　减值：{{ player._战斗减值 ?? 0 }}</div>
+        <div class="tk-panel-inline-note">伤势：{{ player._伤势 || '完好' }}　减值：{{ player._伤势减值 ?? 0 }}</div>
         <div class="tk-panel-kv-grid">
           <div v-for="item in resourceItems" :key="item.label" class="tk-panel-kv" :class="{ 'is-accent': item.accent }"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
         </div>
@@ -63,11 +63,11 @@ const resourceItems = computed(() => [
   { label: '兵种适性', value: formatAptitude(player.value.兵种适性) },
 ]);
 const battleItems = computed(() => [
-  { label: '先攻', value: player.value._先攻值 ?? 0 },
+  { label: '先攻', value: player.value._先攻基础值 ?? 0 },
   { label: '攻击', value: player.value._攻击基础值 ?? 0 },
   { label: '伤害', value: player.value._伤害基础值 ?? 0 },
-  { label: '防御DC', value: player.value._防御DC ?? 0 },
-  { label: '伤害减免', value: player.value._伤害减免 ?? 0 },
+  { label: '防御DC', value: player.value._防御DC基础值 ?? 0 },
+  { label: '伤害减免', value: player.value._伤害减免基础值 ?? 0 },
 ]);
 const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
 const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息?.是否已招募)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.所在地 || '未知地点'} · ${npc.简述 || '无'}` })));

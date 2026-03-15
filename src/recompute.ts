@@ -59,25 +59,25 @@ export function recompute角色战斗数据(data: 角色战斗数据): 角色战
 
   const 基础生命上限 = (next.六维._体质加值 ?? 0) * 5;
   const 基础体力上限 = (next.六维._体质加值 ?? 0) * 8;
-  const 生命上限 = Math.max(0, 基础生命上限 + 数值(next.生命值上限加成));
-  const 体力上限 = Math.max(0, 基础体力上限 + 数值(next.体力值上限加成));
+  const 生命上限 = Math.max(0, 基础生命上限 + 数值(next.生命上限加成值));
+  const 体力上限 = Math.max(0, 基础体力上限 + 数值(next.体力上限加成值));
   next.当前生命值 = _.clamp(数值(next.当前生命值), 0, 生命上限);
   next.当前体力值 = _.clamp(数值(next.当前体力值), 0, 体力上限);
-  next._基础生命值上限 = 基础生命上限;
-  next._基础体力值上限 = 基础体力上限;
+  next._生命上限基础值 = 基础生命上限;
+  next._体力上限基础值 = 基础体力上限;
   next._生命值上限 = 生命上限;
   next._体力值上限 = 体力上限;
 
   const 伤势 = 计算伤势(next.当前生命值, 生命上限);
   next._伤势 = 伤势._伤势;
-  next._战斗减值 = 伤势._战斗减值;
+  next._伤势减值 = 伤势._伤势减值;
 
   const 装备汇总 = 汇总装备加值(next.装备);
-  next._先攻值 = Math.floor((next.六维._武力加值 ?? 0) / 4) + 装备汇总.先攻 + (next._战斗减值 ?? 0);
-  next._攻击基础值 = (next.六维._武力加值 ?? 0) + 装备汇总.攻击 + (next._战斗减值 ?? 0);
-  next._伤害基础值 = (next.六维._武力加值 ?? 0) + (next._战斗减值 ?? 0);
-  next._防御DC = 40 + Math.floor((next.六维._武力加值 ?? 0) * 0.75) + 装备汇总.防御DC + (next._战斗减值 ?? 0);
-  next._伤害减免 = 装备汇总.减免;
+  next._先攻基础值 = Math.floor((next.六维._武力加值 ?? 0) / 4) + 装备汇总.先攻 + (next._伤势减值 ?? 0);
+  next._攻击基础值 = (next.六维._武力加值 ?? 0) + 装备汇总.攻击 + (next._伤势减值 ?? 0);
+  next._伤害基础值 = (next.六维._武力加值 ?? 0) + (next._伤势减值 ?? 0);
+  next._防御DC基础值 = 40 + Math.floor((next.六维._武力加值 ?? 0) * 0.75) + 装备汇总.防御DC + (next._伤势减值 ?? 0);
+  next._伤害减免基础值 = 装备汇总.减免;
 
   return next;
 }
@@ -114,6 +114,9 @@ export function recomputeNPC(data: NPC): NPC {
 
 export function recompute主角(data: 主角): 主角 {
   const next = recompute角色战斗数据(data) as 主角;
+  if (next._伤势 === '濒死') {
+    next._防御DC基础值 = 30;
+  }
   next.物品栏 = _.pickBy(next.物品栏 || {}, ({ 数量 }) => Math.max(0, 数值(数量)) > 0);
   next._声望称号 = 声望称号(next.声望);
   next._和谐等级 = 和谐等级(next.后宫和谐度);

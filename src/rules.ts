@@ -91,14 +91,14 @@ export function 计算加值(属性值: number): number {
   return 属性值;
 }
 
-export function 计算伤势(当前: number, 上限: number): { _伤势: string; _战斗减值: number } {
-  if (上限 <= 0) return { _伤势: '完好', _战斗减值: 0 };
-  if (当前 <= 0) return { _伤势: '濒死', _战斗减值: -999 };
+export function 计算伤势(当前: number, 上限: number): { _伤势: string; _伤势减值: number } {
+  if (上限 <= 0) return { _伤势: '完好', _伤势减值: 0 };
+  if (当前 <= 0) return { _伤势: '濒死', _伤势减值: -999 };
   const pct = (当前 / 上限) * 100;
-  if (pct <= 25) return { _伤势: '重伤', _战斗减值: -15 };
-  if (pct <= 50) return { _伤势: '中伤', _战斗减值: -10 };
-  if (pct <= 75) return { _伤势: '轻伤', _战斗减值: -5 };
-  return { _伤势: '完好', _战斗减值: 0 };
+  if (pct <= 25) return { _伤势: '重伤', _伤势减值: -15 };
+  if (pct <= 50) return { _伤势: '中伤', _伤势减值: -10 };
+  if (pct <= 75) return { _伤势: '轻伤', _伤势减值: -5 };
+  return { _伤势: '完好', _伤势减值: 0 };
 }
 
 export function 声望称号(v: number): string {
