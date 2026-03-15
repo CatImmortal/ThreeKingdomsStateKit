@@ -31,6 +31,7 @@
                   <div class="tk-panel-kv-grid compact">
                     <div class="tk-panel-kv"><span class="tk-panel-k">名称</span><span class="tk-panel-v">{{ city.名称 || '未命名城池' }}</span></div>
                     <div class="tk-panel-kv"><span class="tk-panel-k">等级</span><span class="tk-panel-v">{{ city.等级 || '无' }}</span></div>
+                    <div class="tk-panel-kv"><span class="tk-panel-k">人口</span><span class="tk-panel-v">{{ city.人口 ?? 0 }}</span></div>
                     <div class="tk-panel-kv"><span class="tk-panel-k">太守</span><span class="tk-panel-v">{{ city.太守 || '无' }}</span></div>
                   </div>
                   <div class="tk-panel-inline-note">设施：{{ formatFacilities(city.设施) }}</div>

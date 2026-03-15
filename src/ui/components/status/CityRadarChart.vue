@@ -1,6 +1,6 @@
 <template>
   <div class="tk-radar-wrap">
-    <svg class="tk-radar" :viewBox="`0 0 ${viewBoxWidth} ${viewBoxHeight}`" role="img" aria-label="城池六维雷达图">
+    <svg class="tk-radar" :viewBox="`0 0 ${viewBoxWidth} ${viewBoxHeight}`" role="img" aria-label="城池五维雷达图">
       <polygon v-for="ring in rings" :key="ring" class="tk-radar-ring" :points="polygonPoints(ring)" />
       <line
         v-for="(angle, index) in angles"
@@ -41,7 +41,6 @@ import type { 城池 } from '../../../state';
 const props = defineProps<{ city: 城池 }>();
 
 const labels = computed(() => [
-  { key: '人口', value: props.city.人口 ?? 0 },
   { key: '农业', value: props.city.农业 ?? 0 },
   { key: '商业', value: props.city.商业 ?? 0 },
   { key: '繁荣度', value: props.city.繁荣度 ?? 0 },
