@@ -77,11 +77,8 @@ function applyScene(sceneKey: string): void {
   updateSystemPanelState({ messageId: 1, state: scene.state });
   updatePlayerOptionsPanelState({ messageId: 1, options: scene.options });
   setSystemPanelVisible(true);
-  setPlayerOptionsPanelVisible(true);
+  setPlayerOptionsPanelVisible(false);
   selectedNpcName.value = '';
-  for (const npcName of scene.defaultNpcDetails || []) {
-    openNpcDetailWindow(npcName);
-  }
 }
 
 function toggleSystemPanel(): void {

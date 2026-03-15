@@ -1,125 +1,142 @@
 <template>
-  <div class="tk-npc-detail-scope tk-panel-page-grid cols-2">
-    <section class="tk-panel-card">
-      <div class="tk-panel-card-title">基础信息</div>
-      <div class="tk-panel-kv-grid compact">
-        <div v-for="item in baseItems" :key="item.label" class="tk-panel-kv">
-          <span class="tk-panel-k">{{ item.label }}</span>
-          <span class="tk-panel-v">{{ item.value }}</span>
-        </div>
-      </div>
-      <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
-    </section>
+  <section class="tk-npc-detail-scope">
+    <div class="tk-panel-pages">
+      <div class="tk-panel-page">
+        <div class="tk-panel-page-grid cols-2">
+          <section class="tk-panel-card">
+            <div class="tk-panel-card-title">基础信息</div>
+            <div class="tk-panel-kv-grid compact">
+              <div v-for="item in baseItems" :key="item.label" class="tk-panel-kv">
+                <span class="tk-panel-k">{{ item.label }}</span>
+                <span class="tk-panel-v">{{ item.value }}</span>
+              </div>
+            </div>
+            <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
+          </section>
 
-    <section class="tk-panel-card">
-      <div class="tk-panel-card-title">关系与羁绊</div>
-      <div class="tk-panel-kv-grid">
-        <div class="tk-panel-kv">
-          <span class="tk-panel-k">关系</span>
-          <span class="tk-panel-v">{{ relationText }}</span>
-        </div>
-        <div class="tk-panel-kv">
-          <span class="tk-panel-k">羁绊数</span>
-          <span class="tk-panel-v">{{ bondEntries.length }}</span>
-        </div>
-      </div>
-      <div class="tk-panel-list" v-if="bondEntries.length > 0">
-        <div v-for="[name, desc] in bondEntries" :key="name" class="tk-panel-list-item">
-          <div class="tk-panel-list-title">{{ name }}</div>
-          <div class="tk-panel-list-desc">{{ desc || '无' }}</div>
-        </div>
-      </div>
-      <div v-else class="tk-panel-empty">暂无羁绊信息</div>
-    </section>
+          <section class="tk-panel-card">
+            <div class="tk-panel-card-title">关系与羁绊</div>
+            <div class="tk-panel-kv-grid">
+              <div class="tk-panel-kv">
+                <span class="tk-panel-k">关系</span>
+                <span class="tk-panel-v">{{ relationText }}</span>
+              </div>
+              <div class="tk-panel-kv">
+                <span class="tk-panel-k">羁绊数</span>
+                <span class="tk-panel-v">{{ bondEntries.length }}</span>
+              </div>
+            </div>
+            <div class="tk-panel-list" v-if="bondEntries.length > 0">
+              <div v-for="[name, desc] in bondEntries" :key="name" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ name }}</div>
+                <div class="tk-panel-list-desc" style="margin-top: 10px; line-height: 1.6;">{{ desc || '无' }}</div>
+              </div>
+            </div>
+            <div v-else class="tk-panel-empty">暂无羁绊信息</div>
+          </section>
 
-    <section v-if="npc.角色数据" class="tk-panel-card cols-span-2">
-      <div class="tk-panel-card-title">角色数据</div>
-      <div class="tk-panel-kv-grid compact">
-        <div v-for="item in battleItems" :key="item.label" class="tk-panel-kv">
-          <span class="tk-panel-k">{{ item.label }}</span>
-          <span class="tk-panel-v">{{ item.value }}</span>
-        </div>
-      </div>
-      <div class="tk-panel-kv-grid compact" style="margin-top: 8px;">
-        <div v-for="item in statItems" :key="item.label" class="tk-panel-kv">
-          <span class="tk-panel-k">{{ item.label }}</span>
-          <span class="tk-panel-v">{{ item.value }}</span>
-        </div>
-      </div>
-    </section>
+          <section v-if="npc.角色数据" class="tk-panel-card cols-span-2">
+            <div class="tk-panel-card-title">角色数据</div>
+            <div class="tk-panel-page-grid cols-2">
+              <section class="tk-panel-card">
+                <div class="tk-panel-card-title">角色面板</div>
+                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.角色数据.当前生命值, npc.角色数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前生命值 }} / {{ npc.角色数据._生命值上限 ?? 0 }}</div></div>
+                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.角色数据.当前体力值, npc.角色数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前体力值 }} / {{ npc.角色数据._体力值上限 ?? 0 }}</div></div>
+                <div class="tk-panel-inline-note">伤势：{{ npc.角色数据._伤势 || '完好' }}　减值：{{ npc.角色数据._伤势减值 ?? 0 }}</div>
+                <div class="tk-panel-kv-grid compact" style="margin-top: 18px;">
+                  <div v-for="item in battleItems" :key="item.label" class="tk-panel-kv">
+                    <span class="tk-panel-k">{{ item.label }}</span>
+                    <span class="tk-panel-v">{{ item.value }}</span>
+                  </div>
+                </div>
+              </section>
+              <section class="tk-panel-card">
+                <div class="tk-panel-card-title">六维与战斗</div>
+                <RadarChart :stats="npc.角色数据.六维" />
+                <div class="tk-panel-kv-grid compact">
+                  <div v-for="item in statItems" :key="item.label" class="tk-panel-kv">
+                    <span class="tk-panel-k">{{ item.label }}</span>
+                    <span class="tk-panel-v">{{ item.value }}</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
 
-    <section v-if="equipmentList.length > 0" class="tk-panel-card">
-      <div class="tk-panel-card-title">装备</div>
-      <div class="tk-panel-list">
-        <div v-for="item in equipmentList" :key="item.title" class="tk-panel-list-item">
-          <div class="tk-panel-list-title">{{ item.title }}</div>
-          <div class="tk-panel-list-meta">{{ item.meta }}</div>
-          <div class="tk-panel-list-desc">{{ item.desc }}</div>
-        </div>
-      </div>
-    </section>
+          <section v-if="equipmentList.length > 0" class="tk-panel-card">
+            <div class="tk-panel-card-title">装备</div>
+            <div class="tk-panel-list">
+              <div v-for="item in equipmentList" :key="item.title" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ item.title }}</div>
+                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </section>
 
-    <section v-if="skillList.length > 0" class="tk-panel-card">
-      <div class="tk-panel-card-title">武技</div>
-      <div class="tk-panel-list">
-        <div v-for="item in skillList" :key="item.title" class="tk-panel-list-item">
-          <div class="tk-panel-list-title">{{ item.title }}</div>
-          <div class="tk-panel-list-meta">{{ item.meta }}</div>
-          <div class="tk-panel-list-desc">{{ item.desc }}</div>
-        </div>
-      </div>
-    </section>
+          <section v-if="skillList.length > 0" class="tk-panel-card">
+            <div class="tk-panel-card-title">武技</div>
+            <div class="tk-panel-list">
+              <div v-for="item in skillList" :key="item.title" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ item.title }}</div>
+                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </section>
 
-    <section v-if="perkList.length > 0" class="tk-panel-card cols-span-2">
-      <div class="tk-panel-card-title">专长</div>
-      <div class="tk-panel-list">
-        <div v-for="item in perkList" :key="item.title" class="tk-panel-list-item">
-          <div class="tk-panel-list-title">{{ item.title }}</div>
-          <div class="tk-panel-list-meta">{{ item.meta }}</div>
-          <div class="tk-panel-list-desc">{{ item.desc }}</div>
-        </div>
-      </div>
-    </section>
+          <section v-if="perkList.length > 0" class="tk-panel-card cols-span-2">
+            <div class="tk-panel-card-title">专长</div>
+            <div class="tk-panel-list">
+              <div v-for="item in perkList" :key="item.title" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ item.title }}</div>
+                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </section>
 
-    <section v-if="statusList.length > 0" class="tk-panel-card cols-span-2">
-      <div class="tk-panel-card-title">状态</div>
-      <div class="tk-panel-list">
-        <div v-for="item in statusList" :key="item.title" class="tk-panel-list-item">
-          <div class="tk-panel-list-title">{{ item.title }}</div>
-          <div class="tk-panel-list-meta">剩余：{{ item.meta }}</div>
-          <div class="tk-panel-list-desc">{{ item.desc }}</div>
-        </div>
-      </div>
-    </section>
+          <section v-if="statusList.length > 0" class="tk-panel-card cols-span-2">
+            <div class="tk-panel-card-title">状态</div>
+            <div class="tk-panel-list">
+              <div v-for="item in statusList" :key="item.title" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ item.title }}</div>
+                <div class="tk-panel-list-meta">剩余：{{ item.meta }}</div>
+                <div class="tk-panel-list-desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </section>
 
-    <section v-if="npc.武将信息" class="tk-panel-card cols-span-2">
-      <div class="tk-panel-card-title">武将信息</div>
-      <BoundedBar label="忠诚" :value="npc.武将信息.忠诚" :max="100" color-class="is-cyan" />
-      <BoundedBar label="野心值" :value="npc.武将信息.野心值" :max="100" color-class="is-rose" />
-      <AptitudeRadarChart :aptitude="npc.武将信息.兵种适性" />
-      <div class="tk-panel-inline-note">{{ formatAptitude(npc.武将信息.兵种适性) }}</div>
-      <div class="tk-panel-kv-grid compact">
-        <div v-for="item in generalItems" :key="item.label" class="tk-panel-kv">
-          <span class="tk-panel-k">{{ item.label }}</span>
-          <span class="tk-panel-v">{{ item.value }}</span>
-        </div>
-      </div>
-    </section>
+          <section v-if="npc.武将信息" class="tk-panel-card cols-span-2">
+            <div class="tk-panel-card-title">武将信息</div>
+            <BoundedBar label="忠诚" :value="npc.武将信息.忠诚" :max="100" color-class="is-cyan" />
+            <BoundedBar label="野心值" :value="npc.武将信息.野心值" :max="100" color-class="is-rose" />
+            <AptitudeRadarChart :aptitude="npc.武将信息.兵种适性" />
+            <div class="tk-panel-kv-grid compact">
+              <div v-for="item in generalItems" :key="item.label" class="tk-panel-kv">
+                <span class="tk-panel-k">{{ item.label }}</span>
+                <span class="tk-panel-v">{{ item.value }}</span>
+              </div>
+            </div>
+          </section>
 
-    <section v-if="npc.美人属性" class="tk-panel-card">
-      <div class="tk-panel-card-title">美人属性</div>
-      <BoundedBar label="依赖度" :value="npc.美人属性.依赖度" :max="100" color-class="is-purple" />
-      <BoundedBar label="敏感度" :value="npc.美人属性.敏感度" :max="100" color-class="is-rose" />
-      <BoundedBar label="贞洁度" :value="npc.美人属性.贞洁度" :max="100" color-class="is-cyan" />
-      <BoundedBar label="好感" :value="npc.好感" :max="100" color-class="is-gold" />
-      <div class="tk-panel-kv-grid compact">
-        <div v-for="item in consortItems" :key="item.label" class="tk-panel-kv">
-          <span class="tk-panel-k">{{ item.label }}</span>
-          <span class="tk-panel-v">{{ item.value }}</span>
+          <section v-if="npc.美人属性" class="tk-panel-card">
+            <div class="tk-panel-card-title">美人属性</div>
+            <BoundedBar label="依赖度" :value="npc.美人属性.依赖度" :max="100" color-class="is-purple" />
+            <BoundedBar label="敏感度" :value="npc.美人属性.敏感度" :max="100" color-class="is-rose" />
+            <BoundedBar label="贞洁度" :value="npc.美人属性.贞洁度" :max="100" color-class="is-cyan" />
+            <BoundedBar label="好感" :value="npc.好感" :max="100" color-class="is-gold" />
+            <div class="tk-panel-kv-grid compact">
+              <div v-for="item in consortItems" :key="item.label" class="tk-panel-kv">
+                <span class="tk-panel-k">{{ item.label }}</span>
+                <span class="tk-panel-v">{{ item.value }}</span>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -127,6 +144,7 @@ import { computed } from 'vue';
 import type { NPC } from '../../../state';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
+import RadarChart from './RadarChart.vue';
 
 const props = defineProps<{ npc: NPC }>();
 const npc = computed(() => props.npc);
@@ -154,10 +172,6 @@ const battleItems = computed(() => {
     return [];
   }
   return [
-    { label: '当前生命', value: `${data.当前生命值} / ${data._生命值上限 ?? 0}` },
-    { label: '当前体力', value: `${data.当前体力值} / ${data._体力值上限 ?? 0}` },
-    { label: '伤势', value: data._伤势 || '完好' },
-    { label: '伤势减值', value: data._伤势减值 ?? 0 },
     { label: '先攻', value: data._先攻基础值 ?? 0 },
     { label: '攻击', value: data._攻击基础值 ?? 0 },
     { label: '伤害', value: data._伤害基础值 ?? 0 },
@@ -222,7 +236,6 @@ const generalItems = computed(() => {
     { label: '性格', value: general.性格 || '无' },
     { label: '当前状态', value: general.当前状态 || '无' },
     { label: '是否已招募', value: general.是否已招募 ? '是' : '否' },
-    { label: '兵种适性', value: formatAptitude(general.兵种适性) },
     { label: '状态描述', value: general.状态描述 || '无' },
     { label: '特技', value: Object.entries(general.特技 || {}).map(([name, desc]) => `${name}:${desc}`).join(' / ') || '无' },
   ];
@@ -244,7 +257,5 @@ const consortItems = computed(() => {
   ];
 });
 
-function formatAptitude(aptitude?: Record<string, number>): string {
-  return Object.entries(aptitude || {}).map(([兵种, 数值]) => `${兵种}:${数值}`).join(' / ') || '无';
-}
+const ratio = (current: number, max?: number) => `${Math.max(0, Math.min(100, Math.round((current / Math.max(max || 100, 1)) * 100)))}%`;
 </script>

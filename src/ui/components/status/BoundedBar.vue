@@ -1,6 +1,6 @@
 <template>
   <div class="tk-panel-bar-row">
-    <div class="tk-panel-bar-label">{{ label }}</div>
+    <div class="tk-panel-bar-label" style="white-space: pre-line; line-height: 1.35; text-align: center;">{{ label }}</div>
     <div class="tk-panel-bar">
       <span class="tk-panel-bar-fill" :class="colorClass" :style="{ width: ratio }"></span>
     </div>

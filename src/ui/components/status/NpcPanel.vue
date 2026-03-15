@@ -17,17 +17,25 @@
                   <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
                   <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
                 </div>
+                <template v-if="npc.角色数据">
+                  <div class="tk-panel-bar-row" style="margin-top: 10px;"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.角色数据.当前生命值, npc.角色数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前生命值 }} / {{ npc.角色数据._生命值上限 ?? 0 }}</div></div>
+                  <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.角色数据.当前体力值, npc.角色数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前体力值 }} / {{ npc.角色数据._体力值上限 ?? 0 }}</div></div>
+                </template>
                 <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
               </section>
               <section class="tk-panel-card">
-                <div class="tk-panel-card-title">关系</div>
-                <div class="tk-panel-inline-note">{{ relationLevelText(npc) }}</div>
-                <BoundedBar label="好感" :value="npc.好感 ?? 0" :max="100" color-class="is-gold" />
+                <div class="tk-panel-card-title">关系与效忠势力</div>
+                <BoundedBar :label="`好感\n（${relationLevelText(npc)}）`" :value="npc.好感 ?? 0" :max="100" color-class="is-gold" />
+                <template v-if="npc.武将信息">
+                  <BoundedBar :label="`忠诚·${npc.武将信息.势力 || '无'}\n（${npc.武将信息._忠诚等级 || '无'}）`" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
+                </template>
               </section>
-              <section v-if="npc.武将信息" class="tk-panel-card">
-                <div class="tk-panel-card-title">效忠势力</div>
-                <div class="tk-panel-inline-note">{{ loyaltyTitle(npc) }}</div>
-                <BoundedBar label="忠诚" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
+              <section v-if="npc.角色数据" class="tk-panel-card">
+                <div class="tk-panel-card-title">六维与战斗</div>
+                <RadarChart :stats="npc.角色数据.六维" />
+                <div class="tk-panel-kv-grid compact">
+                  <div v-for="item in battleItems(npc)" :key="item.label" class="tk-panel-kv"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
+                </div>
               </section>
               <section v-if="npc.武将信息" class="tk-panel-card">
                 <div class="tk-panel-card-title">兵种适性</div>
@@ -51,6 +59,7 @@ import type { NPC, 状态总表 } from '../../../state';
 import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
+import RadarChart from './RadarChart.vue';
 
 const props = defineProps<{ state: 状态总表 }>();
 const UNKNOWN_LOCATION = '未知地点';
@@ -84,9 +93,19 @@ function relationLevelText(npc: NPC): string {
   return String(npc.好感 ?? 0);
 }
 
-function loyaltyTitle(npc: NPC): string {
-  const faction = npc.武将信息?.势力 || '无';
-  const loyalty = npc.武将信息?._忠诚等级 || '未知';
-  return `${faction} / ${loyalty}`;
+function battleItems(npc: NPC): Array<{ label: string; value: number }> {
+  const data = npc.角色数据;
+  if (!data) {
+    return [];
+  }
+  return [
+    { label: '先攻', value: data._先攻基础值 ?? 0 },
+    { label: '攻击', value: data._攻击基础值 ?? 0 },
+    { label: '伤害', value: data._伤害基础值 ?? 0 },
+    { label: '防御DC', value: data._防御DC基础值 ?? 0 },
+    { label: '伤害减免', value: data._伤害减免基础值 ?? 0 },
+  ];
 }
+
+const ratio = (current: number, max?: number) => `${Math.max(0, Math.min(100, Math.round((current / Math.max(max || 100, 1)) * 100)))}%`;
 </script>
