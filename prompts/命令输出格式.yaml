@@ -138,6 +138,7 @@
       价格: number
       描述: string
     城池:
+      名称: string
       等级: 城池等级
       城防: number
       人口: number
@@ -149,6 +150,7 @@
       太守: string
       设施: string[]
     军队:
+      名称: string
       兵种: string
       等级: 军队等级
       兵力: number
@@ -287,12 +289,13 @@
       关键约束:
         - `factionId` 必填，表示该城池隶属哪个势力
         - `data` 至少包含一个字段
+        - `data.名称` 必须显式提供，不能只依赖 id 表示城池名称
       示例: |-
         {
           "type": "UpsertCity",
           "factionId": "liubei",
           "id": "xinye",
-          "data": { "等级": "县城", "城防": 42, "太守": "关羽" }
+          "data": { "名称": "新野", "等级": "县城", "城防": 42, "太守": "关羽" }
         }
     AddCityFacility:
       必填字段: [type, factionId, id, facility]
@@ -333,12 +336,13 @@
       关键约束:
         - `factionId` 必填，表示该军队隶属哪个势力
         - `data` 至少包含一个字段
+        - `data.名称` 必须显式提供，不能只依赖 id 表示军队名称
       示例: |-
         {
           "type": "UpsertArmy",
           "factionId": "liubei",
           "id": "first_cavalry",
-          "data": { "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
+          "data": { "名称": "白马骑营", "兵种": "骑兵", "等级": "精锐", "兵力": 3000, "统属将领": "赵云", "阵型": "锋矢阵" }
         }
     RemoveArmy:
       必填字段: [type, factionId, id]

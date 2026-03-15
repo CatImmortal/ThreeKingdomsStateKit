@@ -7,12 +7,12 @@
       <div class="tk-panel-card-title">{{ activeTab ? `${activeTab}任务` : '任务列表' }}</div>
       <div v-if="currentTasks.length > 0" class="tk-panel-detail-list">
         <details v-for="[id, task] in currentTasks" :key="id" class="tk-panel-detail">
-          <summary><span>{{ task.名称 || id }}</span><span>{{ task.类型 }} / {{ task.状态 }}</span></summary>
+          <summary><span>{{ task.名称 || '未命名任务' }}</span><span>{{ task.类型 }} / {{ task.状态 }}</span></summary>
           <div class="tk-panel-detail-body">
             <div class="tk-panel-inline-note">时限：{{ task.时限 || '无时限' }}</div>
             <div class="tk-panel-list">
               <div v-for="[targetId, target] in Object.entries(task.目标 || {})" :key="targetId" class="tk-panel-list-item">
-                <div class="tk-panel-list-title">{{ target.描述 || targetId }}</div>
+                <div class="tk-panel-list-title">{{ target.描述 || '未命名目标' }}</div>
                 <div class="tk-panel-list-meta">{{ target.类型 }} / {{ target.状态 }}</div>
                 <div class="tk-panel-list-desc">积分：{{ target.积分 ?? 0 }}　其他奖励：{{ target.其他奖励 || '无' }}</div>
               </div>

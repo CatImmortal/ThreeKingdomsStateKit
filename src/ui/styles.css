@@ -9,23 +9,24 @@
 #tk-vue-root .tk-vue-head-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
 #tk-vue-root .tk-vue-head-btn{appearance:none;border:1px solid rgba(220,181,119,.28);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;font-size:12px}
 #tk-vue-root .tk-vue-panel-content{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:14px}
-#tk-vue-root .tk-vue-panel-content.is-system-panel{flex:1;min-height:0;grid-template-columns:minmax(0,1fr);overflow-y:auto;overscroll-behavior:contain}
+#tk-vue-root .tk-vue-panel-content.is-system-panel{flex:1;min-height:0;grid-template-columns:minmax(0,1fr);overflow:hidden}
 #tk-vue-root .tk-vue-card{border:1px solid rgba(196,154,92,.22);border-radius:14px;background:rgba(255,248,232,.03);padding:14px}
 #tk-vue-root .tk-vue-card-title{margin-bottom:10px;font-size:13px;font-weight:700;color:#f0c983;letter-spacing:1px}
 #tk-vue-root .tk-vue-options-list{display:flex;flex-direction:column;gap:10px}
 #tk-vue-root .tk-vue-option-btn{appearance:none;border:1px solid rgba(220,181,119,.34);border-radius:12px;padding:10px 12px;background:linear-gradient(180deg,rgba(123,77,38,.42),rgba(74,45,24,.36));color:#fff0d0;cursor:pointer;font-size:13px;line-height:1.45;text-align:left;transition:.18s box-shadow,.18s transform,.18s background,.18s border-color}
 #tk-vue-root .tk-vue-option-btn:hover{transform:translateY(-1px);background:linear-gradient(180deg,rgba(149,96,47,.56),rgba(88,53,28,.46));border-color:rgba(255,222,160,.68);box-shadow:0 8px 18px rgba(0,0,0,.18)}
 #tk-vue-root .tk-vue-empty{padding:14px;color:#bda681;font-size:12px;text-align:center}
-#tk-vue-root .tk-statusbar{margin-top:0;border:1px solid rgba(196,154,92,.45);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(37,24,17,.96),rgba(15,12,10,.96));box-shadow:0 12px 32px rgba(0,0,0,.35);color:#f3e3c3;font-family:"Microsoft YaHei",serif}
+#tk-vue-root .tk-statusbar{margin-top:0;display:flex;flex-direction:column;min-height:0;height:100%;border:1px solid rgba(196,154,92,.45);border-radius:14px;overflow:hidden;background:linear-gradient(180deg,rgba(37,24,17,.96),rgba(15,12,10,.96));box-shadow:0 12px 32px rgba(0,0,0,.35);color:#f3e3c3;font-family:"Microsoft YaHei",serif}
 #tk-vue-root .tk-statusbar *{box-sizing:border-box}
-#tk-vue-root .tk-statusbar .tk-panel-shell{position:relative}
+#tk-vue-root .tk-statusbar .tk-panel-shell{position:relative;display:flex;flex-direction:column;flex:1;min-height:0}
 #tk-vue-root .tk-statusbar .tk-panel-head{padding:14px 16px;border-bottom:1px solid rgba(196,154,92,.28);background:linear-gradient(180deg,rgba(122,63,30,.35),rgba(54,30,18,.15))}
 #tk-vue-root .tk-statusbar .tk-panel-title{font-size:18px;font-weight:700;letter-spacing:2px;color:#f6d9a2}
 #tk-vue-root .tk-statusbar .tk-panel-subtitle{margin-top:6px;font-size:12px;color:#d8bf93;display:flex;flex-wrap:wrap;gap:10px}
 #tk-vue-root .tk-statusbar .tk-panel-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(196,154,92,.22);background:rgba(255,255,255,.02)}
 #tk-vue-root .tk-statusbar .tk-panel-tab-label{padding:8px 14px;border:1px solid rgba(196,154,92,.28);border-radius:999px;background:rgba(255,255,255,.04);color:#dcc59c;cursor:pointer;transition:.2s;font-size:12px}
 #tk-vue-root .tk-statusbar .tk-panel-tab-label:hover,#tk-vue-root .tk-statusbar .tk-panel-tab-label.is-active{background:linear-gradient(180deg,#a76b2e,#7a4a1f);color:#fff5e6;border-color:rgba(255,216,158,.8);box-shadow:0 0 0 1px rgba(255,240,212,.12) inset}
-#tk-vue-root .tk-statusbar .tk-panel-pages{padding:14px}
+#tk-vue-root .tk-statusbar .tk-panel-pages{flex:1;min-height:0;padding:14px;overflow-y:auto;overscroll-behavior:contain}
+#tk-vue-root .tk-statusbar .tk-panel-page{min-height:100%}
 #tk-vue-root .tk-statusbar .tk-panel-page-grid{display:grid;gap:12px}
 #tk-vue-root .tk-statusbar .tk-panel-page-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 #tk-vue-root .tk-statusbar .tk-subtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}

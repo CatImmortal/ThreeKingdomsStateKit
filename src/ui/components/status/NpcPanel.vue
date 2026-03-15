@@ -3,7 +3,7 @@
     <div class="tk-panel-card-title">当前地点 NPC</div>
     <div class="tk-panel-detail-list">
       <details v-for="[id, npc] in entries" :key="id" class="tk-panel-detail">
-        <summary><span>{{ npc.名称 || id }}</span><span>{{ npc.品质 }} / {{ npc.定位 || '未知' }}</span></summary>
+        <summary><span>{{ npc.名称 || '未命名角色' }}</span><span>{{ npc.品质 }} / {{ npc.定位 || '未知' }}</span></summary>
         <div class="tk-panel-detail-body">
           <div class="tk-panel-kv-grid compact">
             <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>

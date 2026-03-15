@@ -68,13 +68,13 @@ const battleItems = computed(() => [
   { label: '防御DC', value: player.value._防御DC ?? 0 },
   { label: '伤害减免', value: player.value._伤害减免 ?? 0 },
 ]);
-const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性)).map(([id, npc]) => ({ title: npc.名称 || id, meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
-const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息)).map(([id, npc]) => ({ title: npc.名称 || id, meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.武将信息?.驻扎地 || '无驻地'} · ${npc.简述 || '无'}` })));
+const 后宫项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.美人属性?.位份 || '未纳入'} / ${npc.美人属性?._依赖等级 || npc.美人属性?.依赖度 || 0}`, desc: `${npc.美人属性?.当前状态 || '正常'} · ${npc.简述 || '无'}` })));
+const 武将项列表 = computed(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息)).map(([, npc]) => ({ title: npc.名称 || '未命名角色', meta: `${npc.武将信息?.官职 || '无官职'} / ${npc.武将信息?.当前状态 || '待命'}`, desc: `${npc.武将信息?.驻扎地 || '无驻地'} · ${npc.简述 || '无'}` })));
 const lists = computed(() => ({
   equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无' ? ({ title: slot, meta: '未装备', desc: '' }) : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, desc: item.描述 || item.其他效果 || '无' })),
-  bag: Object.entries(player.value.物品栏 || {}).map(([id, item]) => ({ title: id, meta: `${item.品质} / 数量:${item.数量}`, desc: item.描述 || '无' })),
-  skills: Object.entries(player.value.武技 || {}).map(([id, skill]) => ({ title: skill.名称 || id, meta: `${skill.等级} / ${skill.类型}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
-  perks: Object.entries(player.value.专长 || {}).map(([id, perk]) => ({ title: perk.名称 || id, meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
+  bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.名称 || '未命名物品', meta: `${item.品质} / 数量:${item.数量}`, desc: item.描述 || '无' })),
+  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
+  perks: Object.entries(player.value.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,
   generals: 武将项列表.value,
 }));

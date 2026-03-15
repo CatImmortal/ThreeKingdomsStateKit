@@ -117,6 +117,7 @@ export type 主角 = 角色战斗数据 & {
 };
 
 export type 城池 = {
+  名称: string;
   等级: 城池等级;
   城防: number;
   人口: number;
@@ -137,6 +138,7 @@ export type 城池 = {
 };
 
 export type 军队 = {
+  名称: string;
   兵种: string;
   等级: 军队等级;
   兵力: number;
@@ -355,6 +357,7 @@ export function create角色战斗数据(data: Partial<角色战斗数据> = {},
 
 export function create城池(data: Partial<城池> = {}): 城池 {
   return {
+    名称: String(data.名称 || ''),
     等级: 枚举.城池等级.includes(data.等级 as 城池等级) ? (data.等级 as 城池等级) : '村落',
     城防: Math.max(0, 数值(data.城防)),
     人口: Math.max(0, 数值(data.人口)),
@@ -370,6 +373,7 @@ export function create城池(data: Partial<城池> = {}): 城池 {
 
 export function create军队(data: Partial<军队> = {}): 军队 {
   return {
+    名称: String(data.名称 || ''),
     兵种: String(data.兵种 || ''),
     等级: 枚举.军队等级.includes(data.等级 as 军队等级) ? (data.等级 as 军队等级) : '新兵',
     兵力: Math.max(0, 数值(data.兵力)),
@@ -512,8 +516,8 @@ export function create世界(data: Partial<世界> = {}): 世界 {
 export function create主角(data: Partial<主角> = {}): 主角 {
   return {
     ...create角色战斗数据(data, { 完整: true }),
-    物品栏: _.mapValues(data.物品栏 || {}, (item, id) => ({
-      名称: String(item?.名称 || id || ''),
+    物品栏: _.mapValues(data.物品栏 || {}, item => ({
+      名称: String(item?.名称 || ''),
       品质: (枚举.装备品质.includes(item?.品质 as 装备品质) ? (item?.品质 as 装备品质) : '无') as 装备品质 | '无',
       描述: String(item?.描述 || ''),
       数量: Math.max(0, 数值(item?.数量, 1)),

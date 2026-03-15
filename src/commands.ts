@@ -177,8 +177,8 @@ const 专长条目字段 = ['名称', '等级', '效果'] as const;
 const 主角字段 = ['六维', '当前生命值', '当前体力值', '生命值上限加成', '体力值上限加成', '装备', '武技', '专长', '状态', '物品栏', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['名称', '品质', '描述', '数量'] as const;
 const 势力字段 = ['名称', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
-const 城池字段 = ['等级', '城防', '人口', '农业', '商业', '民心', '治安', '繁荣度', '太守', '设施'] as const;
-const 军队字段 = ['兵种', '等级', '兵力', '士气', '疲惫', '装备等级', '统属将领', '驻扎地', '训练进度', '阵型'] as const;
+const 城池字段 = ['名称', '等级', '城防', '人口', '农业', '商业', '民心', '治安', '繁荣度', '太守', '设施'] as const;
+const 军队字段 = ['名称', '兵种', '等级', '兵力', '士气', '疲惫', '装备等级', '统属将领', '驻扎地', '训练进度', '阵型'] as const;
 const 政策字段 = ['当前研究', '研究进度', '富国', '强兵', '霸道', '王道'] as const;
 const NPC字段 = ['名称', '品质', '阵营', '定位', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
 const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '驻扎地', '特技'] as const;
@@ -467,6 +467,7 @@ function 校验主角更新(value: unknown, path: string): void {
 function 校验城池更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 城池字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.城池等级, `${path}.等级`);
   for (const key of ['城防', '人口', '农业', '商业', '民心', '治安', '繁荣度'] as const) {
     if (value[key] !== undefined) 断言数字(value[key], `${path}.${key}`);
@@ -481,6 +482,7 @@ function 校验城池更新(value: unknown, path: string): void {
 function 校验军队更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 军队字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
   if (value.兵种 !== undefined) 断言字符串(value.兵种, `${path}.兵种`);
   if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.军队等级, `${path}.等级`);
   for (const key of ['兵力', '士气', '疲惫', '训练进度'] as const) {
