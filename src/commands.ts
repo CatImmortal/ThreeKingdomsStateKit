@@ -329,7 +329,7 @@ function 校验专长条目(value: unknown, path: string): void {
   断言对象(value, path);
   断言字段白名单(value, 专长条目字段, path);
   if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
-  if (value.等级 !== undefined) 断言字符串(value.等级, `${path}.等级`);
+  if (value.等级 !== undefined) 断言枚举值(value.等级, 枚举.属性等级, `${path}.等级`);
   if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
 }
 

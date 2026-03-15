@@ -12,6 +12,7 @@ import {
   type 任务类型,
   type 商品分类,
   type 武技类型,
+  type 属性等级,
   type 武技等级,
   type 装备品质,
   type 势力规模,
@@ -38,6 +39,12 @@ export type 六维 = {
   _政治加值?: number;
   _魅力加值?: number;
   _体质加值?: number;
+  _武力等级?: 属性等级;
+  _智力等级?: 属性等级;
+  _统率等级?: 属性等级;
+  _政治等级?: 属性等级;
+  _魅力等级?: 属性等级;
+  _体质等级?: 属性等级;
 };
 
 export type 装备条目 = {
@@ -78,7 +85,7 @@ export type 武技条目 = {
 
 export type 专长条目 = {
   名称: string;
-  等级: string;
+  等级: 属性等级;
   效果: string;
 };
 
@@ -345,7 +352,7 @@ export function create武技条目(data: Partial<武技条目> = {}, { 完整 = 
 export function create专长条目(data: Partial<专长条目> = {}): 专长条目 {
   return {
     名称: String(data.名称 || ''),
-    等级: String(data.等级 || ''),
+    等级: 枚举.属性等级.includes(data.等级 as 属性等级) ? (data.等级 as 属性等级) : '普通',
     效果: String(data.效果 || ''),
   };
 }

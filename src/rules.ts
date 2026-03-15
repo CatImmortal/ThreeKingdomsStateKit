@@ -5,6 +5,7 @@ export const MAX_RECENT_EVENTS = 5;
 export const 枚举 = {
   品质: ['N', 'R', 'SR', 'SSR', 'UR'],
   装备品质: ['凡品', '良品', '上品', '极品', '传说', '神话'],
+  属性等级: ['低下', '普通', '优秀', '一流', '超一流', '当世巅峰', '传说', '神话'],
   武技等级: ['入门', '精通', '大成', '绝学', '神技'],
   武技类型: ['攻击', '防御', '辅助', '反击'],
   剧本: ['S1黄巾起义', 'S2讨伐董卓'],
@@ -51,6 +52,7 @@ export const 阵型数据 = {
 
 export type 品质 = (typeof 枚举.品质)[number];
 export type 装备品质 = (typeof 枚举.装备品质)[number];
+export type 属性等级 = (typeof 枚举.属性等级)[number];
 export type 武技等级 = (typeof 枚举.武技等级)[number];
 export type 武技类型 = (typeof 枚举.武技类型)[number];
 export type 剧本 = (typeof 枚举.剧本)[number];
@@ -89,6 +91,17 @@ export function 计算加值(属性值: number): number {
   if (属性值 <= 95) return Math.floor(属性值 * 0.8);
   if (属性值 <= 99) return Math.floor(属性值 * 0.9);
   return 属性值;
+}
+
+export function 属性等级(v: number): 属性等级 {
+  if (v <= 20) return '低下';
+  if (v <= 40) return '普通';
+  if (v <= 60) return '优秀';
+  if (v <= 80) return '一流';
+  if (v <= 90) return '超一流';
+  if (v <= 95) return '当世巅峰';
+  if (v <= 99) return '传说';
+  return '神话';
 }
 
 export function 计算伤势(当前: number, 上限: number): { _伤势: string; _伤势减值: number } {

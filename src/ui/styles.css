@@ -58,7 +58,7 @@
 #tk-vue-root .tk-statusbar .tk-panel-action-btn{appearance:none;border:1px solid rgba(220,181,119,.34);border-radius:999px;padding:7px 12px;background:linear-gradient(180deg,rgba(123,77,38,.42),rgba(74,45,24,.36));color:#fff0d0;cursor:pointer;font-size:12px;transition:.18s box-shadow,.18s transform,.18s background,.18s border-color}
 #tk-vue-root .tk-statusbar .tk-panel-action-btn:hover{transform:translateY(-1px);background:linear-gradient(180deg,rgba(149,96,47,.56),rgba(88,53,28,.46));border-color:rgba(255,222,160,.68);box-shadow:0 8px 18px rgba(0,0,0,.18)}
 #tk-vue-root .tk-statusbar .tk-radar-wrap{display:block;margin-bottom:12px;padding-bottom:6px}
-#tk-vue-root .tk-statusbar .tk-radar{width:220px;height:236px;display:block;margin:0 auto;overflow:visible}
+#tk-vue-root .tk-statusbar .tk-radar{width:220px;height:248px;display:block;margin:0 auto;overflow:visible}
 #tk-vue-root .tk-statusbar .tk-radar-ring,#tk-vue-root .tk-statusbar .tk-radar-axis{fill:none;stroke:rgba(240,201,131,.18);stroke-width:1}
 #tk-vue-root .tk-statusbar .tk-radar-shape{fill:rgba(167,107,46,.28);stroke:#f0c983;stroke-width:2}
 #tk-vue-root .tk-statusbar .tk-radar-dot{fill:#f6dfb5}
@@ -66,6 +66,7 @@
 #tk-vue-root .tk-statusbar .tk-radar-value{fill:#f6dfb5}
 #tk-vue-root .tk-statusbar .tk-radar-separator{fill:#bfa57a}
 #tk-vue-root .tk-statusbar .tk-radar-bonus{fill:#7dd3fc}
+#tk-vue-root .tk-statusbar .tk-radar-rank{fill:#f0c983;font-size:10px}
 #tk-vue-root .tk-statusbar .tk-panel-bar-row{display:grid;grid-template-columns:56px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
 #tk-vue-root .tk-statusbar .tk-panel-bar-label,#tk-vue-root .tk-statusbar .tk-panel-bar-value{font-size:11px;color:#d8bf93}
 #tk-vue-root .tk-statusbar .tk-panel-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}

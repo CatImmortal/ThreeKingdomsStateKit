@@ -84,7 +84,7 @@
             <div class="tk-panel-list">
               <div v-for="item in perkList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
-                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-meta"><span :style="属性等级文本样式(item.meta)">{{ item.meta }}</span></div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -139,7 +139,7 @@ import type { NPC } from '../../../state';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
-import { 品质文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
+import { 品质文本样式, 属性等级文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ npc: NPC }>();
 const npc = computed(() => props.npc);

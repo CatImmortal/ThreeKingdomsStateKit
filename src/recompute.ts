@@ -26,6 +26,7 @@ import {
   汇总装备加值,
   计算伤势,
   计算加值,
+  属性等级,
   贞洁等级,
   城池基础,
   外交等级,
@@ -50,6 +51,12 @@ export function recompute六维(stats: 六维): 六维 {
   next._政治加值 = 计算加值(next.政治);
   next._魅力加值 = 计算加值(next.魅力);
   next._体质加值 = 计算加值(next.体质);
+  next._武力等级 = 属性等级(next.武力);
+  next._智力等级 = 属性等级(next.智力);
+  next._统率等级 = 属性等级(next.统率);
+  next._政治等级 = 属性等级(next.政治);
+  next._魅力等级 = 属性等级(next.魅力);
+  next._体质等级 = 属性等级(next.体质);
   return next;
 }
 

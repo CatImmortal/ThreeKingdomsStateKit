@@ -49,6 +49,9 @@
               <span :style="武技等级文本样式(item.metaPrimary)">{{ item.metaPrimary }}</span>
               <span v-if="item.metaSuffix"> / {{ item.metaSuffix }}</span>
             </template>
+            <template v-else-if="currentListKey === 'perks'">
+              <span :style="属性等级文本样式(item.meta)">{{ item.meta }}</span>
+            </template>
             <template v-else>{{ item.meta }}</template>
           </div>
           <template v-if="currentListKey === 'consorts' || currentListKey === 'generals'">
@@ -78,7 +81,7 @@ import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
-import { 品质文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
+import { 品质文本样式, 属性等级文本样式, 装备品质文本样式, 武技等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ state: 状态总表 }>();
 const player = computed(() => props.state.主角);

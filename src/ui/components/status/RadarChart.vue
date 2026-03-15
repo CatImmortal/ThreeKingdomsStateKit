@@ -34,6 +34,7 @@
           <tspan class="tk-radar-separator">/</tspan>
           <tspan class="tk-radar-bonus">{{ formatBonus(label.bonus) }}</tspan>
         </tspan>
+        <tspan :x="labelPositions[index].x" dy="13" class="tk-radar-rank" :style="label.rankStyle">{{ label.rank }}</tspan>
       </text>
     </svg>
   </div>
@@ -42,24 +43,25 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { 六维 } from '../../../state';
+import { 属性等级文本样式 } from './qualityStyles';
 
 const props = defineProps<{ stats: 六维 }>();
 
 const labels = computed(() => [
-  { key: '武力', value: props.stats.武力, bonus: props.stats._武力加值 ?? 0 },
-  { key: '智力', value: props.stats.智力, bonus: props.stats._智力加值 ?? 0 },
-  { key: '统率', value: props.stats.统率, bonus: props.stats._统率加值 ?? 0 },
-  { key: '政治', value: props.stats.政治, bonus: props.stats._政治加值 ?? 0 },
-  { key: '魅力', value: props.stats.魅力, bonus: props.stats._魅力加值 ?? 0 },
-  { key: '体质', value: props.stats.体质, bonus: props.stats._体质加值 ?? 0 },
+  { key: '武力', value: props.stats.武力, bonus: props.stats._武力加值 ?? 0, rank: props.stats._武力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._武力等级) },
+  { key: '智力', value: props.stats.智力, bonus: props.stats._智力加值 ?? 0, rank: props.stats._智力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._智力等级) },
+  { key: '统率', value: props.stats.统率, bonus: props.stats._统率加值 ?? 0, rank: props.stats._统率等级 ?? '', rankStyle: 属性等级文本样式(props.stats._统率等级) },
+  { key: '政治', value: props.stats.政治, bonus: props.stats._政治加值 ?? 0, rank: props.stats._政治等级 ?? '', rankStyle: 属性等级文本样式(props.stats._政治等级) },
+  { key: '魅力', value: props.stats.魅力, bonus: props.stats._魅力加值 ?? 0, rank: props.stats._魅力等级 ?? '', rankStyle: 属性等级文本样式(props.stats._魅力等级) },
+  { key: '体质', value: props.stats.体质, bonus: props.stats._体质加值 ?? 0, rank: props.stats._体质等级 ?? '', rankStyle: 属性等级文本样式(props.stats._体质等级) },
 ]);
 
 const viewBoxWidth = 220;
-const viewBoxHeight = 236;
+const viewBoxHeight = 248;
 const cx = 110;
 const cy = 104;
 const maxRadius = 68;
-const labelRadius = 96;
+const labelRadius = 100;
 const maxValue = 100;
 const rings = [0.25, 0.5, 0.75, 1];
 const angles = computed(() => labels.value.map((_, index) => (-Math.PI / 2) + (Math.PI * 2 * index) / labels.value.length));
