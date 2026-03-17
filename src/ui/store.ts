@@ -24,7 +24,7 @@ export type NpcDetailWindowState = {
 
 export type UnifiedPanelStore = {
   systemPanel: PanelState<{ state: 状态总表 | null }>;
-  playerOptionsPanel: PanelState<{ options: 玩家选项[] }>;
+  playerOptionsPanel: PanelState<{ options: 玩家选项[]; collapsed: boolean }>;
   npcDetailWindows: NpcDetailWindowState[];
 };
 
@@ -71,6 +71,7 @@ export const unifiedPanelState = reactive<UnifiedPanelStore>({
     visible: false,
     latestMessageId: null,
     options: [],
+    collapsed: false,
     position: 读取位置(PLAYER_OPTIONS_POSITION_KEY),
   },
   npcDetailWindows: [],
@@ -94,6 +95,14 @@ export function setSystemPanelVisible(visible: boolean): void {
 
 export function setPlayerOptionsPanelVisible(visible: boolean): void {
   unifiedPanelState.playerOptionsPanel.visible = visible;
+}
+
+export function setPlayerOptionsPanelCollapsed(collapsed: boolean): void {
+  unifiedPanelState.playerOptionsPanel.collapsed = collapsed;
+}
+
+export function togglePlayerOptionsPanelCollapsed(): void {
+  unifiedPanelState.playerOptionsPanel.collapsed = !unifiedPanelState.playerOptionsPanel.collapsed;
 }
 
 export function setSystemPanelPosition(left: number, top: number): void {
@@ -183,5 +192,6 @@ export function clearUnifiedPanelState(): void {
   unifiedPanelState.playerOptionsPanel.visible = false;
   unifiedPanelState.playerOptionsPanel.latestMessageId = null;
   unifiedPanelState.playerOptionsPanel.options = [];
+  unifiedPanelState.playerOptionsPanel.collapsed = false;
   unifiedPanelState.npcDetailWindows = [];
 }

@@ -6,11 +6,12 @@
         <div class="tk-vue-panel-subtitle">当前最新 AI 回复可选项</div>
       </div>
       <div class="tk-vue-head-actions">
+        <button type="button" class="tk-vue-head-btn" @click.stop="handleToggleCollapsed">{{ collapsed ? '展开' : '折叠' }}</button>
         <button type="button" class="tk-vue-head-btn" @click.stop="handleResetPosition">重置位置</button>
         <button type="button" class="tk-vue-head-btn" @click.stop="handleClose">关闭</button>
       </div>
     </div>
-    <PlayerOptionsPanel />
+    <PlayerOptionsPanel v-if="!collapsed" />
   </div>
 </template>
 
@@ -19,10 +20,11 @@ import { computed, nextTick, ref, watch, type CSSProperties } from 'vue';
 import { getHostDocument } from '../../dom-host';
 import { attachDragHandlers, computeInputAbovePosition } from '../drag';
 import PlayerOptionsPanel from '../components/PlayerOptionsPanel.vue';
-import { resetPlayerOptionsPanelPosition, setPlayerOptionsPanelPosition, setPlayerOptionsPanelVisible, unifiedPanelState } from '../store';
+import { resetPlayerOptionsPanelPosition, setPlayerOptionsPanelCollapsed, setPlayerOptionsPanelPosition, setPlayerOptionsPanelVisible, unifiedPanelState } from '../store';
 
 const panelRef = ref<HTMLElement | null>(null);
 const visible = computed(() => unifiedPanelState.playerOptionsPanel.visible);
+const collapsed = computed(() => unifiedPanelState.playerOptionsPanel.collapsed);
 const measuredSize = ref({ width: 420, height: 220 });
 const panelStyle = computed<CSSProperties>(() => {
   const position = unifiedPanelState.playerOptionsPanel.position;
@@ -99,11 +101,16 @@ const handleResetPosition = () => {
   更新默认位置();
 };
 
+const handleToggleCollapsed = () => {
+  setPlayerOptionsPanelCollapsed(!collapsed.value);
+  更新默认位置();
+};
+
 const handleClose = () => {
   setPlayerOptionsPanelVisible(false);
 };
 
-watch([visible, () => unifiedPanelState.playerOptionsPanel.options.length, () => unifiedPanelState.playerOptionsPanel.position.mode], () => {
+watch([visible, collapsed, () => unifiedPanelState.playerOptionsPanel.options.length, () => unifiedPanelState.playerOptionsPanel.position.mode], () => {
   更新默认位置();
 }, { immediate: true });
 </script>

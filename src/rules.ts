@@ -165,18 +165,18 @@ export function 外交等级(v: number): string {
 }
 
 export function 士气等级(v: number): string {
-  if (v <= 19) return '崩溃';
-  if (v <= 39) return '低落';
-  if (v <= 59) return '普通';
-  if (v <= 79) return '高昂';
+  if (v <= 20) return '崩溃';
+  if (v <= 40) return '低落';
+  if (v <= 60) return '普通';
+  if (v <= 80) return '高昂';
   return '狂热';
 }
 
 export function 疲惫等级(v: number): string {
-  if (v <= 19) return '精力充沛';
-  if (v <= 39) return '轻度疲惫';
-  if (v <= 59) return '中度疲惫';
-  if (v <= 79) return '重度疲惫';
+  if (v <= 20) return '精力充沛';
+  if (v <= 40) return '轻度疲惫';
+  if (v <= 60) return '中度疲惫';
+  if (v <= 80) return '重度疲惫';
   return '精疲力竭';
 }
 
@@ -212,18 +212,18 @@ export function 和谐等级(v: number): string {
 }
 
 export function 士气系数(v: number): number {
-  if (v <= 19) return 0.3;
-  if (v <= 39) return 0.6;
-  if (v <= 59) return 0.8;
-  if (v <= 79) return 1.0;
+  if (v <= 20) return 0.3;
+  if (v <= 40) return 0.6;
+  if (v <= 60) return 0.8;
+  if (v <= 80) return 1.0;
   return 1.2;
 }
 
 export function 疲惫系数(v: number): number {
-  if (v <= 19) return 1.0;
-  if (v <= 39) return 0.9;
-  if (v <= 59) return 0.75;
-  if (v <= 79) return 0.6;
+  if (v <= 20) return 1.0;
+  if (v <= 40) return 0.9;
+  if (v <= 60) return 0.75;
+  if (v <= 80) return 0.6;
   return 0.4;
 }
 
@@ -233,10 +233,10 @@ export function 统率系数(v: number): number {
 }
 
 export function 兵种适性修正(v: number): number {
-  if (v <= 19) return -0.1;
-  if (v <= 39) return 0;
-  if (v <= 59) return 0.1;
-  if (v <= 79) return 0.2;
+  if (v <= 20) return -0.1;
+  if (v <= 40) return 0;
+  if (v <= 60) return 0.1;
+  if (v <= 80) return 0.2;
   return 0.3;
 }
 
