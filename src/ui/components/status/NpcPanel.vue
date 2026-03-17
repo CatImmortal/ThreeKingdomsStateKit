@@ -30,7 +30,7 @@
                   <BoundedBar :label="`忠诚·${npc.武将信息.势力 || '无'}\n（${npc.武将信息._忠诚等级 || '无'}）`" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
                 </template>
               </section>
-              <section class="tk-panel-card">
+              <section v-if="npc.六维" class="tk-panel-card">
                 <div class="tk-panel-card-title">六维与战斗</div>
                 <RadarChart :stats="npc.六维" />
                 <div class="tk-panel-kv-grid compact">
