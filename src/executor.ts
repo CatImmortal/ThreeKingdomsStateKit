@@ -45,6 +45,11 @@ function 应用主角资源变更(state: 状态总表, command: Extract<状态�
   for (const key of 主角资源字段) {
     const value = command.changes[key];
     if (value === undefined) continue;
+    if (key === '当前生命值' || key === '当前体力值') {
+      const current = 数值(state.主角.战斗数据[key]);
+      (state.主角.战斗数据[key] as number) = mode === 'set' ? 数值(value) : current + 数值(value);
+      continue;
+    }
     const current = 数值(state.主角[key]);
     (state.主角[key] as number) = mode === 'set' ? 数值(value) : current + 数值(value);
   }

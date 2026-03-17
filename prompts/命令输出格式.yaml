@@ -64,7 +64,7 @@
     状态记录: Record<string, { 效果: string, 剩余: string }>
     武技条目: { 名称: string, 等级: 武技等级, 类型: 武技类型, 效果: string, 熟练度?: number, 体力消耗?: number }
     专长条目: { 名称: string, 等级: 属性等级, 效果: string }
-    角色战斗数据基础字段: { 六维: 六维基础字段, 当前生命值: number, 当前体力值: number, 生命上限加成值: number, 体力上限加成值: number, 装备: 装备栏, 武技: Record<string, 武技条目>, 专长: Record<string, 专长条目>, 状态: 状态记录 }
+    战斗数据基础字段: { 当前生命值: number, 当前体力值: number, 生命上限加成值: number, 体力上限加成值: number, 装备: 装备栏, 武技: Record<string, 武技条目>, 专长: Record<string, 专长条目>, 状态: 状态记录 }
     物品栏条目: { 物品: 物品条目, 数量: number }
     兵种适性表: { 刀盾兵: number, 枪矛兵: number, 弓弩兵: number, 骑兵: number, 水军: number }
     武将信息: { 野心值: number, 性格: 武将性格, 官职: string, 当前状态: 武将状态, 状态描述: string, 势力: string, 忠诚: number, 是否已招募: boolean, 兵种适性: 兵种适性表, 特技: Record<string, string> }
@@ -91,12 +91,12 @@
         - 仅用于追加单条新事件
     UpdatePlayerBase:
       必填: [type, changes]
-      changes: { 六维?: 六维基础字段, 当前生命值?: number, 当前体力值?: number, 生命上限加成值?: number, 体力上限加成值?: number, 装备?: 装备栏, 武技?: Record<string, 武技条目>, 专长?: Record<string, 专长条目>, 状态?: 状态记录, 物品栏?: Record<string, 物品栏条目>, 所属势力?: string, 兵种适性?: 兵种适性表, 声望?: number, 金钱?: number, 积分?: number, 官职?: string, 爵位?: string, 后宫和谐度?: number }
+      changes: { 六维?: 六维基础字段, 战斗数据?: 战斗数据基础字段, 物品栏?: Record<string, 物品栏条目>, 所属势力?: string, 兵种适性?: 兵种适性表, 声望?: number, 金钱?: number, 积分?: number, 官职?: string, 爵位?: string, 后宫和谐度?: number }
       约束:
         - `changes` 至少 1 项
         - `物品栏` 中每个条目都必须显式写 `物品.名称`
         - 小幅资源增减优先用 `AdjustPlayerResource`
-      示例: '{"type":"UpdatePlayerBase","changes":{"官职":"校尉","六维":{"武力":68,"统率":61}}}'
+      示例: '{"type":"UpdatePlayerBase","changes":{"官职":"校尉","六维":{"武力":68,"统率":61},"战斗数据":{"当前生命值":32}}}'
     AdjustPlayerResource:
       必填: [type, changes]
       可选: [mode]
@@ -147,13 +147,13 @@
       changes: 政策
     UpsertNpc:
       必填: [type, 名称, data]
-      data: { 名称?: string, 品质?: 品质, 阵营?: string, 定位?: string, 所在地?: string, 好感?: number, 简述?: string, 羁绊?: Record<string, string>, 角色数据?: 角色战斗数据基础字段, 武将信息?: 武将信息, 美人属性?: 美人属性 }
+      data: { 名称?: string, 品质?: 品质, 阵营?: string, 定位?: string, 所在地?: string, 好感?: number, 简述?: string, 羁绊?: Record<string, string>, 六维?: 六维基础字段, 战斗数据?: 战斗数据基础字段, 武将信息?: 武将信息, 美人属性?: 美人属性 }
       约束:
         - `data.名称` 必须显式提供且与定位 `名称` 一致
         - NPC 出现且可确定位置时，应尽量写 `所在地`
         - 若写 `武将信息`，应显式写 `势力` 与 `是否已招募`
         - 只写重要 NPC，或本轮与主角有明确互动的 NPC；路人、背景板、杂兵、无名小兵不要输出
-        - 未明确出现的详细子结构不要补全；`角色数据` / `武将信息` / `美人属性` 仅在正文明确涉及时写入
+        - 未明确出现的详细子结构不要补全；`六维` / `战斗数据` / `武将信息` / `美人属性` 仅在正文明确涉及时写入
       示例: '{"type":"UpsertNpc","名称":"赵云","data":{"名称":"赵云","品质":"SSR","阵营":"蜀","定位":"武将","简述":"白马银枪，随刘备同行。"}}'
     UpdateNpcRelation:
       必填: [type, 名称]

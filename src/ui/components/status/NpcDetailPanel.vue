@@ -35,14 +35,14 @@
             <div v-else class="tk-panel-empty">暂无羁绊信息</div>
           </section>
 
-          <section v-if="npc.角色数据" class="tk-panel-card cols-span-2">
-            <div class="tk-panel-card-title">角色数据</div>
+          <section v-if="npc.战斗数据" class="tk-panel-card cols-span-2">
+            <div class="tk-panel-card-title">战斗数据</div>
             <div class="tk-panel-page-grid cols-2">
               <section class="tk-panel-card">
                 <div class="tk-panel-card-title">角色面板</div>
-                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.角色数据.当前生命值, npc.角色数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前生命值 }} / {{ npc.角色数据._生命值上限 ?? 0 }}</div></div>
-                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.角色数据.当前体力值, npc.角色数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前体力值 }} / {{ npc.角色数据._体力值上限 ?? 0 }}</div></div>
-                <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(npc.角色数据._伤势)">{{ npc.角色数据._伤势 || '完好' }}</span>　减值：{{ npc.角色数据._伤势减值 ?? 0 }}</div>
+                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.战斗数据.当前生命值, npc.战斗数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.战斗数据.当前生命值 }} / {{ npc.战斗数据._生命值上限 ?? 0 }}</div></div>
+                <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.战斗数据.当前体力值, npc.战斗数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.战斗数据.当前体力值 }} / {{ npc.战斗数据._体力值上限 ?? 0 }}</div></div>
+                <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(npc.战斗数据._伤势)">{{ npc.战斗数据._伤势 || '完好' }}</span>　减值：{{ npc.战斗数据._伤势减值 ?? 0 }}</div>
                 <div class="tk-panel-kv-grid compact" style="margin-top: 18px;">
                   <div v-for="item in battleItems" :key="item.label" class="tk-panel-kv">
                     <span class="tk-panel-k">{{ item.label }}</span>
@@ -52,7 +52,7 @@
               </section>
               <section class="tk-panel-card">
                 <div class="tk-panel-card-title">六维与战斗</div>
-                <RadarChart :stats="npc.角色数据.六维" />
+                <RadarChart :stats="npc.六维" />
               </section>
             </div>
           </section>
@@ -169,7 +169,7 @@ const baseItems = computed(() => [
   { label: '关系', value: relationText.value },
 ]);
 const battleItems = computed(() => {
-  const data = npc.value.角色数据;
+  const data = npc.value.战斗数据;
   if (!data) {
     return [];
   }
@@ -183,7 +183,7 @@ const battleItems = computed(() => {
 });
 const equipmentList = computed(() => {
   const list: Array<{ title: string; quality: string; type: string; desc: string; details: Array<{ label: string; value: string | number }> }> = [];
-  for (const [slot, item] of Object.entries(npc.value.角色数据?.装备 || {})) {
+  for (const [slot, item] of Object.entries(npc.value.战斗数据?.装备 || {})) {
     if (!item || item === '无') {
       continue;
     }
@@ -203,7 +203,7 @@ const equipmentList = computed(() => {
   }
   return list;
 });
-const skillList = computed(() => Object.entries(npc.value.角色数据?.武技 || {})
+const skillList = computed(() => Object.entries(npc.value.战斗数据?.武技 || {})
   .map(([, skill]) => ({
     title: skill.名称 || '未命名武技',
     level: skill.等级,
@@ -211,13 +211,13 @@ const skillList = computed(() => Object.entries(npc.value.角色数据?.武技 |
     actionType: skill._动作类型 || 计算武技动作类型(skill.类型),
     desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}`,
   })));
-const perkList = computed(() => Object.entries(npc.value.角色数据?.专长 || {})
+const perkList = computed(() => Object.entries(npc.value.战斗数据?.专长 || {})
   .map(([, perk]) => ({
     title: perk.名称 || '未命名专长',
     meta: perk.等级 || '未定级',
     desc: perk.效果 || '无',
   })));
-const statusList = computed(() => Object.entries(npc.value.角色数据?.状态 || {})
+const statusList = computed(() => Object.entries(npc.value.战斗数据?.状态 || {})
   .map(([name, status]) => ({
     title: name,
     meta: status.剩余 || '未知',

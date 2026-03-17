@@ -17,9 +17,9 @@
                   <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
                   <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
                 </div>
-                <template v-if="npc.角色数据">
-                  <div class="tk-panel-bar-row" style="margin-top: 10px;"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.角色数据.当前生命值, npc.角色数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前生命值 }} / {{ npc.角色数据._生命值上限 ?? 0 }}</div></div>
-                  <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.角色数据.当前体力值, npc.角色数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.角色数据.当前体力值 }} / {{ npc.角色数据._体力值上限 ?? 0 }}</div></div>
+                <template v-if="npc.战斗数据">
+                  <div class="tk-panel-bar-row" style="margin-top: 10px;"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(npc.战斗数据.当前生命值, npc.战斗数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.战斗数据.当前生命值 }} / {{ npc.战斗数据._生命值上限 ?? 0 }}</div></div>
+                  <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(npc.战斗数据.当前体力值, npc.战斗数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ npc.战斗数据.当前体力值 }} / {{ npc.战斗数据._体力值上限 ?? 0 }}</div></div>
                 </template>
                 <div class="tk-panel-inline-note">{{ npc.简述 || '暂无描述' }}</div>
               </section>
@@ -30,9 +30,9 @@
                   <BoundedBar :label="`忠诚·${npc.武将信息.势力 || '无'}\n（${npc.武将信息._忠诚等级 || '无'}）`" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
                 </template>
               </section>
-              <section v-if="npc.角色数据" class="tk-panel-card">
+              <section class="tk-panel-card">
                 <div class="tk-panel-card-title">六维与战斗</div>
-                <RadarChart :stats="npc.角色数据.六维" />
+                <RadarChart :stats="npc.六维" />
                 <div class="tk-panel-kv-grid compact">
                   <div v-for="item in battleItems(npc)" :key="item.label" class="tk-panel-kv"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
                 </div>
@@ -95,7 +95,7 @@ function relationLevelText(npc: NPC): string {
 }
 
 function battleItems(npc: NPC): Array<{ label: string; value: number }> {
-  const data = npc.角色数据;
+  const data = npc.战斗数据;
   if (!data) {
     return [];
   }

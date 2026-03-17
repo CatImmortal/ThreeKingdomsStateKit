@@ -6,10 +6,10 @@
     <div v-if="activeTab === 'attrs'" class="tk-panel-page-grid cols-2">
       <section class="tk-panel-card">
         <div class="tk-panel-card-title">主角面板</div>
-        <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(player.当前生命值, player._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前生命值 }} / {{ player._生命值上限 ?? 0 }}</div></div>
-        <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(player.当前体力值, player._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.当前体力值 }} / {{ player._体力值上限 ?? 0 }}</div></div>
+        <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">生命</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-hp" :style="{ width: ratio(player.战斗数据.当前生命值, player.战斗数据._生命值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.战斗数据.当前生命值 }} / {{ player.战斗数据._生命值上限 ?? 0 }}</div></div>
+        <div class="tk-panel-bar-row"><div class="tk-panel-bar-label">体力</div><div class="tk-panel-bar"><span class="tk-panel-bar-fill is-sp" :style="{ width: ratio(player.战斗数据.当前体力值, player.战斗数据._体力值上限) }"></span></div><div class="tk-panel-bar-value">{{ player.战斗数据.当前体力值 }} / {{ player.战斗数据._体力值上限 ?? 0 }}</div></div>
         <BoundedBar label="声望" :value="player.声望" :max="100" color-class="is-gold" />
-        <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(player._伤势)">{{ player._伤势 || '完好' }}</span>　减值：{{ player._伤势减值 ?? 0 }}</div>
+        <div class="tk-panel-inline-note">伤势：<span :style="伤势文本样式(player.战斗数据._伤势)">{{ player.战斗数据._伤势 || '完好' }}</span>　减值：{{ player.战斗数据._伤势减值 ?? 0 }}</div>
         <div class="tk-panel-kv-grid" style="margin-top: 18px;">
           <div v-for="item in resourceItems" :key="item.label" class="tk-panel-kv" :class="{ 'is-accent': item.accent }"><span class="tk-panel-k">{{ item.label }}</span><span class="tk-panel-v">{{ item.value }}</span></div>
         </div>
@@ -114,7 +114,7 @@ type 列表项 = {
   metaSuffix?: string;
 };
 
-function build装备详情(item: Exclude<状态总表['主角']['装备'][keyof 状态总表['主角']['装备']], '无'>): Array<{ label: string; value: string | number }> {
+function build装备详情(item: Exclude<状态总表['主角']['战斗数据']['装备'][keyof 状态总表['主角']['战斗数据']['装备']], '无'>): Array<{ label: string; value: string | number }> {
   const 装备数据 = item.装备条目;
   if (!装备数据) {
     return [];
@@ -153,11 +153,11 @@ const resourceItems = computed(() => [
   { label: '积分', value: player.value.积分 },
 ]);
 const battleItems = computed(() => [
-  { label: '先攻', value: player.value._先攻基础值 ?? 0 },
-  { label: '攻击', value: player.value._攻击基础值 ?? 0 },
-  { label: '伤害', value: player.value._伤害基础值 ?? 0 },
-  { label: '防御DC', value: player.value._防御DC基础值 ?? 0 },
-  { label: '伤害减免', value: player.value._伤害减免基础值 ?? 0 },
+  { label: '先攻', value: player.value.战斗数据._先攻基础值 ?? 0 },
+  { label: '攻击', value: player.value.战斗数据._攻击基础值 ?? 0 },
+  { label: '伤害', value: player.value.战斗数据._伤害基础值 ?? 0 },
+  { label: '防御DC', value: player.value.战斗数据._防御DC基础值 ?? 0 },
+  { label: '伤害减免', value: player.value.战斗数据._伤害减免基础值 ?? 0 },
 ]);
 const 武将项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息?.是否已招募)).map(([, npc]) => ({
   title: npc.名称 || '未命名角色',
@@ -176,12 +176,12 @@ const 武将项列表 = computed<列表项[]>(() => Object.entries(props.state.N
 })));
 type ListTabKey = 'equip' | 'bag' | 'skills' | 'perks' | 'consorts' | 'generals';
 const lists = computed<Record<ListTabKey, 列表项[]>>(() => ({
-  equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无'
+  equip: Object.entries(player.value.战斗数据.装备 || {}).map(([slot, item]) => !item || item === '无'
     ? ({ title: slot, meta: '未装备', desc: '' })
     : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.装备条目?.其他效果 || '无', details: build装备详情(item) })),
   bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.物品?.名称 || '未命名物品', meta: item.物品?.品质 || '凡品', desc: item.物品?.描述 || '无', quality: item.物品?.品质 || '凡品', quantity: item.数量 ?? 0 })),
-  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, metaPrimary: skill.等级, metaSuffix: `${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
-  perks: Object.entries(player.value.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
+  skills: Object.entries(player.value.战斗数据.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, metaPrimary: skill.等级, metaSuffix: `${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
+  perks: Object.entries(player.value.战斗数据.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,
   generals: 武将项列表.value,
 }));

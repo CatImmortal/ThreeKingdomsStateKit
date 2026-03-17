@@ -39,9 +39,14 @@ export type 状态命令 =
   | {
       type: 'AdjustPlayerResource';
       mode?: 'delta' | 'set';
-      changes: Partial<
-        Pick<主角, '当前生命值' | '当前体力值' | '声望' | '金钱' | '积分' | '后宫和谐度'>
-      >;
+      changes: Partial<{
+        当前生命值: number;
+        当前体力值: number;
+        声望: number;
+        金钱: number;
+        积分: number;
+        后宫和谐度: number;
+      }>;
     }
   | {
       type: 'UpdateFaction';
@@ -169,19 +174,21 @@ const 命令字段白名单 = {
 
 const 世界字段 = ['当前时间', '当前地点', '当前剧本', '天气', '近期事件'] as const;
 const 主角资源字段 = ['当前生命值', '当前体力值', '声望', '金钱', '积分', '后宫和谐度'] as const;
+const 主角顶层资源字段 = ['声望', '金钱', '积分', '后宫和谐度'] as const;
 const 六维字段 = ['武力', '智力', '统率', '政治', '魅力', '体质'] as const;
 const 装备条目字段 = ['伤害骰', '先攻加值', '攻击加值', '防御DC加值', '伤害减免', '其他效果'] as const;
 const 物品条目字段 = ['名称', '品质', '类型', '描述', '装备条目'] as const;
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
 const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度', '体力消耗'] as const;
 const 专长条目字段 = ['名称', '等级', '效果'] as const;
-const 主角字段 = ['六维', '当前生命值', '当前体力值', '生命上限加成值', '体力上限加成值', '装备', '武技', '专长', '状态', '物品栏', '所属势力', '兵种适性', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
+const 角色战斗字段 = ['当前生命值', '当前体力值', '生命上限加成值', '体力上限加成值', '装备', '武技', '专长', '状态'] as const;
+const 主角字段 = ['六维', '战斗数据', '物品栏', '所属势力', '兵种适性', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['物品', '数量'] as const;
 const 势力字段 = ['名称', '主公', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
 const 城池字段 = ['名称', '等级', '城防', '人口', '农业', '商业', '民心', '治安', '繁荣度', '太守', '设施'] as const;
 const 军队字段 = ['名称', '兵种', '等级', '兵力', '士气', '疲惫', '装备等级', '统属将领', '驻扎地', '训练进度', '阵型'] as const;
 const 政策字段 = ['当前研究', '研究进度', '富国', '强兵', '霸道', '王道'] as const;
-const NPC字段 = ['名称', '品质', '阵营', '定位', '所在地', '好感', '简述', '羁绊', '角色数据', '武将信息', '美人属性'] as const;
+const NPC字段 = ['名称', '品质', '阵营', '定位', '所在地', '好感', '简述', '羁绊', '六维', '战斗数据', '武将信息', '美人属性'] as const;
 const 武将信息字段 = ['野心值', '性格', '官职', '当前状态', '状态描述', '势力', '忠诚', '是否已招募', '兵种适性', '特技'] as const;
 const 兵种适性字段 = ['刀盾兵', '枪矛兵', '弓弩兵', '骑兵', '水军'] as const;
 const 美人属性字段 = ['依赖度', '敏感度', '贞洁度', '位份', '性格', '当前状态'] as const;
@@ -369,10 +376,9 @@ function 校验专长映射(value: unknown, path: string): void {
   }
 }
 
-function 校验角色战斗数据(value: unknown, path: string): void {
+function 校验战斗数据(value: unknown, path: string): void {
   断言非空对象(value, path);
-  断言字段白名单(value, ['六维', '当前生命值', '当前体力值', '生命上限加成值', '体力上限加成值', '装备', '武技', '专长', '状态'], path);
-  if (value.六维 !== undefined) 校验六维(value.六维, `${path}.六维`);
+  断言字段白名单(value, 角色战斗字段, path);
   if (value.当前生命值 !== undefined) 断言数字(value.当前生命值, `${path}.当前生命值`);
   if (value.当前体力值 !== undefined) 断言数字(value.当前体力值, `${path}.当前体力值`);
   if (value.生命上限加成值 !== undefined) 断言数字(value.生命上限加成值, `${path}.生命上限加成值`);
@@ -382,6 +388,7 @@ function 校验角色战斗数据(value: unknown, path: string): void {
   if (value.专长 !== undefined) 校验专长映射(value.专长, `${path}.专长`);
   if (value.状态 !== undefined) 校验状态记录(value.状态, `${path}.状态`);
 }
+
 
 function 校验物品栏(value: unknown, path: string): void {
   断言对象(value, path);
@@ -472,14 +479,7 @@ function 校验主角更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 主角字段, path);
   if (value.六维 !== undefined) 校验六维(value.六维, `${path}.六维`);
-  if (value.当前生命值 !== undefined) 断言数字(value.当前生命值, `${path}.当前生命值`);
-  if (value.当前体力值 !== undefined) 断言数字(value.当前体力值, `${path}.当前体力值`);
-  if (value.生命上限加成值 !== undefined) 断言数字(value.生命上限加成值, `${path}.生命上限加成值`);
-  if (value.体力上限加成值 !== undefined) 断言数字(value.体力上限加成值, `${path}.体力上限加成值`);
-  if (value.装备 !== undefined) 校验装备栏(value.装备, `${path}.装备`);
-  if (value.武技 !== undefined) 校验武技映射(value.武技, `${path}.武技`);
-  if (value.专长 !== undefined) 校验专长映射(value.专长, `${path}.专长`);
-  if (value.状态 !== undefined) 校验状态记录(value.状态, `${path}.状态`);
+  if (value.战斗数据 !== undefined) 校验战斗数据(value.战斗数据, `${path}.战斗数据`);
   if (value.物品栏 !== undefined) 校验物品栏(value.物品栏, `${path}.物品栏`);
   if (value.所属势力 !== undefined) 断言字符串(value.所属势力, `${path}.所属势力`);
   if (value.兵种适性 !== undefined) 校验兵种适性表(value.兵种适性, `${path}.兵种适性`);
@@ -570,7 +570,8 @@ function 校验NPC更新(value: unknown, path: string): void {
   if (value.好感 !== undefined) 断言数字(value.好感, `${path}.好感`);
   if (value.简述 !== undefined) 断言字符串(value.简述, `${path}.简述`);
   if (value.羁绊 !== undefined) 校验字符串映射(value.羁绊, `${path}.羁绊`);
-  if (value.角色数据 !== undefined) 校验角色战斗数据(value.角色数据, `${path}.角色数据`);
+  if (value.六维 !== undefined) 校验六维(value.六维, `${path}.六维`);
+  if (value.战斗数据 !== undefined) 校验战斗数据(value.战斗数据, `${path}.战斗数据`);
   if (value.武将信息 !== undefined) 校验武将信息(value.武将信息, `${path}.武将信息`);
   if (value.美人属性 !== undefined) 校验美人属性(value.美人属性, `${path}.美人属性`);
 }

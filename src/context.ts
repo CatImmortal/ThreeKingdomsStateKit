@@ -7,7 +7,10 @@ function 隐藏伤势减值<T extends { _伤势减值?: number }>(data: T): T {
 }
 
 function 构建注入主角(state: 状态总表): 状态总表['主角'] {
-  return 隐藏伤势减值(state.主角);
+  return {
+    ..._.cloneDeep(state.主角),
+    战斗数据: 隐藏伤势减值(state.主角.战斗数据),
+  };
 }
 
 function 构建注入NPC集合(state: 状态总表, limit = MAX_CONTEXT_NPCS): Record<string, NPC> {
@@ -16,7 +19,7 @@ function 构建注入NPC集合(state: 状态总表, limit = MAX_CONTEXT_NPCS): R
       名称,
       {
         ..._.cloneDeep(npc),
-        ...(npc.角色数据 ? { 角色数据: 隐藏伤势减值(npc.角色数据) } : {}),
+        ...(npc.战斗数据 ? { 战斗数据: 隐藏伤势减值(npc.战斗数据) } : {}),
       },
     ]),
   );
