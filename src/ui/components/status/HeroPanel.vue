@@ -66,7 +66,12 @@
               <button type="button" class="tk-panel-action-btn" @click="openNpcDetailWindow(item.npcName || item.title)">查看详情</button>
             </div>
           </template>
-          <div v-else-if="item.desc" class="tk-panel-list-desc">{{ item.desc }}</div>
+          <template v-else>
+            <div v-if="item.details?.length" class="tk-panel-kv-grid compact" style="margin-top: 8px;">
+              <div v-for="detail in item.details || []" :key="detail.label" class="tk-panel-kv"><span class="tk-panel-k">{{ detail.label }}</span><span class="tk-panel-v">{{ detail.value }}</span></div>
+            </div>
+            <div v-if="item.desc" class="tk-panel-list-desc">{{ item.desc }}</div>
+          </template>
         </div>
         <div v-if="currentList.length === 0" class="tk-panel-empty">{{ currentEmpty }}</div>
       </div>
@@ -77,6 +82,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { 状态总表 } from '../../../state';
+import { 计算武技动作类型 } from '../../../recompute';
 import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
@@ -107,6 +113,20 @@ type 列表项 = {
   metaPrimary?: string;
   metaSuffix?: string;
 };
+
+function build装备详情(item: Exclude<状态总表['主角']['装备'][keyof 状态总表['主角']['装备']], '无'>): Array<{ label: string; value: string | number }> {
+  const 装备数据 = item.装备条目;
+  if (!装备数据) {
+    return [];
+  }
+  return [
+    ...(item.类型 === '武器' ? [{ label: '伤害骰', value: 装备数据.伤害骰 || '无' }] : []),
+    { label: '先攻加值', value: 装备数据.先攻加值 ?? 0 },
+    { label: '攻击加值', value: 装备数据.攻击加值 ?? 0 },
+    { label: '防御DC加值', value: 装备数据.防御DC加值 ?? 0 },
+    { label: '伤害减免', value: 装备数据.伤害减免 ?? 0 },
+  ];
+}
 const 后宫项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.美人属性?.位份 && npc.美人属性.位份 !== '未纳入')).map(([, npc]) => ({
   title: npc.名称 || '未命名角色',
   meta: '',
@@ -158,9 +178,9 @@ type ListTabKey = 'equip' | 'bag' | 'skills' | 'perks' | 'consorts' | 'generals'
 const lists = computed<Record<ListTabKey, 列表项[]>>(() => ({
   equip: Object.entries(player.value.装备 || {}).map(([slot, item]) => !item || item === '无'
     ? ({ title: slot, meta: '未装备', desc: '' })
-    : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.装备条目?.其他效果 || '无' })),
+    : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.装备条目?.其他效果 || '无', details: build装备详情(item) })),
   bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.物品?.名称 || '未命名物品', meta: item.物品?.品质 || '凡品', desc: item.物品?.描述 || '无', quality: item.物品?.品质 || '凡品', quantity: item.数量 ?? 0 })),
-  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型}`, metaPrimary: skill.等级, metaSuffix: skill.类型, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
+  skills: Object.entries(player.value.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, metaPrimary: skill.等级, metaSuffix: `${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
   perks: Object.entries(player.value.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,
   generals: 武将项列表.value,

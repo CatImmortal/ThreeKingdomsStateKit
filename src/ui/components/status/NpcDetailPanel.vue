@@ -63,6 +63,12 @@
               <div v-for="item in equipmentList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
                 <div class="tk-panel-list-meta"><span :style="物品品质文本样式(item.quality)">{{ item.quality }}</span> / {{ item.type }}</div>
+                <div v-if="item.details.length > 0" class="tk-panel-kv-grid compact" style="margin-top: 8px;">
+                  <div v-for="detail in item.details" :key="detail.label" class="tk-panel-kv">
+                    <span class="tk-panel-k">{{ detail.label }}</span>
+                    <span class="tk-panel-v">{{ detail.value }}</span>
+                  </div>
+                </div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -73,7 +79,7 @@
             <div class="tk-panel-list">
               <div v-for="item in skillList" :key="item.title" class="tk-panel-list-item">
                 <div class="tk-panel-list-title">{{ item.title }}</div>
-                <div class="tk-panel-list-meta"><span :style="武技等级文本样式(item.level)">{{ item.level }}</span> / {{ item.type }}</div>
+                <div class="tk-panel-list-meta"><span :style="武技等级文本样式(item.level)">{{ item.level }}</span> / {{ item.type }} / {{ item.actionType }}</div>
                 <div class="tk-panel-list-desc">{{ item.desc }}</div>
               </div>
             </div>
@@ -136,6 +142,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { NPC } from '../../../state';
+import { 计算武技动作类型 } from '../../../recompute';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
 import RadarChart from './RadarChart.vue';
@@ -175,7 +182,7 @@ const battleItems = computed(() => {
   ];
 });
 const equipmentList = computed(() => {
-  const list: Array<{ title: string; quality: string; type: string; desc: string }> = [];
+  const list: Array<{ title: string; quality: string; type: string; desc: string; details: Array<{ label: string; value: string | number }> }> = [];
   for (const [slot, item] of Object.entries(npc.value.角色数据?.装备 || {})) {
     if (!item || item === '无') {
       continue;
@@ -185,6 +192,13 @@ const equipmentList = computed(() => {
       quality: item.品质,
       type: item.类型,
       desc: item.描述 || item.装备条目?.其他效果 || '无',
+      details: item.装备条目 ? [
+        ...(item.类型 === '武器' ? [{ label: '伤害骰', value: item.装备条目.伤害骰 || '无' }] : []),
+        { label: '先攻加值', value: item.装备条目.先攻加值 ?? 0 },
+        { label: '攻击加值', value: item.装备条目.攻击加值 ?? 0 },
+        { label: '防御DC加值', value: item.装备条目.防御DC加值 ?? 0 },
+        { label: '伤害减免', value: item.装备条目.伤害减免 ?? 0 },
+      ] : [],
     });
   }
   return list;
@@ -194,6 +208,7 @@ const skillList = computed(() => Object.entries(npc.value.角色数据?.武技 |
     title: skill.名称 || '未命名武技',
     level: skill.等级,
     type: skill.类型,
+    actionType: skill._动作类型 || 计算武技动作类型(skill.类型),
     desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}`,
   })));
 const perkList = computed(() => Object.entries(npc.value.角色数据?.专长 || {})

@@ -6,6 +6,7 @@ import {
   type 状态总表,
   type 角色战斗数据,
   type 美人属性,
+  type 武技条目,
   type NPC,
   type 主角,
   type 城池,
@@ -36,6 +37,7 @@ import {
   疲惫系数,
   统率系数,
   兵种适性修正,
+  动作类型列表,
   军饷基数,
   军队装备系数,
   等级系数,
@@ -60,9 +62,22 @@ export function recompute六维(stats: 六维): 六维 {
   return next;
 }
 
+export function 计算武技动作类型(type: 武技条目['类型']): 武技条目['_动作类型'] {
+  if (type === '攻击') return 动作类型列表[0];
+  if (type === '反击') return 动作类型列表[2];
+  return 动作类型列表[1];
+}
+
+export function recompute武技条目(data: 武技条目): 武技条目 {
+  const next = _.cloneDeep(data);
+  next._动作类型 = 计算武技动作类型(next.类型);
+  return next;
+}
+
 export function recompute角色战斗数据(data: 角色战斗数据): 角色战斗数据 {
   const next = _.cloneDeep(data);
   next.六维 = recompute六维(next.六维);
+  next.武技 = _.mapValues(next.武技 || {}, item => recompute武技条目(item));
 
   const 基础生命上限 = (next.六维._体质加值 ?? 0) * 5;
   const 基础体力上限 = (next.六维._体质加值 ?? 0) * 8;
@@ -209,7 +224,7 @@ export function recompute全局(state: 状态总表): 状态总表 {
   next.主角 = recompute主角(next.主角);
   next.NPC = _.mapValues(next.NPC || {}, npc => recomputeNPC(npc));
   next.势力 = recompute势力集合(create势力集合(next.势力), { NPC: next.NPC, 主角: next.主角 });
-  next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中'].includes(task.状态));
+  next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中', '可提交'].includes(task.状态));
   next.meta.updatedAt = new Date().toISOString();
   return next;
 }

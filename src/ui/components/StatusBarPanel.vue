@@ -6,6 +6,7 @@
       </div>
       <div class="tk-panel-pages">
         <div v-if="activeTab === 'hero'" class="tk-panel-page is-hero"><HeroPanel :state="state" /></div>
+        <div v-else-if="activeTab === 'event'" class="tk-panel-page is-event"><EventPanel :state="state" /></div>
         <div v-else-if="activeTab === 'npc'" class="tk-panel-page is-npc"><NpcPanel :state="state" /></div>
         <div v-else-if="activeTab === 'quest'" class="tk-panel-page is-quest"><QuestPanel :state="state" /></div>
         <div v-else-if="activeTab === 'shop'" class="tk-panel-page is-shop"><ShopPanel :state="state" /></div>
@@ -19,6 +20,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { unifiedPanelState } from '../store';
+import EventPanel from './status/EventPanel.vue';
 import FactionPanel from './status/FactionPanel.vue';
 import HeroPanel from './status/HeroPanel.vue';
 import NpcPanel from './status/NpcPanel.vue';
@@ -28,6 +30,7 @@ import ShopPanel from './status/ShopPanel.vue';
 const state = computed(() => unifiedPanelState.systemPanel.state);
 const tabs = [
   { key: 'hero', label: '主角' },
+  { key: 'event', label: '事件' },
   { key: 'npc', label: 'NPC' },
   { key: 'quest', label: '任务' },
   { key: 'shop', label: '商城' },
