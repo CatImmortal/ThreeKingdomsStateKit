@@ -55,7 +55,9 @@
     参战军队状态: [参战, 溃败, 撤退, 全灭]
     围城状态: [完全围城, 部分围城, 未围城]
   共享子结构:
-    世界事件输入: { 事件名: string, 简述: string, 日期: string }
+    世界时间: { 年?: number, 月?: number, 日?: number, 时辰?: string }
+    地点结构: { 州?: string, 城?: string, 地点?: string }
+    世界事件输入: { 事件名: string, 简述: string, 日期: 世界时间 }
     六维基础字段: { 武力?: number, 智力?: number, 统率?: number, 政治?: number, 魅力?: number, 体质?: number }
     装备条目: { 伤害骰?: string, 先攻加值?: number, 攻击加值?: number, 防御DC加值?: number, 伤害减免?: number, 其他效果?: string }
     物品条目: { 名称: string, 品质: 物品品质, 类型: 物品类型, 描述: string, 装备条目?: 装备条目 | null }
@@ -81,10 +83,10 @@
   命令白名单:
     UpdateWorld:
       必填: [type, changes]
-      changes: { 当前时间?: string, 当前地点?: string, 当前剧本?: 当前剧本, 天气?: string, 近期事件?: 世界事件输入[] }
+      changes: { 当前时间?: 世界时间, 当前地点?: 地点结构, 当前剧本?: 当前剧本, 天气?: string, 近期事件?: 世界事件输入[] }
       约束:
         - 追加单条近期事件优先用 `AppendRecentEvent`
-      示例: '{"type":"UpdateWorld","changes":{"当前时间":"建安元年三月初三","当前地点":"洛阳"}}'
+      示例: '{"type":"UpdateWorld","changes":{"当前时间":{"年":189,"月":3,"日":3,"时辰":"辰时"},"当前地点":{"州":"司隶","城":"洛阳","地点":"北宫"}}}'
     AppendRecentEvent:
       必填: [type, event]
       event: 世界事件输入
@@ -135,7 +137,7 @@
       changes: 政策
     UpsertNpc:
       必填: [type, 名称, data]
-      data: { 名称?: string, 品质?: 品质, 阵营?: string, 定位?: string, 所在地?: string, 好感?: number, 简述?: string, 羁绊?: Record<string, string>, 六维?: 六维基础字段, 战斗数据?: 战斗数据基础字段, 武将信息?: 武将信息, 美人属性?: 美人属性 }
+      data: { 名称?: string, 品质?: 品质, 阵营?: string, 定位?: string, 所在地?: 地点结构, 好感?: number, 简述?: string, 羁绊?: Record<string, string>, 六维?: 六维基础字段, 战斗数据?: 战斗数据基础字段, 武将信息?: 武将信息, 美人属性?: 美人属性 }
       约束:
         - NPC 出现且可确定位置时，应尽量写 `所在地`
         - 只写重要 NPC，或本轮与主角有明确互动的 NPC；路人、背景板、杂兵、无名小兵不要输出

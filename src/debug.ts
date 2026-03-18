@@ -1,4 +1,4 @@
-import type { 状态总表 } from './state';
+import { 格式化世界时间, 格式化地点, type 状态总表 } from './state';
 
 const DEBUG_PREFIX = '[ThreeKingdomsStateKit]';
 const DUPLICATE_LOG_WINDOW_MS = 600;
@@ -130,8 +130,8 @@ export function debugError(scope: string, message: string, error?: unknown): voi
 export function summarizeState(state: 状态总表) {
   return {
     世界: {
-      当前时间: state.世界?.当前时间 || '',
-      当前地点: state.世界?.当前地点 || '',
+      当前时间: 格式化世界时间(state.世界?.当前时间),
+      当前地点: 格式化地点(state.世界?.当前地点),
       当前剧本: state.世界?.当前剧本 || '',
       近期事件数: state.世界?.近期事件?.length || 0,
     },

@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch, type CSSProperties } from 'vue';
 import { getHostDocument } from '../../dom-host';
+import { 格式化世界时间, 格式化地点 } from '../../state';
 import { attachDragHandlers, computeCenteredPosition } from '../drag';
 import StatusBarPanel from '../components/StatusBarPanel.vue';
 import { resetSystemPanelPosition, setSystemPanelPosition, setSystemPanelVisible, unifiedPanelState } from '../store';
@@ -34,7 +35,7 @@ const worldSummary = computed(() => {
   if (!state) {
     return '';
   }
-  return [state.世界.当前时间 || '未知时刻', state.世界.当前地点 || '未知地点', state.世界.天气 || '未知天气', state.世界.当前剧本 || '未知剧本'].join(' · ');
+  return [格式化世界时间(state.世界.当前时间) || '未知时刻', 格式化地点(state.世界.当前地点) || '未知地点', state.世界.天气 || '未知天气', state.世界.当前剧本 || '未知剧本'].join(' · ');
 });
 const panelStyle = computed<CSSProperties>(() => {
   const position = unifiedPanelState.systemPanel.position;

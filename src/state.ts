@@ -244,12 +244,18 @@ export type 美人属性 = {
   _好感等级?: string;
 };
 
+export type 地点结构 = {
+  州: string;
+  城: string;
+  地点: string;
+};
+
 export type NPC = {
   名称: string;
   品质: 品质;
   阵营: string;
   定位: string;
-  所在地: string;
+  所在地: 地点结构;
   好感: number;
   简述: string;
   羁绊: Record<string, string>;
@@ -312,15 +318,22 @@ export type 军队战 = {
   _守方总战力?: number;
 };
 
+export type 世界时间 = {
+  年: number;
+  月: number;
+  日: number;
+  时辰: string;
+};
+
 export type 世界 = {
-  当前时间: string;
-  当前地点: string;
+  当前时间: 世界时间;
+  当前地点: 地点结构;
   当前剧本: 剧本;
   天气: string;
   近期事件: Array<{
     事件名: string;
     简述: string;
-    日期: string;
+    日期: 世界时间;
   }>;
 };
 
@@ -552,7 +565,7 @@ export function createNPC(data: Partial<NPC> = {}): NPC {
     品质: 枚举.品质.includes(data.品质 as 品质) ? (data.品质 as 品质) : 'N',
     阵营: String(data.阵营 || ''),
     定位: String(data.定位 || ''),
-    所在地: String(data.所在地 || ''),
+    所在地: create地点结构(data.所在地),
     好感: 限制数值(数值(data.好感, 30), 0, 100),
     简述: String(data.简述 || ''),
     羁绊: _.mapValues(data.羁绊 || {}, value => String(value || '')),
@@ -623,17 +636,54 @@ export function create军队战(data: Partial<军队战> = {}): 军队战 {
   };
 }
 
+export function create地点结构(data: Partial<地点结构> = {}): 地点结构 {
+  return {
+    州: String(data.州 || ''),
+    城: String(data.城 || ''),
+    地点: String(data.地点 || ''),
+  };
+}
+
+export function 格式化地点(data?: Partial<地点结构> | null): string {
+  if (!data) {
+    return '';
+  }
+  const 地点 = create地点结构(data);
+  const parts = [地点.州, 地点.城, 地点.地点].filter(Boolean);
+  return parts.join(' / ');
+}
+
+export function create世界时间(data: Partial<世界时间> = {}): 世界时间 {
+  return {
+    年: Math.max(0, 数值(data.年)),
+    月: Math.max(1, 数值(data.月, 1)),
+    日: Math.max(1, 数值(data.日, 1)),
+    时辰: String(data.时辰 || ''),
+  };
+}
+
+export function 格式化世界时间(data?: Partial<世界时间> | null): string {
+  if (!data) {
+    return '';
+  }
+  const 时间 = create世界时间(data);
+  if (!时间.年 && !时间.月 && !时间.日 && !时间.时辰) {
+    return '';
+  }
+  return `${时间.年}年${时间.月}月${时间.日}日${时间.时辰 || ''}`;
+}
+
 export function create世界(data: Partial<世界> = {}): 世界 {
   return {
-    当前时间: String(data.当前时间 || ''),
-    当前地点: String(data.当前地点 || ''),
+    当前时间: create世界时间(data.当前时间),
+    当前地点: create地点结构(data.当前地点),
     当前剧本: 枚举.剧本.includes(data.当前剧本 as 剧本) ? (data.当前剧本 as 剧本) : 'S1黄巾起义',
     天气: String(data.天气 || '晴'),
     近期事件: Array.isArray(data.近期事件)
       ? data.近期事件.map(item => ({
           事件名: String(item?.事件名 || ''),
           简述: String(item?.简述 || ''),
-          日期: String(item?.日期 || ''),
+          日期: create世界时间(item?.日期),
         }))
       : [],
   };

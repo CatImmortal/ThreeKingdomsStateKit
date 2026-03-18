@@ -1,4 +1,4 @@
-import { type NPC, type 军队战, type 状态总表 } from './state';
+import { create地点结构, type NPC, type 军队战, type 状态总表 } from './state';
 
 function 隐藏伤势减值<T extends { _伤势减值?: number }>(data: T): T {
   const next = _.cloneDeep(data);
@@ -39,14 +39,12 @@ export type 注入视图 = {
   军队战?: 军队战;
 };
 
-function 是否当前地点相关(npc: NPC, 当前地点: string): boolean {
-  if (!当前地点) {
+function 是否当前地点相关(npc: NPC, 当前地点: 状态总表['世界']['当前地点']): boolean {
+  const 当前 = create地点结构(当前地点);
+  if (!当前.城) {
     return true;
   }
-  if (npc.所在地 === 当前地点) {
-    return true;
-  }
-  return String(npc.定位 || '').includes(当前地点) || String(npc.简述 || '').includes(当前地点);
+  return create地点结构(npc.所在地).城 === 当前.城;
 }
 
 export function 选择当前地点相关NPC(state: 状态总表, limit = MAX_CONTEXT_NPCS): Record<string, NPC> {

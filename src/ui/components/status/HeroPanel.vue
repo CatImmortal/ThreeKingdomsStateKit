@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { 状态总表 } from '../../../state';
+import { 格式化地点, type 状态总表 } from '../../../state';
 import { 计算武技动作类型 } from '../../../recompute';
 import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
@@ -162,7 +162,7 @@ const battleItems = computed(() => [
 const 武将项列表 = computed<列表项[]>(() => Object.entries(props.state.NPC || {}).filter(([, npc]) => Boolean(npc.武将信息?.是否已招募)).map(([, npc]) => ({
   title: npc.名称 || '未命名角色',
   meta: '',
-  desc: `${npc.所在地 || '未知地点'} · ${npc.简述 || '无'}`,
+  desc: `${格式化地点(npc.所在地) || '未知地点'} · ${npc.简述 || '无'}`,
   npcName: npc.名称 || '未命名角色',
   bars: [
     { label: `好感\n（${npc._交情等级 || String(npc.好感 ?? 0)}）`, value: npc.好感 ?? 0, colorClass: 'is-gold' },

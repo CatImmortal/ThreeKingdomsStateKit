@@ -141,7 +141,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { NPC } from '../../../state';
+import { 格式化地点, type NPC } from '../../../state';
 import { 计算武技动作类型 } from '../../../recompute';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
@@ -164,7 +164,7 @@ const baseItems = computed(() => [
   { label: '名称', value: npc.value.名称 || '未命名角色' },
   { label: '品质', value: npc.value.品质 || '无' },
   { label: '阵营', value: npc.value.阵营 || '无' },
-  { label: '所在地', value: npc.value.所在地 || '未知地点' },
+  { label: '所在地', value: 格式化地点(npc.value.所在地) || '未知地点' },
   { label: '定位', value: npc.value.定位 || '无' },
   { label: '关系', value: relationText.value },
 ]);

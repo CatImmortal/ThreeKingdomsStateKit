@@ -14,6 +14,7 @@ import {
   create军队战,
   create参战军队引用,
   create攻城数据,
+  create世界时间,
   type NPC,
   type 商品条目,
   type 状态总表,
@@ -69,7 +70,7 @@ function 应用近期事件(state: 状态总表, command: Extract<状态命令, 
   state.世界.近期事件.push({
     事件名: String(command.event.事件名 || ''),
     简述: String(command.event.简述 || ''),
-    日期: String(command.event.日期 || ''),
+    日期: create世界时间(command.event.日期),
   });
   state.世界.近期事件 = state.世界.近期事件.slice(-MAX_RECENT_EVENTS);
 }

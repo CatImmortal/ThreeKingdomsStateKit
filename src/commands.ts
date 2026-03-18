@@ -1,4 +1,4 @@
-import type { NPC, 世界, 主角, 商品条目, 状态总表, 任务, 任务目标, 势力, 城池, 军队, 政策, 参战军队引用, 攻城数据, 军队战 } from './state';
+import type { NPC, 世界, 世界时间, 地点结构, 主角, 商品条目, 状态总表, 任务, 任务目标, 势力, 城池, 军队, 政策, 参战军队引用, 攻城数据, 军队战 } from './state';
 import { 枚举, type 任务状态 } from './rules';
 import { debugError, debugLog, summarizeValue } from './debug';
 
@@ -22,8 +22,11 @@ export type 攻城数据更新 = Partial<基础字段<攻城数据>>;
 export type 世界事件输入 = {
   事件名: string;
   简述: string;
-  日期: string;
+  日期: 世界时间更新;
 };
+
+export type 世界时间更新 = Partial<基础字段<世界时间>>;
+export type 地点结构更新 = Partial<基础字段<地点结构>>;
 
 export type 状态命令 =
   | {
@@ -202,6 +205,8 @@ const 命令字段白名单 = {
 } as const;
 
 const 世界字段 = ['当前时间', '当前地点', '当前剧本', '天气', '近期事件'] as const;
+const 世界时间字段 = ['年', '月', '日', '时辰'] as const;
+const 地点结构字段 = ['州', '城', '地点'] as const;
 const 主角资源字段 = ['当前生命值', '当前体力值', '声望', '金钱', '积分', '后宫和谐度'] as const;
 const 主角顶层资源字段 = ['声望', '金钱', '积分', '后宫和谐度'] as const;
 const 六维字段 = ['武力', '智力', '统率', '政治', '魅力', '体质'] as const;
@@ -315,7 +320,7 @@ function 校验世界事件输入(value: unknown, path: string): void {
   断言字段白名单(value, ['事件名', '简述', '日期'], path);
   断言字符串(value.事件名, `${path}.事件名`);
   断言字符串(value.简述, `${path}.简述`);
-  断言字符串(value.日期, `${path}.日期`);
+  校验世界时间更新(value.日期, `${path}.日期`);
 }
 
 function 校验六维(value: unknown, path: string): void {
@@ -551,11 +556,28 @@ function 校验军队战更新(value: unknown, path: string): void {
   if (value.攻城数据 !== undefined) 校验攻城数据更新(value.攻城数据, `${path}.攻城数据`);
 }
 
+function 校验世界时间更新(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 世界时间字段, path);
+  if (value.年 !== undefined) 断言数字(value.年, `${path}.年`);
+  if (value.月 !== undefined) 断言数字(value.月, `${path}.月`);
+  if (value.日 !== undefined) 断言数字(value.日, `${path}.日`);
+  if (value.时辰 !== undefined) 断言字符串(value.时辰, `${path}.时辰`);
+}
+
+function 校验地点结构(value: unknown, path: string): void {
+  断言非空对象(value, path);
+  断言字段白名单(value, 地点结构字段, path);
+  if (value.州 !== undefined) 断言字符串(value.州, `${path}.州`);
+  if (value.城 !== undefined) 断言字符串(value.城, `${path}.城`);
+  if (value.地点 !== undefined) 断言字符串(value.地点, `${path}.地点`);
+}
+
 function 校验世界更新(value: unknown, path: string): void {
   断言非空对象(value, path);
   断言字段白名单(value, 世界字段, path);
-  if (value.当前时间 !== undefined) 断言字符串(value.当前时间, `${path}.当前时间`);
-  if (value.当前地点 !== undefined) 断言字符串(value.当前地点, `${path}.当前地点`);
+  if (value.当前时间 !== undefined) 校验世界时间更新(value.当前时间, `${path}.当前时间`);
+  if (value.当前地点 !== undefined) 校验地点结构(value.当前地点, `${path}.当前地点`);
   if (value.当前剧本 !== undefined) 断言枚举值(value.当前剧本, 枚举.剧本, `${path}.当前剧本`);
   if (value.天气 !== undefined) 断言字符串(value.天气, `${path}.天气`);
   if (value.近期事件 !== undefined) {
@@ -655,7 +677,7 @@ function 校验NPC更新(value: unknown, path: string): void {
   if (value.品质 !== undefined) 断言枚举值(value.品质, 枚举.品质, `${path}.品质`);
   if (value.阵营 !== undefined) 断言字符串(value.阵营, `${path}.阵营`);
   if (value.定位 !== undefined) 断言字符串(value.定位, `${path}.定位`);
-  if (value.所在地 !== undefined) 断言字符串(value.所在地, `${path}.所在地`);
+  if (value.所在地 !== undefined) 校验地点结构(value.所在地, `${path}.所在地`);
   if (value.好感 !== undefined) 断言数字(value.好感, `${path}.好感`);
   if (value.简述 !== undefined) 断言字符串(value.简述, `${path}.简述`);
   if (value.羁绊 !== undefined) 校验字符串映射(value.羁绊, `${path}.羁绊`);

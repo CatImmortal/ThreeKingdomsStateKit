@@ -13,7 +13,7 @@
               <section class="tk-panel-card">
                 <div class="tk-panel-card-title">基础信息</div>
                 <div class="tk-panel-kv-grid compact">
-                  <div class="tk-panel-kv"><span class="tk-panel-k">所在地</span><span class="tk-panel-v">{{ npc.所在地 || '未知地点' }}</span></div>
+                  <div class="tk-panel-kv"><span class="tk-panel-k">所在地</span><span class="tk-panel-v">{{ 格式化地点(npc.所在地) || '未知地点' }}</span></div>
                   <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
                   <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
                 </div>
@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import type { NPC, 状态总表 } from '../../../state';
+import { create地点结构, 格式化地点, type NPC, type 状态总表 } from '../../../state';
 import { openNpcDetailWindow } from '../../store';
 import AptitudeRadarChart from './AptitudeRadarChart.vue';
 import BoundedBar from './BoundedBar.vue';
@@ -66,22 +66,22 @@ const props = defineProps<{ state: 状态总表 }>();
 const UNKNOWN_LOCATION = '未知地点';
 const activeTab = ref('');
 const entries = computed(() => Object.entries(props.state.NPC || {}));
-const currentLocation = computed(() => props.state.世界?.当前地点 || '');
+const currentLocation = computed(() => create地点结构(props.state.世界?.当前地点));
 const locationTabs = computed(() => {
-  const unique = [...new Set(entries.value.map(([, npc]) => npc.所在地 || UNKNOWN_LOCATION))];
-  if (!currentLocation.value) {
+  const unique = [...new Set(entries.value.map(([, npc]) => create地点结构(npc.所在地).城 || UNKNOWN_LOCATION))];
+  if (!currentLocation.value.城) {
     return unique;
   }
-  const current = unique.find(location => location === currentLocation.value);
-  const rest = unique.filter(location => location !== currentLocation.value);
-  return current ? [current, ...rest] : [currentLocation.value, ...rest];
+  const current = unique.find(location => location === currentLocation.value.城);
+  const rest = unique.filter(location => location !== currentLocation.value.城);
+  return current ? [current, ...rest] : [currentLocation.value.城, ...rest];
 });
 watch(locationTabs, value => {
   activeTab.value = value[0] || '';
 }, { immediate: true });
 const currentEntries = computed(() => {
-  const location = activeTab.value || currentLocation.value || UNKNOWN_LOCATION;
-  return entries.value.filter(([, npc]) => (npc.所在地 || UNKNOWN_LOCATION) === location);
+  const location = activeTab.value || currentLocation.value.城 || UNKNOWN_LOCATION;
+  return entries.value.filter(([, npc]) => (create地点结构(npc.所在地).城 || UNKNOWN_LOCATION) === location);
 });
 
 function relationLevelText(npc: NPC): string {
