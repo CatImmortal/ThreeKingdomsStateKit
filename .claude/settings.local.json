@@ -7,7 +7,9 @@
       "Bash(jq:*)",
       "Bash(python3:*)",
       "Bash(node:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "mcp__memos-api-mcp__search_memory",
+      "mcp__memos-api-mcp__add_message"
     ]
   }
 }
