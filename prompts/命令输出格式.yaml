@@ -51,32 +51,32 @@
     军队装备等级: [简陋, 普通, 精良, 上等, 精锐]
     阵型: [无, 锋矢阵, 鹤翼阵, 鱼鳞阵, 方圆阵, 长蛇阵, 雁行阵, 偃月阵]
     军队战类型: [遭遇战, 攻城战]
-    军队战阶段: [侦察, 布阵, 交战, 围城, 攻城, 巷战, 结束]
+    军队战阶段: [伏击, 布阵, 交战, 围城, 攻城, 巷战, 结束]
     参战军队状态: [参战, 溃败, 撤退, 全灭]
     围城状态: [完全围城, 部分围城, 未围城]
   共享子结构:
     世界事件输入: { 事件名: string, 简述: string, 日期: string }
-    六维基础字段: { 武力: number, 智力: number, 统率: number, 政治: number, 魅力: number, 体质: number }
-    装备条目: { 伤害骰: string, 先攻加值: number, 攻击加值: number, 防御DC加值: number, 伤害减免: number, 其他效果: string }
+    六维基础字段: { 武力?: number, 智力?: number, 统率?: number, 政治?: number, 魅力?: number, 体质?: number }
+    装备条目: { 伤害骰?: string, 先攻加值?: number, 攻击加值?: number, 防御DC加值?: number, 伤害减免?: number, 其他效果?: string }
     物品条目: { 名称: string, 品质: 物品品质, 类型: 物品类型, 描述: string, 装备条目?: 装备条目 | null }
-    装备栏: { 主武器: 物品条目 | 无, 副武器: 物品条目 | 无, 护甲: 物品条目 | 无, 坐骑: 物品条目 | 无, 饰品1: 物品条目 | 无, 饰品2: 物品条目 | 无, 饰品3: 物品条目 | 无 }
-    状态记录: Record<string, { 效果: string, 剩余: string }>
-    武技条目: { 名称: string, 等级: 武技等级, 类型: 武技类型, 效果: string, 熟练度?: number, 体力消耗?: number }
-    专长条目: { 名称: string, 等级: 属性等级, 效果: string }
-    战斗数据基础字段: { 当前生命值: number, 当前体力值: number, 生命上限加成值: number, 体力上限加成值: number, 装备: 装备栏, 武技: Record<string, 武技条目>, 专长: Record<string, 专长条目>, 状态: 状态记录 }
-    物品栏条目: { 物品: 物品条目, 数量: number }
-    兵种适性表: { 刀盾兵: number, 枪矛兵: number, 弓弩兵: number, 骑兵: number, 水军: number }
-    武将信息: { 野心值: number, 性格: 武将性格, 官职: string, 当前状态: 武将状态, 状态描述: string, 势力: string, 忠诚: number, 是否已招募: boolean, 兵种适性: 兵种适性表, 特技: Record<string, string> }
-    美人属性: { 依赖度: number, 敏感度: number, 贞洁度: number, 位份: 美人位份, 性格: 美人性格, 当前状态: 美人状态 }
-    任务目标更新: { 类型: 任务目标类型, 状态: 任务目标状态, 描述: string, 积分: number, 其他奖励: string }
-    商品条目: { 物品: 物品条目, 分类: 商品分类, 价格: number }
-    城池: { 名称: string, 等级: 城池等级, 城防: number, 人口: number, 农业: number, 商业: number, 民心: number, 治安: number, 繁荣度: number, 太守: string, 设施: string[] }
-    军队: { 名称: string, 兵种: 基础兵种, 等级: 军队等级, 兵力: number, 士气: number, 疲惫: number, 装备等级: 军队装备等级, 统属将领: string, 驻扎地: string, 训练进度: number, 阵型: 阵型 }
-    政策: { 当前研究: string, 研究进度: number, 富国: number, 强兵: number, 霸道: number, 王道: number }
-    势力: { 名称: string, 主公: string, 规模: 势力规模, 正统性: number, 情报网: number, 金钱: number, 粮草: number, 城池: Record<string, 城池>, 军队: Record<string, 军队>, 外交: Record<string, number>, 政策: 政策 }
+    装备栏: { 主武器?: 物品条目 | 无, 副武器?: 物品条目 | 无, 护甲?: 物品条目 | 无, 坐骑?: 物品条目 | 无, 饰品1?: 物品条目 | 无, 饰品2?: 物品条目 | 无, 饰品3?: 物品条目 | 无 }
+    状态记录: Record<string, { 效果?: string, 剩余?: string }>
+    武技条目: { 名称?: string, 等级?: 武技等级, 类型?: 武技类型, 效果?: string, 熟练度?: number, 体力消耗?: number }
+    专长条目: { 名称?: string, 等级?: 属性等级, 效果?: string }
+    战斗数据基础字段: { 当前生命值?: number, 当前体力值?: number, 生命上限加成值?: number, 体力上限加成值?: number, 装备?: 装备栏, 武技?: Record<string, 武技条目>, 专长?: Record<string, 专长条目>, 状态?: 状态记录 }
+    物品栏条目: { 物品?: 物品条目, 数量?: number }
+    兵种适性表: { 刀盾兵?: number, 枪矛兵?: number, 弓弩兵?: number, 骑兵?: number, 水军?: number }
+    武将信息: { 野心值?: number, 性格?: 武将性格, 官职?: string, 当前状态?: 武将状态, 状态描述?: string, 势力?: string, 忠诚?: number, 是否已招募?: boolean, 兵种适性?: 兵种适性表, 特技?: Record<string, string> }
+    美人属性: { 依赖度?: number, 敏感度?: number, 贞洁度?: number, 位份?: 美人位份, 性格?: 美人性格, 当前状态?: 美人状态 }
+    任务目标更新: { 类型?: 任务目标类型, 状态?: 任务目标状态, 描述?: string, 积分?: number, 其他奖励?: string }
+    商品条目: { 物品?: 物品条目, 分类?: 商品分类, 价格?: number }
+    城池: { 名称?: string, 等级?: 城池等级, 城防?: number, 人口?: number, 农业?: number, 商业?: number, 民心?: number, 治安?: number, 繁荣度?: number, 太守?: string, 设施?: string[] }
+    军队: { 名称?: string, 兵种?: 基础兵种, 等级?: 军队等级, 兵力?: number, 士气?: number, 疲惫?: number, 装备等级?: 军队装备等级, 统属将领?: string, 驻扎地?: string, 训练进度?: number, 阵型?: 阵型 }
+    政策: { 当前研究?: string, 研究进度?: number, 富国?: number, 强兵?: number, 霸道?: number, 王道?: number }
+    势力: { 名称?: string, 主公?: string, 规模?: 势力规模, 正统性?: number, 情报网?: number, 金钱?: number, 粮草?: number, 城池?: Record<string, 城池>, 军队?: Record<string, 军队>, 外交?: Record<string, number>, 政策?: 政策 }
     势力集合: Record<string, 势力>
-    参战军队引用: { 名称: string, 势力名称: string, 状态: 参战军队状态 }
-    攻城数据: { 目标城池: string, 围城状态: 围城状态, 器械: Record<string, number> }
+    参战军队引用: { 名称?: string, 势力名称?: string, 状态?: 参战军队状态 }
+    攻城数据: { 目标城池?: string, 围城状态?: 围城状态, 器械?: Record<string, number> }
     当前军队战: { 名称: string, 类型: 军队战类型, 阶段: 军队战阶段, 地形: string, 遭遇战当前轮次: number, 攻城战当前天数: number, 攻方势力: string, 守方势力: string, 攻方军队: Record<string, 参战军队引用>, 守方军队: Record<string, 参战军队引用>, 攻城数据?: 攻城数据 }
   命令白名单:
     UpdateWorld:

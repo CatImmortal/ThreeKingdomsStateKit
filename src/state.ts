@@ -611,7 +611,7 @@ export function create军队战(data: Partial<军队战> = {}): 军队战 {
   return {
     名称: String(data.名称 || ''),
     类型: 枚举.军队战类型.includes(data.类型 as 军队战类型) ? (data.类型 as 军队战类型) : '遭遇战',
-    阶段: 枚举.军队战阶段.includes(data.阶段 as 军队战阶段) ? (data.阶段 as 军队战阶段) : '侦察',
+    阶段: 枚举.军队战阶段.includes(data.阶段 as 军队战阶段) ? (data.阶段 as 军队战阶段) : '伏击',
     地形: String(data.地形 || '平原'),
     遭遇战当前轮次: Math.max(0, 数值(data.遭遇战当前轮次)),
     攻城战当前天数: Math.max(0, 数值(data.攻城战当前天数)),
