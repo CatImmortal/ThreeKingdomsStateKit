@@ -9,6 +9,9 @@ import {
   create城池,
   create军队,
   create政策,
+  create军队战,
+  create参战军队引用,
+  create攻城数据,
   create初始状态,
 } from './state';
 import {
@@ -53,6 +56,9 @@ export {
   create城池,
   create军队,
   create政策,
+  create军队战,
+  create参战军队引用,
+  create攻城数据,
   create初始状态,
   解析命令块,
   解析玩家选项块,
@@ -94,6 +100,9 @@ export const ThreeKingdomsStateKit = {
     create城池,
     create军队,
     create政策,
+    create军队战,
+    create参战军队引用,
+    create攻城数据,
     create初始状态,
   },
   协议: {

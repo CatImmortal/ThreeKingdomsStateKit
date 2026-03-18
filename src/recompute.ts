@@ -2,6 +2,7 @@ import {
   create世界,
   create势力,
   create势力集合,
+  create军队战,
   type 六维,
   type 状态总表,
   type 战斗数据,
@@ -13,6 +14,8 @@ import {
   type 军队,
   type 势力,
   type 势力集合,
+  type 军队战,
+  type 参战军队引用,
 } from './state';
 import {
   MAX_RECENT_EVENTS,
@@ -224,6 +227,29 @@ export function recompute势力集合(data: 势力集合, state?: Pick<状态总
   return _.mapValues(data || {}, faction => recompute势力(create势力(faction), state));
 }
 
+function 查找参战军队总值(
+  refs: Record<string, 参战军队引用>,
+  势力集合: 状态总表['势力'],
+  field: '_综合战力' | '兵力',
+): number {
+  return Object.values(refs).reduce((sum, ref) => {
+    if (ref.状态 !== '参战') return sum;
+    const faction = 势力集合[ref.势力名称];
+    const army = faction?.军队?.[ref.名称];
+    if (!army) return sum;
+    return sum + (field === '兵力' ? army.兵力 ?? 0 : army._综合战力 ?? 0);
+  }, 0);
+}
+
+export function recompute军队战(data: 军队战, state: Pick<状态总表, '势力'>): 军队战 {
+  const next = _.cloneDeep(data);
+  next._攻方总兵力 = 查找参战军队总值(next.攻方军队, state.势力, '兵力');
+  next._守方总兵力 = 查找参战军队总值(next.守方军队, state.势力, '兵力');
+  next._攻方总战力 = 查找参战军队总值(next.攻方军队, state.势力, '_综合战力');
+  next._守方总战力 = 查找参战军队总值(next.守方军队, state.势力, '_综合战力');
+  return next;
+}
+
 export function recompute全局(state: 状态总表): 状态总表 {
   const next = _.cloneDeep(state);
   next.世界 = create世界(next.世界);
@@ -232,6 +258,7 @@ export function recompute全局(state: 状态总表): 状态总表 {
   next.NPC = _.mapValues(next.NPC || {}, npc => recomputeNPC(npc));
   next.势力 = recompute势力集合(create势力集合(next.势力), { NPC: next.NPC, 主角: next.主角 });
   next.任务 = _.pickBy(next.任务 || {}, task => ['可接取', '进行中', '可提交'].includes(task.状态));
+  next.军队战 = _.mapValues(next.军队战 || {}, battle => recompute军队战(create军队战(battle), { 势力: next.势力 }));
   next.meta.updatedAt = new Date().toISOString();
   return next;
 }

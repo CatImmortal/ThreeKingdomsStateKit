@@ -2,17 +2,12 @@
   目标:
     - 正文照常输出；仅在确有状态变化时，于最末尾追加命令块。
     - 命令块只驱动 {{char}} 数据层，不属于正文。
-    - 只允许使用白名单命令、字段与枚举值。
   全局规则:
     - 更新块固定为 `<UpdateVariable><Analysis>...</Analysis><Commands>...</Commands></UpdateVariable>`，且必须放在回复最后。
     - `Commands` 必须是合法 JSON 数组；不得带注释、解释、markdown 代码块。
-    - 每条命令都必须有 `type`，且只能是白名单命令。
-    - 严禁输出任何 `_` 开头字段。
     - 同一轮可输出多条命令，按数组顺序执行。
     - 只写本轮正文中明确出现、确认变化、或可直接推出的字段；未提及的不补全。
-    - 名称为唯一定位键：按名称定位的命令必须显式提供 `名称`；城池/军队相关命令还必须提供 `势力名称`。
     - 不允许改名：若命令中出现 `data.名称` / `changes.名称`，其值必须与定位用 `名称` 一致；需要改名时只能删旧建新。
-    - `Update*` 的 `changes`、`Upsert*` 的 `data` 都至少包含 1 个字段；对已有对象只写局部变化，不整对象重写。
     - `势力.主公` 必须是已存在或本轮同步创建的 NPC 名称，不能写称号、职位、势力名或泛指身份。
     - 没有状态变化时，不输出 `UpdateVariable`。
   标签模板: |-
@@ -55,6 +50,10 @@
     军队等级: [新兵, 普通, 老兵, 精锐, 特殊兵种]
     军队装备等级: [简陋, 普通, 精良, 上等, 精锐]
     阵型: [无, 锋矢阵, 鹤翼阵, 鱼鳞阵, 方圆阵, 长蛇阵, 雁行阵, 偃月阵]
+    军队战类型: [遭遇战, 攻城战]
+    军队战阶段: [侦察, 布阵, 交战, 围城, 攻城, 巷战, 结束]
+    参战军队状态: [参战, 溃败, 撤退, 全灭]
+    围城状态: [完全围城, 部分围城, 未围城]
   共享子结构:
     世界事件输入: { 事件名: string, 简述: string, 日期: string }
     六维基础字段: { 武力: number, 智力: number, 统率: number, 政治: number, 魅力: number, 体质: number }
@@ -76,6 +75,8 @@
     政策: { 当前研究: string, 研究进度: number, 富国: number, 强兵: number, 霸道: number, 王道: number }
     势力: { 名称: string, 主公: string, 规模: 势力规模, 正统性: number, 情报网: number, 金钱: number, 粮草: number, 城池: Record<string, 城池>, 军队: Record<string, 军队>, 外交: Record<string, number>, 政策: 政策 }
     势力集合: Record<string, 势力>
+    参战军队引用: { 名称: string, 势力名称: string, 状态: 参战军队状态 }
+    攻城数据: { 目标城池: string, 围城状态: 围城状态, 器械: Record<string, number> }
   命令白名单:
     UpdateWorld:
       必填: [type, changes]
@@ -93,33 +94,26 @@
       changes: { 六维?: 六维基础字段, 战斗数据?: 战斗数据基础字段, 物品栏?: Record<string, 物品栏条目>, 所属势力?: string, 兵种适性?: 兵种适性表, 声望?: number, 金钱?: number, 积分?: number, 官职?: string, 爵位?: string, 后宫和谐度?: number }
       约束:
         - 小幅资源增减优先用 `AdjustPlayerResource`
-      示例: '{"type":"UpdatePlayerBase","changes":{"官职":"校尉","六维":{"武力":68,"统率":61},"战斗数据":{"当前生命值":32}}}'
+      示例: '{"type":"UpdatePlayerBase","changes":{"官职":"校尉"}}'
     AdjustPlayerResource:
       必填: [type, changes]
       可选: [mode]
       changes: { 当前生命值?: number, 当前体力值?: number, 声望?: number, 金钱?: number, 积分?: number, 后宫和谐度?: number }
-      约束:
-        - `mode` 仅可为 `delta` / `set`；缺省视为 `delta`
-        - 只允许资源字段
       示例: '{"type":"AdjustPlayerResource","mode":"delta","changes":{"当前生命值":-12,"声望":3}}'
     UpdateFaction:
       必填: [type, 名称, changes]
       changes: { 名称?: string, 主公?: string, 规模?: 势力规模, 正统性?: number, 情报网?: number, 金钱?: number, 粮草?: number }
       约束:
         - 不要整块重写 `城池` / `军队` / `外交` / `政策`
-      示例: '{"type":"UpdateFaction","名称":"刘备军","changes":{"名称":"刘备军","主公":"刘备","规模":"郡级","粮草":2400}}'
+      示例: '{"type":"UpdateFaction","名称":"刘备军","changes":{"粮草":2400}}'
     UpsertCity:
       必填: [type, 势力名称, 名称, data]
       data: 城池
-      示例: '{"type":"UpsertCity","势力名称":"刘备军","名称":"新野","data":{"名称":"新野","等级":"县城","城防":42,"太守":"关羽"}}'
+      示例: '{"type":"UpsertCity","势力名称":"刘备军","名称":"新野","data":{"名称":"新野","城防":42}}'
     AddCityFacility:
       必填: [type, 势力名称, 名称, facility]
-      约束:
-        - 只追加单个设施，不重写整个 `设施`
     RemoveCityFacility:
       必填: [type, 势力名称, 名称, facility]
-      约束:
-        - 只移除单个设施，不重写整个 `设施`
     RemoveCity:
       必填: [type, 势力名称, 名称]
     UpsertArmy:
@@ -127,7 +121,7 @@
       data: 军队
       约束:
         - 特色军名写在 `名称`
-      示例: '{"type":"UpsertArmy","势力名称":"刘备军","名称":"白马骑营","data":{"名称":"白马骑营","兵种":"骑兵","等级":"精锐","兵力":3000,"统属将领":"赵云","阵型":"锋矢阵"}}'
+      示例: '{"type":"UpsertArmy","势力名称":"刘备军","名称":"白马骑营","data":{"名称":"白马骑营","兵力":3000}}'
     RemoveArmy:
       必填: [type, 势力名称, 名称]
     UpdateDiplomacy:
@@ -145,19 +139,16 @@
         - NPC 出现且可确定位置时，应尽量写 `所在地`
         - 只写重要 NPC，或本轮与主角有明确互动的 NPC；路人、背景板、杂兵、无名小兵不要输出
         - 未明确出现的详细子结构不要补全；`六维` / `战斗数据` / `武将信息` / `美人属性` 仅在正文明确涉及时写入
-      示例: '{"type":"UpsertNpc","名称":"赵云","data":{"名称":"赵云","品质":"SSR","阵营":"蜀","定位":"武将","简述":"白马银枪，随刘备同行。"}}'
+      示例: '{"type":"UpsertNpc","名称":"赵云","data":{"名称":"赵云","简述":"白马银枪，随刘备同行。"}}'
     UpdateNpcRelation:
       必填: [type, 名称]
       可选: [mode, 好感, 羁绊]
-      约束:
-        - `好感` 与 `羁绊` 至少提供 1 项
-        - `mode` 仅对 `好感` 生效，且仅可为 `delta` / `set`
     RemoveNpc:
       必填: [type, 名称]
     UpsertQuest:
       必填: [type, 名称, data]
       data: { 名称?: string, 类型?: 任务类型, 状态?: 任务状态, 时限?: string, 目标?: Record<string, 任务目标更新> }
-      示例: '{"type":"UpsertQuest","名称":"清剿山匪营地","data":{"名称":"清剿山匪营地","状态":"可提交"}}'
+      示例: '{"type":"UpsertQuest","名称":"清剿山匪营地","data":{"状态":"可提交"}}'
     UpdateQuestState:
       必填: [type, 名称, 状态]
       可选: [目标]
@@ -173,13 +164,24 @@
     UpsertShopItem:
       必填: [type, 名称, data]
       data: { 物品?: 物品条目, 分类?: 商品分类, 价格?: number }
-      示例: '{"type":"UpsertShopItem","名称":"止血草","data":{"物品":{"名称":"止血草","品质":"凡品","类型":"消耗品","描述":"可用于简单止血疗伤。"},"分类":"消耗品","价格":80}}'
+      示例: '{"type":"UpsertShopItem","名称":"止血草","data":{"价格":80}}'
     RemoveShopItem:
       必填: [type, 名称]
+    CreateArmyBattle:
+      必填: [type, 名称, data]
+      data: { 类型: 军队战类型, 地形: string, 攻方势力: string, 守方势力: string, 攻方军队: string[], 守方军队: string[], 攻城数据?: 攻城数据 }
+      约束:
+        - 攻城战须提供 `攻城数据`
+      示例: '{"type":"CreateArmyBattle","名称":"新野遭遇战","data":{"类型":"遭遇战","地形":"平原","攻方势力":"曹操军","守方势力":"刘备军","攻方军队":["虎豹骑"],"守方军队":["白马骑营"]}}'
+    UpdateArmyBattle:
+      必填: [type, 名称]
+      可选: [changes, 攻方军队, 守方军队]
+      changes: { 阶段?: 军队战阶段, 遭遇战当前轮次?: number, 攻城战当前天数?: number, 攻城数据?: 攻城数据 }
+      攻方军队: Record<string, 参战军队引用>
+      守方军队: Record<string, 参战军队引用>
+      约束:
+        - `阶段` 表示战斗流程步骤（如围城/攻城/巷战）；`围城状态` 表示对目标城池的封锁程度（完全围城/部分围城/未围城）
+      示例: '{"type":"UpdateArmyBattle","名称":"新野遭遇战","changes":{"阶段":"结束"},"攻方军队":{"虎豹骑":{"状态":"全灭"}}}'
   最终检查清单:
     - 是否先写正文，再在最末尾输出命令块
-    - 是否只使用了白名单命令、字段与枚举值
-    - 是否显式提供了定位所需名称字段
-    - 是否误写了 `_` 开头字段
     - 是否只写了本轮明确变化，而非整对象重写
-    - 是否输出了合法 JSON

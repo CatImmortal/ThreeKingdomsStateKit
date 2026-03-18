@@ -26,6 +26,10 @@ export const 枚举 = {
   军队等级: ['新兵', '普通', '老兵', '精锐', '特殊兵种'],
   军队装备等级: ['简陋', '普通', '精良', '上等', '精锐'],
   阵型: ['无', '锋矢阵', '鹤翼阵', '鱼鳞阵', '方圆阵', '长蛇阵', '雁行阵', '偃月阵'],
+  军队战类型: ['遭遇战', '攻城战'],
+  军队战阶段: ['侦察', '布阵', '交战', '围城', '攻城', '巷战', '结束'],
+  参战军队状态: ['参战', '溃败', '撤退', '全灭'],
+  围城状态: ['完全围城', '部分围城', '未围城'],
 } as const;
 
 export const 城池基础 = {
@@ -77,6 +81,10 @@ export type 基础兵种 = (typeof 枚举.基础兵种)[number];
 export type 军队等级 = (typeof 枚举.军队等级)[number];
 export type 军队装备等级 = (typeof 枚举.军队装备等级)[number];
 export type 阵型 = (typeof 枚举.阵型)[number];
+export type 军队战类型 = (typeof 枚举.军队战类型)[number];
+export type 军队战阶段 = (typeof 枚举.军队战阶段)[number];
+export type 参战军队状态 = (typeof 枚举.参战军队状态)[number];
+export type 围城状态 = (typeof 枚举.围城状态)[number];
 
 export function 数值(value: unknown, fallback = 0): number {
   const n = Number(value);
