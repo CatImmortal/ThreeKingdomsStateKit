@@ -14,7 +14,6 @@
                 <div class="tk-panel-card-title">基础信息</div>
                 <div class="tk-panel-kv-grid compact">
                   <div class="tk-panel-kv"><span class="tk-panel-k">所在地</span><span class="tk-panel-v">{{ 格式化地点(npc.所在地) || '未知地点' }}</span></div>
-                  <div class="tk-panel-kv"><span class="tk-panel-k">阵营</span><span class="tk-panel-v">{{ npc.阵营 || '无' }}</span></div>
                   <div class="tk-panel-kv"><span class="tk-panel-k">定位</span><span class="tk-panel-v">{{ npc.定位 || '无' }}</span></div>
                 </div>
                 <template v-if="npc.战斗数据">
@@ -27,7 +26,7 @@
                 <div class="tk-panel-card-title">关系与效忠势力</div>
                 <BoundedBar :label="`好感\n（${relationLevelText(npc)}）`" :value="npc.好感 ?? 0" :max="100" color-class="is-gold" />
                 <template v-if="npc.武将信息">
-                  <BoundedBar :label="`忠诚·${npc.武将信息.势力 || '无'}\n（${npc.武将信息._忠诚等级 || '无'}）`" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
+                  <BoundedBar :label="`忠诚·${npc.所属势力 || '无'}\n（${npc.武将信息._忠诚等级 || '无'}）`" :value="npc.武将信息.忠诚 ?? 0" :max="100" color-class="is-cyan" />
                 </template>
               </section>
               <section v-if="npc.六维" class="tk-panel-card">
