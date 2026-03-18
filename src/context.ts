@@ -36,7 +36,7 @@ export type 注入视图 = {
   当前地点相关NPC: Record<string, NPC>;
   进行中任务: 状态总表['任务'];
   商城: 状态总表['商城'];
-  军队战?: Record<string, 军队战>;
+  军队战?: 军队战;
 };
 
 function 是否当前地点相关(npc: NPC, 当前地点: string): boolean {
@@ -66,14 +66,13 @@ export function 选择商城条目(state: 状态总表, limit = MAX_CONTEXT_SHOP
   return Object.fromEntries(Object.entries(state.商城 || {}).slice(0, limit));
 }
 
-export function 选择活跃军队战(state: 状态总表): Record<string, 军队战> | undefined {
-  const active = state.军队战 || {};
-  if (Object.keys(active).length === 0) return undefined;
-  return active;
+export function 选择活跃军队战(state: 状态总表): 军队战 | undefined {
+  if (!state.军队战) return undefined;
+  return state.军队战;
 }
 
 export function 构建注入视图(state: 状态总表): 注入视图 {
-  const activeBattles = 选择活跃军队战(state);
+  const activeBattle = 选择活跃军队战(state);
   return {
     世界: _.cloneDeep(state.世界),
     主角: 构建注入主角(state),
@@ -81,7 +80,7 @@ export function 构建注入视图(state: 状态总表): 注入视图 {
     当前地点相关NPC: 构建注入NPC集合(state),
     进行中任务: _.cloneDeep(选择进行中任务(state)),
     商城: _.cloneDeep(选择商城条目(state)),
-    ...(activeBattles ? { 军队战: _.cloneDeep(activeBattles) } : {}),
+    ...(activeBattle ? { 军队战: _.cloneDeep(activeBattle) } : {}),
   };
 }
 

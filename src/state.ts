@@ -338,7 +338,7 @@ export type 状态总表 = {
   NPC: Record<string, NPC>;
   任务: Record<string, 任务>;
   商城: Record<string, 商品条目>;
-  军队战: Record<string, 军队战>;
+  军队战?: 军队战 | null;
 };
 
 export function create六维(data: Partial<六维> = {}): 六维 {
@@ -671,6 +671,6 @@ export function create初始状态(seed: Partial<状态总表> & { 势力?: Part
     NPC: _.mapValues(seed.NPC || {}, item => createNPC(item)),
     任务: _.mapValues(seed.任务 || {}, item => create任务(item)),
     商城: _.mapValues(seed.商城 || {}, item => create商品条目(item)),
-    军队战: _.mapValues(seed.军队战 || {}, item => create军队战(item)),
+    军队战: seed.军队战 ? create军队战(seed.军队战) : null,
   };
 }
