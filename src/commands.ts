@@ -214,8 +214,9 @@ const 装备条目字段 = ['伤害骰', '先攻加值', '攻击加值', '防御
 const 物品条目字段 = ['名称', '品质', '类型', '描述', '装备条目'] as const;
 const 装备栏字段 = ['主武器', '副武器', '护甲', '坐骑', '饰品1', '饰品2', '饰品3'] as const;
 const 武技条目字段 = ['名称', '等级', '类型', '效果', '熟练度', '体力消耗'] as const;
+const 特殊动作条目字段 = ['名称', '动作类型', '效果', '体力消耗'] as const;
 const 专长条目字段 = ['名称', '等级', '效果'] as const;
-const 角色战斗字段 = ['当前生命值', '当前体力值', '生命上限加成值', '体力上限加成值', '装备', '武技', '专长', '状态'] as const;
+const 角色战斗字段 = ['当前生命值', '当前体力值', '生命上限加成值', '体力上限加成值', '装备', '武技', '特殊动作', '专长', '状态'] as const;
 const 主角字段 = ['六维', '战斗数据', '物品栏', '所属势力', '兵种适性', '声望', '金钱', '积分', '官职', '爵位', '后宫和谐度'] as const;
 const 物品栏字段 = ['物品', '数量'] as const;
 const 势力字段 = ['名称', '主公', '规模', '正统性', '情报网', '金钱', '粮草', '城池', '军队', '外交', '政策'] as const;
@@ -379,6 +380,15 @@ function 校验武技条目(value: unknown, path: string): void {
   if (value.体力消耗 !== undefined) 断言数字(value.体力消耗, `${path}.体力消耗`);
 }
 
+function 校验特殊动作条目(value: unknown, path: string): void {
+  断言对象(value, path);
+  断言字段白名单(value, 特殊动作条目字段, path);
+  if (value.名称 !== undefined) 断言字符串(value.名称, `${path}.名称`);
+  if (value.动作类型 !== undefined) 断言枚举值(value.动作类型, 枚举.动作类型, `${path}.动作类型`);
+  if (value.效果 !== undefined) 断言字符串(value.效果, `${path}.效果`);
+  if (value.体力消耗 !== undefined) 断言数字(value.体力消耗, `${path}.体力消耗`);
+}
+
 function 校验专长条目(value: unknown, path: string): void {
   断言对象(value, path);
   断言字段白名单(value, 专长条目字段, path);
@@ -406,6 +416,14 @@ function 校验武技映射(value: unknown, path: string): void {
   }
 }
 
+function 校验特殊动作映射(value: unknown, path: string): void {
+  断言对象(value, path);
+  for (const [key, item] of Object.entries(value)) {
+    断言字符串(key, `${path} 键名`);
+    校验特殊动作条目(item, `${path}.${key}`);
+  }
+}
+
 function 校验专长映射(value: unknown, path: string): void {
   断言对象(value, path);
   for (const [key, item] of Object.entries(value)) {
@@ -423,6 +441,7 @@ function 校验战斗数据(value: unknown, path: string): void {
   if (value.体力上限加成值 !== undefined) 断言数字(value.体力上限加成值, `${path}.体力上限加成值`);
   if (value.装备 !== undefined) 校验装备栏(value.装备, `${path}.装备`);
   if (value.武技 !== undefined) 校验武技映射(value.武技, `${path}.武技`);
+  if (value.特殊动作 !== undefined) 校验特殊动作映射(value.特殊动作, `${path}.特殊动作`);
   if (value.专长 !== undefined) 校验专长映射(value.专长, `${path}.专长`);
   if (value.状态 !== undefined) 校验状态记录(value.状态, `${path}.状态`);
 }

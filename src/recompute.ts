@@ -3,6 +3,7 @@ import {
   create势力,
   create势力集合,
   create军队战,
+  create特殊动作条目,
   type 六维,
   type 状态总表,
   type 战斗数据,
@@ -80,6 +81,7 @@ export function recompute武技条目(data: 武技条目): 武技条目 {
 export function recompute战斗数据(data: 战斗数据, 六维数据: 六维): 战斗数据 {
   const next = _.cloneDeep(data);
   next.武技 = _.mapValues(next.武技 || {}, item => recompute武技条目(item));
+  next.特殊动作 = _.mapValues(next.特殊动作 || {}, item => create特殊动作条目(item));
 
   const 基础生命上限 = (六维数据._体质加值 ?? 0) * 5;
   const 基础体力上限 = (六维数据._体质加值 ?? 0) * 8;

@@ -9,6 +9,7 @@ export const 枚举 = {
   属性等级: ['低下', '普通', '优秀', '一流', '超一流', '当世巅峰', '传说', '神话'],
   武技等级: ['入门', '精通', '大成', '绝学', '神技'],
   武技类型: ['攻击', '防御', '辅助', '反击'],
+  动作类型: ['主要', '次要', '反应'],
   剧本: ['S1黄巾起义', 'S2讨伐董卓'],
   武将性格: ['义士', '利己', '野心家', '愚忠', '傲气', '感恩'],
   武将状态: ['待命', '驻守', '随军', '执行指令', '受伤', '被俘', '阵亡'],
@@ -55,7 +56,7 @@ export const 阵型数据 = {
   偃月阵: { 攻击: 1.05, 防御: 1.05 },
 } as const;
 
-export const 动作类型列表 = ['主要', '次要', '反应'] as const;
+export const 动作类型列表 = 枚举.动作类型;
 
 export type 品质 = (typeof 枚举.品质)[number];
 export type 物品品质 = (typeof 枚举.物品品质)[number];
@@ -63,7 +64,7 @@ export type 物品类型 = (typeof 枚举.物品类型)[number];
 export type 属性等级 = (typeof 枚举.属性等级)[number];
 export type 武技等级 = (typeof 枚举.武技等级)[number];
 export type 武技类型 = (typeof 枚举.武技类型)[number];
-export type 动作类型 = (typeof 动作类型列表)[number];
+export type 动作类型 = (typeof 枚举.动作类型)[number];
 export type 剧本 = (typeof 枚举.剧本)[number];
 export type 武将性格 = (typeof 枚举.武将性格)[number];
 export type 武将状态 = (typeof 枚举.武将状态)[number];

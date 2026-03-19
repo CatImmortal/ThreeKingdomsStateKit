@@ -96,6 +96,7 @@ const tabs = [
   { key: 'equip', label: '装备' },
   { key: 'bag', label: '背包' },
   { key: 'skills', label: '武技' },
+  { key: 'specialActions', label: '特殊动作' },
   { key: 'perks', label: '专长' },
   { key: 'consorts', label: '后宫' },
   { key: 'generals', label: '武将' },
@@ -174,19 +175,20 @@ const 武将项列表 = computed<列表项[]>(() => Object.entries(props.state.N
     { label: '当前状态', value: npc.武将信息?.当前状态 || '待命' },
   ],
 })));
-type ListTabKey = 'equip' | 'bag' | 'skills' | 'perks' | 'consorts' | 'generals';
+type ListTabKey = 'equip' | 'bag' | 'skills' | 'specialActions' | 'perks' | 'consorts' | 'generals';
 const lists = computed<Record<ListTabKey, 列表项[]>>(() => ({
   equip: Object.entries(player.value.战斗数据.装备 || {}).map(([slot, item]) => !item || item === '无'
     ? ({ title: slot, meta: '未装备', desc: '' })
     : ({ title: `${slot} · ${item.名称}`, meta: `${item.品质} / ${item.类型}`, metaPrimary: item.品质, metaSuffix: item.类型, desc: item.描述 || item.装备条目?.其他效果 || '无', details: build装备详情(item) })),
   bag: Object.entries(player.value.物品栏 || {}).map(([, item]) => ({ title: item.物品?.名称 || '未命名物品', meta: item.物品?.品质 || '凡品', desc: item.物品?.描述 || '无', quality: item.物品?.品质 || '凡品', quantity: item.数量 ?? 0 })),
   skills: Object.entries(player.value.战斗数据.武技 || {}).map(([, skill]) => ({ title: skill.名称 || '未命名武技', meta: `${skill.等级} / ${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, metaPrimary: skill.等级, metaSuffix: `${skill.类型} / ${skill._动作类型 || 计算武技动作类型(skill.类型)}`, desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}` })),
+  specialActions: Object.entries(player.value.战斗数据.特殊动作 || {}).map(([, action]) => ({ title: action.名称 || '未命名特殊动作', meta: action.动作类型 || '主要', desc: `体力消耗：${action.体力消耗 ?? 0}${action.效果 ? `\n${action.效果}` : ''}` })),
   perks: Object.entries(player.value.战斗数据.专长 || {}).map(([, perk]) => ({ title: perk.名称 || '未命名专长', meta: perk.等级 || '未定级', desc: perk.效果 || '无' })),
   consorts: 后宫项列表.value,
   generals: 武将项列表.value,
 }));
-const titles: Record<ListTabKey, string> = { equip: '装备栏', bag: '背包', skills: '武技栏', perks: '专长栏', consorts: '后宫列表', generals: '已招募武将' };
-const empties: Record<ListTabKey, string> = { equip: '暂无装备', bag: '暂无物品', skills: '暂无武技', perks: '暂无专长', consorts: '暂无后宫成员', generals: '暂无已招募武将' };
+const titles: Record<ListTabKey, string> = { equip: '装备栏', bag: '背包', skills: '武技栏', specialActions: '特殊动作', perks: '专长栏', consorts: '后宫列表', generals: '已招募武将' };
+const empties: Record<ListTabKey, string> = { equip: '暂无装备', bag: '暂无物品', skills: '暂无武技', specialActions: '暂无特殊动作', perks: '暂无专长', consorts: '暂无后宫成员', generals: '暂无已招募武将' };
 const currentListKey = computed<ListTabKey>(() => (activeTab.value === 'attrs' ? 'equip' : activeTab.value) as ListTabKey);
 const currentTitle = computed(() => titles[currentListKey.value]);
 const currentEmpty = computed(() => empties[currentListKey.value] || '暂无内容');

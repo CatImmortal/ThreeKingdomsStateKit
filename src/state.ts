@@ -100,6 +100,13 @@ export type 武技条目 = {
   _动作类型?: 动作类型;
 };
 
+export type 特殊动作条目 = {
+  名称: string;
+  动作类型: 动作类型;
+  效果: string;
+  体力消耗?: number;
+};
+
 export type 专长条目 = {
   名称: string;
   等级: 属性等级;
@@ -113,6 +120,7 @@ export type 战斗数据 = {
   体力上限加成值: number;
   装备: 装备栏;
   武技: Record<string, 武技条目>;
+  特殊动作: Record<string, 特殊动作条目>;
   专长: Record<string, 专长条目>;
   状态: 状态记录;
   _生命上限基础值?: number;
@@ -417,6 +425,15 @@ export function create武技条目(data: Partial<武技条目> = {}, { 完整 = 
   };
 }
 
+export function create特殊动作条目(data: Partial<特殊动作条目> = {}): 特殊动作条目 {
+  return {
+    名称: String(data.名称 || ''),
+    动作类型: 枚举.动作类型.includes(data.动作类型 as 动作类型) ? (data.动作类型 as 动作类型) : '主要',
+    效果: String(data.效果 || ''),
+    体力消耗: 数值(data.体力消耗),
+  };
+}
+
 export function create专长条目(data: Partial<专长条目> = {}): 专长条目 {
   return {
     名称: String(data.名称 || ''),
@@ -433,6 +450,7 @@ export function create战斗数据(data: Partial<战斗数据> = {}, { 完整 = 
     体力上限加成值: 数值(data.体力上限加成值),
     装备: create装备栏(data.装备),
     武技: _.mapValues(data.武技 || {}, item => create武技条目(item, { 完整 })),
+    特殊动作: _.mapValues(data.特殊动作 || {}, item => create特殊动作条目(item)),
     专长: _.mapValues(data.专长 || {}, item => create专长条目(item)),
     状态: create状态记录(data.状态),
   };

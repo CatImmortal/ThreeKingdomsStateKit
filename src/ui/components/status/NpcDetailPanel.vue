@@ -85,6 +85,17 @@
             </div>
           </section>
 
+          <section v-if="specialActionList.length > 0" class="tk-panel-card">
+            <div class="tk-panel-card-title">特殊动作</div>
+            <div class="tk-panel-list">
+              <div v-for="item in specialActionList" :key="item.title" class="tk-panel-list-item">
+                <div class="tk-panel-list-title">{{ item.title }}</div>
+                <div class="tk-panel-list-meta">{{ item.meta }}</div>
+                <div class="tk-panel-list-desc">{{ item.desc }}</div>
+              </div>
+            </div>
+          </section>
+
           <section v-if="perkList.length > 0" class="tk-panel-card cols-span-2">
             <div class="tk-panel-card-title">专长</div>
             <div class="tk-panel-list">
@@ -209,6 +220,12 @@ const skillList = computed(() => Object.entries(npc.value.战斗数据?.武技 |
     type: skill.类型,
     actionType: skill._动作类型 || 计算武技动作类型(skill.类型),
     desc: `熟练度：${skill.熟练度 ?? 0}　体力消耗：${skill.体力消耗 ?? 0}${skill.效果 ? `\n${skill.效果}` : ''}`,
+  })));
+const specialActionList = computed(() => Object.entries(npc.value.战斗数据?.特殊动作 || {})
+  .map(([, action]) => ({
+    title: action.名称 || '未命名特殊动作',
+    meta: action.动作类型 || '主要',
+    desc: `体力消耗：${action.体力消耗 ?? 0}${action.效果 ? `\n${action.效果}` : ''}`,
   })));
 const perkList = computed(() => Object.entries(npc.value.战斗数据?.专长 || {})
   .map(([, perk]) => ({
