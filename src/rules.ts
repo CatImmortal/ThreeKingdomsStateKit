@@ -122,9 +122,9 @@ export function 计算伤势(当前: number, 上限: number): { _伤势: string;
   if (上限 <= 0) return { _伤势: '完好', _伤势减值: 0 };
   if (当前 <= 0) return { _伤势: '濒死', _伤势减值: -999 };
   const pct = (当前 / 上限) * 100;
-  if (pct <= 25) return { _伤势: '重伤', _伤势减值: -15 };
-  if (pct <= 50) return { _伤势: '中伤', _伤势减值: -10 };
-  if (pct <= 75) return { _伤势: '轻伤', _伤势减值: -5 };
+  if (pct <= 25) return { _伤势: '重伤', _伤势减值: -10 };
+  if (pct <= 50) return { _伤势: '中伤', _伤势减值: -6 };
+  if (pct <= 75) return { _伤势: '轻伤', _伤势减值: -3 };
   return { _伤势: '完好', _伤势减值: 0 };
 }
 
