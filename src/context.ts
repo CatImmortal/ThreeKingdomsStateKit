@@ -1,27 +1,12 @@
 import { create地点结构, type NPC, type 军队战, type 状态总表 } from './state';
 
-function 隐藏伤势减值<T extends { _伤势减值?: number }>(data: T): T {
-  const next = _.cloneDeep(data);
-  delete next._伤势减值;
-  return next;
-}
-
 function 构建注入主角(state: 状态总表): 状态总表['主角'] {
-  return {
-    ..._.cloneDeep(state.主角),
-    战斗数据: 隐藏伤势减值(state.主角.战斗数据),
-  };
+  return _.cloneDeep(state.主角);
 }
 
 function 构建注入NPC集合(state: 状态总表, limit = MAX_CONTEXT_NPCS): Record<string, NPC> {
   return Object.fromEntries(
-    Object.entries(选择当前地点相关NPC(state, limit)).map(([名称, npc]) => [
-      名称,
-      {
-        ..._.cloneDeep(npc),
-        ...(npc.战斗数据 ? { 战斗数据: 隐藏伤势减值(npc.战斗数据) } : {}),
-      },
-    ]),
+    Object.entries(选择当前地点相关NPC(state, limit)).map(([名称, npc]) => [名称, _.cloneDeep(npc)]),
   );
 }
 
