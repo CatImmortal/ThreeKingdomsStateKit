@@ -14,16 +14,19 @@
     ${正常叙事正文}
 
     <UpdateVariable>
+
     <Analysis>$(不超过150词)
     - ${经过时间: 从上一时间点到现在经过了多久}
     - ${场景类型: 日常/社交/检定/战斗/经营/军队战/军团战}
     - ${基于本轮正文，逐项分析哪些数据需要更新、哪些不需要更新}
     </Analysis>
+
     <Commands>
     [
       { "type": "命令名", "...": "..." }
     ]
     </Commands>
+
     </UpdateVariable>
 
   枚举白名单:
@@ -61,7 +64,7 @@
     世界事件输入: { 事件名: string, 简述: string, 日期: 世界时间 }
     六维基础字段: { 武力?: number, 智力?: number, 统率?: number, 政治?: number, 魅力?: number, 体质?: number }
     装备条目: { 伤害骰?: string, 先攻加值?: number, 攻击加值?: number, 防御DC加值?: number, 伤害减免?: number, 其他效果?: string }
-    物品条目: { 名称: string, 品质: 物品品质, 类型: 物品类型, 描述: string, 装备条目?: 装备条目 | null }
+    物品条目: { 名称: string, 品质: 物品品质, 类型: 物品类型, 描述: string, 装备条目?: 装备条目}
     装备栏: { 主武器?: 物品条目 | 无, 副武器?: 物品条目 | 无, 护甲?: 物品条目 | 无, 坐骑?: 物品条目 | 无, 饰品1?: 物品条目 | 无, 饰品2?: 物品条目 | 无, 饰品3?: 物品条目 | 无 }
     状态记录: Record<string, { 效果?: string, 剩余?: string }>
     武技条目: { 名称?: string, 等级?: 武技等级, 类型?: 武技类型, 效果?: string, 熟练度?: number, 体力消耗?: number }
@@ -106,12 +109,12 @@
       可选: [mode]
       changes: { 当前生命值?: number, 当前体力值?: number, 声望?: number, 金钱?: number, 积分?: number, 后宫和谐度?: number }
       示例: '{"type":"AdjustPlayerResource","mode":"delta","changes":{"当前生命值":-12,"声望":3}}'
-    UpdateFaction:
+    UpsertFaction:
       必填: [type, 名称, changes]
       changes: { 名称?: string, 主公?: string, 规模?: 势力规模, 正统性?: number, 情报网?: number, 金钱?: number, 粮草?: number }
       约束:
         - 不要整块重写 `城池` / `军队` / `外交` / `政策`
-      示例: '{"type":"UpdateFaction","名称":"刘备军","changes":{"粮草":2400}}'
+      示例: '{"type":"UpsertFaction","名称":"刘备军","changes":{"粮草":2400}}'
     UpsertCity:
       必填: [type, 势力名称, 名称, data]
       data: 城池

@@ -1,5 +1,5 @@
 # ThreeKingdomsStateKit
-
+你是一个INTJ型研发工程师
 ## 指令优先级
 
 在本仓库中工作时，请按以下顺序理解并遵守指令：
