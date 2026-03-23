@@ -75,8 +75,24 @@ function 应用近期事件(state: 状态总表, command: Extract<状态命令, 
   state.世界.近期事件 = state.世界.近期事件.slice(-MAX_RECENT_EVENTS);
 }
 
+function 是否首次设置有效体质(旧体质: unknown, 新体质: unknown): boolean {
+  return 数值(旧体质) <= 0 && 数值(新体质) > 0;
+}
+
+function 自动补满战斗资源<T extends { 当前生命值: number; 当前体力值: number; _生命值上限?: number; _体力值上限?: number }>(战斗数据: T): T {
+  战斗数据.当前生命值 = 数值(战斗数据._生命值上限);
+  战斗数据.当前体力值 = 数值(战斗数据._体力值上限);
+  return 战斗数据;
+}
+
 function 应用主角基础更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdatePlayerBase' }>): void {
-  state.主角 = recompute主角(create主角(合并对象(_.cloneDeep(state.主角), command.changes)));
+  const 合并后 = 合并对象(_.cloneDeep(state.主角), command.changes);
+  const 首次设置体质 = 是否首次设置有效体质(state.主角.六维?.体质, 合并后.六维?.体质);
+  let next = recompute主角(create主角(合并后));
+  if (首次设置体质) {
+    next = recompute主角({ ...next, 战斗数据: 自动补满战斗资源(_.cloneDeep(next.战斗数据)) });
+  }
+  state.主角 = next;
 }
 
 function 获取目标势力(state: 状态总表, 势力名称: string): 势力 {
@@ -143,8 +159,14 @@ function 应用政策更新(state: 状态总表, command: Extract<状态命令, 
 function 应用NPC更新(state: 状态总表, command: Extract<状态命令, { type: 'UpsertNpc' }>): void {
   const current = state.NPC[command.名称];
   断言未改名(command.名称, command.data.名称, 'NPC');
-  const next = createNPC(合并对象(_.cloneDeep(current ?? createNPC({ 名称: command.名称 })), command.data));
-  state.NPC[command.名称] = recomputeNPC(next);
+  const 合并前基底 = _.cloneDeep(current ?? createNPC({ 名称: command.名称 }));
+  const 合并后 = 合并对象(合并前基底, command.data);
+  const 首次设置体质 = 是否首次设置有效体质(current?.六维?.体质, 合并后.六维?.体质);
+  let next = recomputeNPC(createNPC(合并后));
+  if (首次设置体质 && next.战斗数据) {
+    next = recomputeNPC({ ...next, 战斗数据: 自动补满战斗资源(_.cloneDeep(next.战斗数据)) });
+  }
+  state.NPC[command.名称] = next;
 }
 
 function 应用NPC关系更新(state: 状态总表, command: Extract<状态命令, { type: 'UpdateNpcRelation' }>): void {
